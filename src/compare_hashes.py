@@ -6,7 +6,7 @@ import numpy as np
 
 
 def read_hashes():
-    conn = sqlite3.connect("../data/frame_hashes.db")
+    conn = sqlite3.connect("data/frame_hashes.db")
     cursor = conn.cursor()
 
     cursor.execute("""
