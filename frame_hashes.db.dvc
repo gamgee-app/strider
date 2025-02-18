@@ -1,0 +1,5 @@
+outs:
+- md5: 01a55ae855798f8f51066712a359330e
+  size: 242536448
+  hash: md5
+  path: frame_hashes.db

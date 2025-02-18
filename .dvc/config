@@ -1,0 +1,6 @@
+[core]
+    autostage = true
+    remote = r2
+['remote "r2"']
+    url = s3://movie-edition-hashes
+    endpointurl = https://206e709bb72c8903c7a655d9a5192932.r2.cloudflarestorage.com
