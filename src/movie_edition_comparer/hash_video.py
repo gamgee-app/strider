@@ -9,8 +9,7 @@ import cv2
 from numpy import ndarray
 from progress.bar import Bar
 
-from algorithms import hashing_algorithms, get_column_name
-
+from .algorithms import hashing_algorithms, get_column_name
 
 def create_database(db_path: str, table_name: str):
     hash_columns = [f"{get_column_name(x)} TEXT NOT NULL" for x in hashing_algorithms]
