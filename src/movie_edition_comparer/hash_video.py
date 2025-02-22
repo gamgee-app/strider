@@ -1,5 +1,6 @@
 import argparse
 import concurrent
+import os
 import sqlite3
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
@@ -20,6 +21,8 @@ def create_database(db_path: str, table_name: str):
         )
     """
 
+    db_dir = os.path.dirname(db_path)
+    os.makedirs(db_dir, exist_ok=True)
     with closing(sqlite3.connect(db_path)) as connection:
         connection.execute(create_table_query)
 
