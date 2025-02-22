@@ -6,10 +6,10 @@ from contextlib import closing
 from datetime import datetime
 
 import cv2
-from cv2 import Mat
+from numpy import ndarray
 from progress.bar import Bar
 
-from src.algorithms import hashing_algorithms, get_column_name
+from src.movie_edition_comparer.algorithms import hashing_algorithms, get_column_name
 
 
 def create_database(db_path: str, table_name: str):
@@ -25,7 +25,7 @@ def create_database(db_path: str, table_name: str):
         connection.execute(create_table_query)
 
 
-def get_frame_hashes(index: int, frame: Mat):
+def get_frame_hashes(index: int, frame: ndarray):
     return index, {name: func(frame) for name, func in hashing_algorithms.items()}
 
 

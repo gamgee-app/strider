@@ -2,9 +2,8 @@ import datetime
 import sqlite3
 
 import cv2
-import numpy as np
 
-from src.algorithms import deserialize
+from src.movie_edition_comparer.algorithms import deserialize
 
 
 def read_hashes():

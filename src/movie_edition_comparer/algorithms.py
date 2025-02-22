@@ -3,7 +3,6 @@ from enum import Enum
 
 import cv2
 import numpy as np
-from cv2 import Mat
 from numpy import ndarray
 
 
@@ -26,7 +25,7 @@ hashing_algorithms = {
 }
 
 
-def get_frame_hash(frame: Mat, hash_algorithm: str) -> str:
+def get_frame_hash(frame: ndarray, hash_algorithm: str) -> str:
     hash_func = getattr(hashlib, hash_algorithm)()
     hash_func.update(frame.tobytes())
     return hash_func.hexdigest()
