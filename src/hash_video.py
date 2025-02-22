@@ -4,6 +4,7 @@ import sqlite3
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from datetime import datetime
+from progress.bar import Bar
 
 import cv2
 
@@ -52,36 +53,37 @@ def get_frame_hashes(index, frame):
 
 def hash_video_frames_to_db(video_path, db_path, table_name, workers):
     cap = cv2.VideoCapture(video_path)
+
     with (closing(sqlite3.connect(db_path)) as connection,
           ThreadPoolExecutor(max_workers=workers) as executor):
+
         futures = []
-        frame_index = 0
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:  # End of video
-                break
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        with Bar('Hashing', max=frame_count) as bar:
+            for frame_index in range(frame_count):
+                ret, frame = cap.read()
+                if not ret:
+                    break
 
-            future = executor.submit(get_frame_hashes, frame_index, frame)
-            futures.append(future)
+                future = executor.submit(get_frame_hashes, frame_index, frame)
+                futures.append(future)
+                bar.next()
 
-            frame_index += 1
-            if frame_index % 24 == 0:
-                print(f"Processed {int(frame_index / 24)} seconds")
+        with Bar('Inserting', max=len(futures)) as bar:
+            for future in concurrent.futures.as_completed(futures):
+                index, hashes = future.result()
+                values = [index] + list(hashes.values())
 
-        for future in concurrent.futures.as_completed(futures):
-            index, hashes = future.result()
-            values = [index] + list(hashes.values())
+                column_names = f"frame_index, {", ".join(get_column_name(x) for x in hashes.keys())}"
+                values_names = ", ".join(["?" for _ in values])
 
-            column_names = f"frame_index, {", ".join(get_column_name(x) for x in hashes.keys())}"
-            values_names = ", ".join(["?" for _ in values])
-
-            connection.execute(f"""
-                INSERT INTO {table_name} ({column_names})
-                VALUES ({values_names})
-            """, values)
+                connection.execute(f"""
+                    INSERT INTO {table_name} ({column_names})
+                    VALUES ({values_names})
+                """, values)
+                bar.next()
 
         connection.commit()
-        print(f"Hashed {len(futures)} frames and stored in {db_path}")
 
     cap.release()
 
