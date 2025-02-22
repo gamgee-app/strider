@@ -3,7 +3,7 @@ import sqlite3
 
 import cv2
 
-from .algorithms import deserialize
+from algorithms import deserialize
 
 
 def read_hashes():
