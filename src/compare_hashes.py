@@ -4,6 +4,8 @@ import sqlite3
 import cv2
 import numpy as np
 
+from src.algorithms import deserialize
+
 
 def read_hashes():
     conn = sqlite3.connect("data/frame_hashes.db")
@@ -41,9 +43,6 @@ def read_hashes():
 
     return theatrical, extended
 
-
-def deserialize(hex_hash):
-    return np.array([int(hex_hash[i:i + 2], 16) for i in range(0, len(hex_hash), 2)], dtype=np.uint8)
 
 
 def frame_to_time(frame):

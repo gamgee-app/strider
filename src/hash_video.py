@@ -1,38 +1,14 @@
 import argparse
 import concurrent
-import hashlib
 import sqlite3
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from datetime import datetime
-from progress.bar import Bar
 
 import cv2
+from progress.bar import Bar
 
-
-def get_frame_hash(frame, hash_algorithm="md5"):
-    hash_func = getattr(hashlib, hash_algorithm)()
-    hash_func.update(frame.tobytes())
-    return hash_func.hexdigest()
-
-
-def serialize(uint8_array):
-    return ''.join(format(x, '02x') for x in uint8_array.flatten())
-
-
-hashing_algorithms = {
-    'md5': lambda img: get_frame_hash(img, 'md5'),
-    'average': lambda img: serialize(cv2.img_hash.averageHash(img)),
-    'perceptual': lambda img: serialize(cv2.img_hash.pHash(img)),
-    'marr_hildreth': lambda img: serialize(cv2.img_hash.marrHildrethHash(img)),
-    'radial_variance': lambda img: serialize(cv2.img_hash.radialVarianceHash(img)),
-    'block_mean': lambda img: serialize(cv2.img_hash.blockMeanHash(img)),
-    # 'color_moment': lambda img : serialize(cv2.img_hash.colorMomentHash(img))
-}
-
-
-def get_column_name(algorithm):
-    return f"hash_{algorithm}"
+from src.algorithms import hashing_algorithms, get_column_name
 
 
 def create_database(db_path, table_name):
