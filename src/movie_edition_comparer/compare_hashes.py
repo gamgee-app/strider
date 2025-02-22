@@ -43,9 +43,9 @@ def read_hashes():
     return theatrical, extended
 
 
-
 def frame_to_time(frame):
     return str(datetime.timedelta(seconds=frame / 24))
+
 
 def compare_hash_arrays(theatricals, extendeds):
     differences = []
@@ -78,7 +78,7 @@ def compare_hash_arrays(theatricals, extendeds):
                  frame_to_time(b_index),
                  frame_to_time(equivalent_b_index))
             )
-            (i, j) = (equivalent_a_index+1, equivalent_b_index+1)
+            (i, j) = (equivalent_a_index + 1, equivalent_b_index + 1)
             print(f"Found difference: {i} ({frame_to_time(i)}) to {j} ({frame_to_time(j)})")
 
     for difference in differences:
@@ -122,7 +122,8 @@ def compare_hashes(theatrical, extended, should_print=True):
                 f"{a_index} frame ({frame_to_time(a_index)}) is similar to {b_index} frame ({frame_to_time(b_index)})")
             return HashEquality.SIMILAR
         else:
-            if should_print: print(f"{a_index} frame ({frame_to_time(a_index)}) is different to {b_index} frame ({frame_to_time(b_index)})")
+            if should_print: print(
+                f"{a_index} frame ({frame_to_time(a_index)}) is different to {b_index} frame ({frame_to_time(b_index)})")
 
     return HashEquality.DIFFERENT
 
@@ -138,10 +139,15 @@ def find_difference(theatricals, i, extendeds, j):
             maybe_extended_frame = maybe_extended[0]
             compared = compare_hashes(maybe_theatrical, maybe_extended, False)
             if compared in (HashEquality.EQUAL, HashEquality.EQUIVALENT):
-                print(f"Got theatrical {maybe_theatrical_frame} ({frame_to_time(maybe_theatrical_frame)}) and extended {maybe_extended_frame} ({frame_to_time(maybe_extended_frame)})")
+                print(
+                    f"Got theatrical {maybe_theatrical_frame} ({frame_to_time(maybe_theatrical_frame)}) and extended {maybe_extended_frame} ({frame_to_time(maybe_extended_frame)})")
                 return maybe_theatrical_frame, maybe_extended_frame
 
 
-if __name__ == "__main__":
+def main():
     (theatrical, extended) = read_hashes()
     compare_hash_arrays(theatrical, extended)
+
+
+if __name__ == "__main__":
+    main()

@@ -66,21 +66,25 @@ def hash_video_frames_to_db(video_path: str, db_path: str, table_name: str, work
     cap.release()
 
 
-parser = argparse.ArgumentParser(
-    prog='Hash Video',
-    description='Calculates the hashes for each frame of a video, and saves the results to a database'
-)
+def main():
+    parser = argparse.ArgumentParser(
+        prog='Hash Video',
+        description='Calculates the hashes for each frame of a video, and saves the results to a database'
+    )
 
-parser.add_argument('video', help="Path to the video file")
-parser.add_argument('table', help="Name of the table to save data to")
-parser.add_argument('--db', default="data/frame_hashes.db", help="Path to database file")
-parser.add_argument('--threads', default=4, type=int, help="Number of threads to use")
-
-if __name__ == "__main__":
-    startTime = datetime.now()
-
+    parser.add_argument('video', help="Path to the video file")
+    parser.add_argument('table', help="Name of the table to save data to")
+    parser.add_argument('--db', default="data/frame_hashes.db", help="Path to database file")
+    parser.add_argument('--threads', default=4, type=int, help="Number of threads to use")
     args = parser.parse_args()
+
+    start_time = datetime.now()
+
     create_database(args.db, args.table)
     hash_video_frames_to_db(args.video, args.db, args.table, args.threads)
 
-    print(f"Took {datetime.now() - startTime}")
+    print(f"Took {datetime.now() - start_time}")
+
+
+if __name__ == "__main__":
+    main()
