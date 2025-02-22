@@ -78,7 +78,7 @@ def hash_video_frames_to_db(video_path, db_path, table_name):
 
 if __name__ == "__main__":
     input_video_path = input(
-        "Enter the path to the video file: ") or "C:\\Users\\obroo\\Lord of the Rings\\The Lord of the Rings The Two Towers (2002) Theatrical Remux-2160p HDR.mkv-00.00.00.000-00.10.00.000.mkv"
+        "Enter the path to the video file: ") or "C:\\Users\\obroo\\Lord of the Rings\\The Lord of the Rings The Fellowship of the Ring (2001) Theatrical Remux-2160p HDR.mkv-00.00.00.000-00.00.30.003.mkv"
     input_db_path = input("Enter the path to the SQLite database (default: frame_hashes.db): ") or "frame_hashes.db"
     input_table_name = input("Enter the table name (e.g., film_extended): ") or "film"
 
