@@ -20,7 +20,7 @@ license-files = ["LICEN[CS]E*"]
 dependencies = [
     "numpy==2.2.2",
     "opencv-contrib-python-headless==4.11.0.86",
-    "progress==4.6",
+    "progress==1.6",
 ]
 
 [project.urls]
