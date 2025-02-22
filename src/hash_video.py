@@ -50,10 +50,10 @@ def get_frame_hashes(index, frame):
     return index, {name: func(frame) for name, func in hashing_algorithms.items()}
 
 
-def hash_video_frames_to_db(video_path, db_path, table_name):
+def hash_video_frames_to_db(video_path, db_path, table_name, workers):
     cap = cv2.VideoCapture(video_path)
     with (closing(sqlite3.connect(db_path)) as connection,
-          ThreadPoolExecutor(max_workers=4) as executor):
+          ThreadPoolExecutor(max_workers=workers) as executor):
         futures = []
         frame_index = 0
         while cap.isOpened():
@@ -91,9 +91,10 @@ if __name__ == "__main__":
         "Enter the path to the video file: ") or "C:\\Users\\obroo\\Lord of the Rings\\The Lord of the Rings The Fellowship of the Ring (2001) Theatrical Remux-2160p HDR.mkv-00.00.00.000-00.00.30.003.mkv"
     input_db_path = input("Enter the path to the SQLite database (default: frame_hashes.db): ") or "frame_hashes.db"
     input_table_name = input("Enter the table name (e.g., film_extended): ") or "film"
+    input_workers = input("Enter the number of threads to use (default: 4): ") or 4
 
     create_database(input_db_path, input_table_name)
 
     startTime = datetime.now()
-    hash_video_frames_to_db(input_video_path, input_db_path, input_table_name)
+    hash_video_frames_to_db(input_video_path, input_db_path, input_table_name, int(input_workers))
     print(datetime.now() - startTime)
