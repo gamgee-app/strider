@@ -6,12 +6,13 @@ from contextlib import closing
 from datetime import datetime
 
 import cv2
+from cv2 import Mat
 from progress.bar import Bar
 
 from src.algorithms import hashing_algorithms, get_column_name
 
 
-def create_database(db_path, table_name):
+def create_database(db_path: str, table_name: str):
     hash_columns = [f"{get_column_name(x)} TEXT NOT NULL" for x in hashing_algorithms]
     create_table_query = f"""
         CREATE TABLE IF NOT EXISTS {table_name} (
@@ -24,11 +25,11 @@ def create_database(db_path, table_name):
         connection.execute(create_table_query)
 
 
-def get_frame_hashes(index, frame):
+def get_frame_hashes(index: int, frame: Mat):
     return index, {name: func(frame) for name, func in hashing_algorithms.items()}
 
 
-def hash_video_frames_to_db(video_path, db_path, table_name, workers):
+def hash_video_frames_to_db(video_path: str, db_path: str, table_name: str, workers: int):
     cap = cv2.VideoCapture(video_path)
 
     with (closing(sqlite3.connect(db_path)) as connection,
@@ -80,6 +81,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     create_database(args.db, args.table)
-    hash_video_frames_to_db(args.video, args.db, args.table, int(args.threads))
+    hash_video_frames_to_db(args.video, args.db, args.table, args.threads)
 
     print(f"Took {datetime.now() - startTime}")
