@@ -1,12 +1,14 @@
+import concurrent
 import hashlib
 import sqlite3
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from datetime import datetime
 
 import cv2
 
 
-def hash_frame(frame, hash_algorithm="md5"):
+def get_frame_hash(frame, hash_algorithm="md5"):
     hash_func = getattr(hashlib, hash_algorithm)()
     hash_func.update(frame.tobytes())
     return hash_func.hexdigest()
@@ -17,7 +19,7 @@ def serialize(uint8_array):
 
 
 hashing_algorithms = {
-    'md5': lambda img: hash_frame(img, 'md5'),
+    'md5': lambda img: get_frame_hash(img, 'md5'),
     'average': lambda img: serialize(cv2.img_hash.averageHash(img)),
     'perceptual': lambda img: serialize(cv2.img_hash.pHash(img)),
     'marr_hildreth': lambda img: serialize(cv2.img_hash.marrHildrethHash(img)),
@@ -44,36 +46,44 @@ def create_database(db_path, table_name):
         connection.execute(create_table_query)
 
 
-def hash_video_frames_to_db(video_path, db_path, table_name):
-    with closing(sqlite3.connect(db_path)) as connection:
-        cap = cv2.VideoCapture(video_path)
+def get_frame_hashes(index, frame):
+    return index, {name: func(frame) for name, func in hashing_algorithms.items()}
 
+
+def hash_video_frames_to_db(video_path, db_path, table_name):
+    cap = cv2.VideoCapture(video_path)
+    with (closing(sqlite3.connect(db_path)) as connection,
+          ThreadPoolExecutor(max_workers=4) as executor):
+        futures = []
         frame_index = 0
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:  # End of video
                 break
 
-            hash_column_names = []
-            hash_column_values = []
-            for name, func in hashing_algorithms.items():
-                hash_column_names.append(get_column_name(name))
-                hash_column_values.append(func(frame))
-
-            column_names = f"frame_index, {", ".join(hash_column_names)}"
-            column_values = f"{frame_index}, {", ".join(f"'{x}'" for x in hash_column_values)}"
-            connection.execute(f"""
-                INSERT INTO {table_name} ({column_names})
-                VALUES ({column_values})
-            """)
+            future = executor.submit(get_frame_hashes, frame_index, frame)
+            futures.append(future)
 
             frame_index += 1
             if frame_index % 24 == 0:
-                connection.commit()
                 print(f"Processed {int(frame_index / 24)} seconds")
 
-        cap.release()
-        print(f"Hashed {frame_index} frames and stored in {db_path}")
+        for future in concurrent.futures.as_completed(futures):
+            index, hashes = future.result()
+            values = [index] + list(hashes.values())
+
+            column_names = f"frame_index, {", ".join(get_column_name(x) for x in hashes.keys())}"
+            values_names = ", ".join(["?" for _ in values])
+
+            connection.execute(f"""
+                INSERT INTO {table_name} ({column_names})
+                VALUES ({values_names})
+            """, values)
+
+        connection.commit()
+        print(f"Hashed {len(futures)} frames and stored in {db_path}")
+
+    cap.release()
 
 
 if __name__ == "__main__":
