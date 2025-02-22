@@ -1,109 +1,89 @@
-import cv2
 import hashlib
 import sqlite3
+from contextlib import closing
 from datetime import datetime
+
+import cv2
 
 
 def hash_frame(frame, hash_algorithm="md5"):
-    """
-    Compute the hash of a video frame.
-
-    Args:
-        frame (numpy.ndarray): The video frame as a NumPy array.
-        hash_algorithm (str): Hash algorithm ('md5', 'sha1', 'sha256', etc.).
-
-    Returns:
-        str: The computed hash as a hexadecimal string.
-    """
     hash_func = getattr(hashlib, hash_algorithm)()
     hash_func.update(frame.tobytes())
     return hash_func.hexdigest()
-
-
-def create_database(db_path, table_name):
-    """
-    Create an SQLite database with a table for frame hashes.
-
-    Args:
-        db_path (str): Path to the SQLite database file.
-    """
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute(f"""
-        CREATE TABLE IF NOT EXISTS {table_name} (
-            frame_index INTEGER PRIMARY KEY,
-            md5_hash TEXT NOT NULL,
-            average_hash TEXT NOT NULL,
-            perceptual_hash TEXT NOT NULL,
-            marr_hildreth_hash TEXT NOT NULL,
-            radial_variance_hash TEXT NOT NULL,
-            block_mean_hash TEXT NOT NULL
-        )
-    """)
-    conn.commit()
-    conn.close()
 
 
 def serialize(uint8_array):
     return ''.join(format(x, '02x') for x in uint8_array.flatten())
 
 
+hashing_algorithms = {
+    'md5': lambda img: hash_frame(img, 'md5'),
+    'average': lambda img: serialize(cv2.img_hash.averageHash(img)),
+    'perceptual': lambda img: serialize(cv2.img_hash.pHash(img)),
+    'marr_hildreth': lambda img: serialize(cv2.img_hash.marrHildrethHash(img)),
+    'radial_variance': lambda img: serialize(cv2.img_hash.radialVarianceHash(img)),
+    'block_mean': lambda img: serialize(cv2.img_hash.blockMeanHash(img)),
+    # 'color_moment': lambda img : serialize(cv2.img_hash.colorMomentHash(img))
+}
+
+
+def get_column_name(algorithm):
+    return f"hash_{algorithm}"
+
+
+def create_database(db_path, table_name):
+    hash_columns = [f"{get_column_name(x)} TEXT NOT NULL" for x in hashing_algorithms]
+    create_table_query = f"""
+        CREATE TABLE IF NOT EXISTS {table_name} (
+            frame_index INTEGER PRIMARY KEY,
+            {",\n\t\t".join(hash_columns)}
+        )
+    """
+
+    with closing(sqlite3.connect(db_path)) as connection:
+        connection.execute(create_table_query)
+
+
 def hash_video_frames_to_db(video_path, db_path, table_name):
-    """
-    Hash video frames and store the results in an SQLite database.
-    """
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+    with closing(sqlite3.connect(db_path)) as connection:
+        cap = cv2.VideoCapture(video_path)
 
-    cap = cv2.VideoCapture(video_path)
-    if not cap.isOpened():
-        print(f"Error: Could not open video file {video_path}")
-        return
+        frame_index = 0
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:  # End of video
+                break
 
-    frame_index = 0
-    hashed_frames = 0
+            hash_column_names = []
+            hash_column_values = []
+            for name, func in hashing_algorithms.items():
+                hash_column_names.append(get_column_name(name))
+                hash_column_values.append(func(frame))
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:  # End of video
-            break
+            column_names = f"frame_index, {", ".join(hash_column_names)}"
+            column_values = f"{frame_index}, {", ".join(f"'{x}'" for x in hash_column_values)}"
+            connection.execute(f"""
+                INSERT INTO {table_name} ({column_names})
+                VALUES ({column_values})
+            """)
 
-        md5_hash = hash_frame(frame)
-        average_hash = serialize(cv2.img_hash.averageHash(frame))
-        perceptual_hash = serialize(cv2.img_hash.pHash(frame))
-        marr_hildreth_hash = serialize(cv2.img_hash.marrHildrethHash(frame))
-        radial_variance_hash = serialize(cv2.img_hash.radialVarianceHash(frame))
-        block_mean_hash = serialize(cv2.img_hash.blockMeanHash(frame))
-        # color_moment_hash = cv2.img_hash.colorMomentHash(frame)
+            frame_index += 1
+            if frame_index % 24 == 0:
+                connection.commit()
+                print(f"Processed {int(frame_index / 24)} seconds")
 
-        cursor.execute(f"""
-            INSERT INTO {table_name} 
-                (frame_index, md5_hash, average_hash, perceptual_hash, marr_hildreth_hash, radial_variance_hash, block_mean_hash)
-            VALUES 
-                (?, ?, ?, ?, ?, ?, ?)
-        """, (frame_index, md5_hash, average_hash, perceptual_hash, marr_hildreth_hash, radial_variance_hash, block_mean_hash))
-
-        hashed_frames += 1
-
-        if frame_index % 24 == 0:
-            conn.commit()
-            print(f"Processed {int(frame_index / 24)} seconds")
-
-        frame_index += 1
-
-    cap.release()
-    conn.close()
-
-    print(f"Hashed {hashed_frames} frames and stored in {db_path}")
+        cap.release()
+        print(f"Hashed {frame_index} frames and stored in {db_path}")
 
 
 if __name__ == "__main__":
-    video_path = input("Enter the path to the video file: ")
-    db_path = input("Enter the path to the SQLite database (default: frame_hashes.db): ") or "frame_hashes.db"
-    table_name = input("Enter the table name (e.g., film_extended): ")
+    input_video_path = input(
+        "Enter the path to the video file: ") or "C:\\Users\\obroo\\Lord of the Rings\\The Lord of the Rings The Two Towers (2002) Theatrical Remux-2160p HDR.mkv-00.00.00.000-00.10.00.000.mkv"
+    input_db_path = input("Enter the path to the SQLite database (default: frame_hashes.db): ") or "frame_hashes.db"
+    input_table_name = input("Enter the table name (e.g., film_extended): ") or "film"
 
-    create_database(db_path, table_name)
+    create_database(input_db_path, input_table_name)
 
     startTime = datetime.now()
-    hash_video_frames_to_db(video_path, db_path, table_name)
+    hash_video_frames_to_db(input_video_path, input_db_path, input_table_name)
     print(datetime.now() - startTime)
