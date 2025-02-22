@@ -9,7 +9,7 @@ import cv2
 from numpy import ndarray
 from progress.bar import Bar
 
-from src.movie_edition_comparer.algorithms import hashing_algorithms, get_column_name
+from algorithms import hashing_algorithms, get_column_name
 
 
 def create_database(db_path: str, table_name: str):
