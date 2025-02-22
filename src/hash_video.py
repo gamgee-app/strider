@@ -1,3 +1,4 @@
+import argparse
 import concurrent
 import hashlib
 import sqlite3
@@ -88,15 +89,21 @@ def hash_video_frames_to_db(video_path, db_path, table_name, workers):
     cap.release()
 
 
+parser = argparse.ArgumentParser(
+    prog='Hash Video',
+    description='Calculates the hashes for each frame of a video, and saves the results to a database'
+)
+
+parser.add_argument('video', help="Path to the video file")
+parser.add_argument('table', help="Name of the table to save data to")
+parser.add_argument('--db', default="data/frame_hashes.db", help="Path to database file")
+parser.add_argument('--threads', default=4, type=int, help="Number of threads to use")
+
 if __name__ == "__main__":
-    input_video_path = input(
-        "Enter the path to the video file: ") or "C:\\Users\\obroo\\Lord of the Rings\\The Lord of the Rings The Fellowship of the Ring (2001) Theatrical Remux-2160p HDR.mkv-00.00.00.000-00.00.30.003.mkv"
-    input_db_path = input("Enter the path to the SQLite database (default: frame_hashes.db): ") or "frame_hashes.db"
-    input_table_name = input("Enter the table name (e.g., film_extended): ") or "film"
-    input_workers = input("Enter the number of threads to use (default: 4): ") or 4
-
-    create_database(input_db_path, input_table_name)
-
     startTime = datetime.now()
-    hash_video_frames_to_db(input_video_path, input_db_path, input_table_name, int(input_workers))
-    print(datetime.now() - startTime)
+
+    args = parser.parse_args()
+    create_database(args.db, args.table)
+    hash_video_frames_to_db(args.video, args.db, args.table, int(args.threads))
+
+    print(f"Took {datetime.now() - startTime}")
