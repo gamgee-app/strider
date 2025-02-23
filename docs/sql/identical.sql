@@ -307,6 +307,8 @@ with md5_theatrical as (select md5_hash
 
                              order by count desc),
 
+     extended_chapters as (select * from two_towers_extended_chapters),
+
      extended_seconds(extended_second) AS (SELECT 0 AS extended_second
                                            UNION ALL
                                            SELECT extended_second + 1
@@ -348,14 +350,25 @@ with md5_theatrical as (select md5_hash
      missing_second_ranges as (
          -- Identify start and end of each missing range
          SELECT MIN(extended_second)                                                 AS range_start,
-                MAX(extended_second)                                                 AS range_end,
+                1 + MAX(extended_second)                                             AS range_end,
                 1 + MAX(extended_second) - MIN(extended_second)                      as duration,
                 time(MIN(extended_second), 'unixepoch')                              as range_start_time,
-                time(MAX(extended_second), 'unixepoch')                              as range_end_time,
+                time(1 + MAX(extended_second), 'unixepoch')                          as range_end_time,
                 time((1 + MAX(extended_second) - MIN(extended_second)), 'unixepoch') as duration_time
          FROM grouped_second_gaps
          GROUP BY gap_group
          ORDER BY range_start),
+
+     missing_second_ranges_with_chapter
+         as (select range_start_time as 'Range Start Time',
+                    range_end_time   as 'Range End Time',
+                    duration_time    as 'Duration',
+                    (select title
+                     from extended_chapters
+                     where time(start_time) <= range_start_time
+                     order by time(start_time) desc
+                     limit 1)        as 'Matched Chapter'
+             from missing_second_ranges),
 
      extended_minutes(extended_minute) AS (SELECT 0 AS extended_minute
                                            UNION ALL
@@ -397,16 +410,26 @@ with md5_theatrical as (select md5_hash
      missing_minute_ranges as (
          -- Identify start and end of each missing range
          SELECT MIN(extended_minute)                                                      AS range_start,
-                MAX(extended_minute)                                                      AS range_end,
+                1 + MAX(extended_minute)                                                  AS range_end,
                 1 + MAX(extended_minute) - MIN(extended_minute)                           as duration,
                 time(MIN(extended_minute) * 60, 'unixepoch')                              as range_start_time,
-                time(MAX(extended_minute) * 60, 'unixepoch')                              as range_end_time,
+                time((1 + MAX(extended_minute)) * 60, 'unixepoch')                        as range_end_time,
                 time((1 + MAX(extended_minute) - MIN(extended_minute)) * 60, 'unixepoch') as duration_time
          FROM grouped_minute_gaps
          GROUP BY gap_group
-         ORDER BY range_start)
+         ORDER BY range_start),
+
+     missing_minute_ranges_with_chapter
+         as (select range_start_time as 'Range Start Time',
+                    range_end_time   as 'Range End Time',
+                    duration_time    as 'Duration',
+                    (select title
+                     from extended_chapters
+                     where time(start_time) <= range_start_time
+                     order by time(start_time) desc
+                     limit 1)        as 'Matched Chapter'
+             from missing_minute_ranges)
 
 select *
-from missing_second_ranges
-
+from missing_second_ranges_with_chapter
 ;
