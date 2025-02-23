@@ -13,12 +13,15 @@ from progress.bar import Bar
 from algorithms import hashing_algorithms, get_column_name
 
 def create_database(db_path: str, table_name: str):
-    hash_columns = [f"{get_column_name(x)} TEXT NOT NULL" for x in hashing_algorithms]
+    hash_columns = [f"{x} TEXT NOT NULL" for x in [get_column_name(x) for x in hashing_algorithms]]
+    index_columns = [f"CREATE INDEX idx_{table_name}_{x} ON {table_name} ({x})" for x in [get_column_name(x) for x in hashing_algorithms]]
     create_table_query = f"""
         CREATE TABLE IF NOT EXISTS {table_name} (
             frame_index INTEGER PRIMARY KEY,
             {",\n\t\t".join(hash_columns)}
         )
+        
+        {"\n\t".join(index_columns)}
     """
 
     db_dir = os.path.dirname(db_path)
