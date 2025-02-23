@@ -333,6 +333,30 @@ with md5_theatrical as (select md5_hash
                                 on extended_seconds.extended_second = per_second.extended_second
              order by extended_seconds.extended_second),
 
+     missing_seconds AS (
+         -- Find seconds that are missing from the dataset
+         SELECT extended_second
+         FROM extended_seconds
+         WHERE extended_second NOT IN (SELECT extended_second FROM per_second)),
+
+     grouped_second_gaps AS (
+         -- Identify contiguous missing second groups using a difference-based technique
+         SELECT extended_second,
+                extended_second - ROW_NUMBER() OVER (ORDER BY extended_second) AS gap_group
+         FROM missing_seconds),
+
+     missing_second_ranges as (
+         -- Identify start and end of each missing range
+         SELECT MIN(extended_second)                                                 AS range_start,
+                MAX(extended_second)                                                 AS range_end,
+                1 + MAX(extended_second) - MIN(extended_second)                      as duration,
+                time(MIN(extended_second), 'unixepoch')                              as range_start_time,
+                time(MAX(extended_second), 'unixepoch')                              as range_end_time,
+                time((1 + MAX(extended_second) - MIN(extended_second)), 'unixepoch') as duration_time
+         FROM grouped_second_gaps
+         GROUP BY gap_group
+         ORDER BY range_start),
+
      extended_minutes(extended_minute) AS (SELECT 0 AS extended_minute
                                            UNION ALL
                                            SELECT extended_minute + 1
@@ -356,7 +380,33 @@ with md5_theatrical as (select md5_hash
              from extended_minutes
                       left join per_minute
                                 on extended_minutes.extended_minute = per_minute.extended_minute
-             order by extended_minutes.extended_minute)
+             order by extended_minutes.extended_minute),
+
+     missing_minutes AS (
+         -- Find minutes that are missing from the dataset
+         SELECT extended_minute
+         FROM extended_minutes
+         WHERE extended_minute NOT IN (SELECT extended_minute FROM per_minute)),
+
+     grouped_minute_gaps AS (
+         -- Identify contiguous missing minute groups using a difference-based technique
+         SELECT extended_minute,
+                extended_minute - ROW_NUMBER() OVER (ORDER BY extended_minute) AS gap_group
+         FROM missing_minutes),
+
+     missing_minute_ranges as (
+         -- Identify start and end of each missing range
+         SELECT MIN(extended_minute)                                                      AS range_start,
+                MAX(extended_minute)                                                      AS range_end,
+                1 + MAX(extended_minute) - MIN(extended_minute)                           as duration,
+                time(MIN(extended_minute) * 60, 'unixepoch')                              as range_start_time,
+                time(MAX(extended_minute) * 60, 'unixepoch')                              as range_end_time,
+                time((1 + MAX(extended_minute) - MIN(extended_minute)) * 60, 'unixepoch') as duration_time
+         FROM grouped_minute_gaps
+         GROUP BY gap_group
+         ORDER BY range_start)
 
 select *
-from per_second_including_empties;
+from missing_second_ranges
+
+;
