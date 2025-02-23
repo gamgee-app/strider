@@ -1,10 +1,10 @@
-# Movie Edition Comparer
+# Strider - Movie Edition Ranger
 
 A simple python package for finding common and unique scenes in various editions of the same movie.
 
 - Calculate the hashes of each video frame, using various different image hashing algorithms
 - Store those hashes in a database, so as not to require rehashing with updates to the comparison logic
-- Compare the hashes, returning any differences found
+- Compare the hashes, returning the ranges in which the videos differ
 
 # The Lord of the Rings
 
