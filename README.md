@@ -12,7 +12,7 @@ This package was made with The Lord of the Rings in mind. I have watched the ext
 have forgotten which scenes are entirely new, which are extended, and which have been changed. I thought it would be
 useful to document here some of my findings when trying to solve this problem.
 
-## Identical Frames
+## Pixel Perfect Identical Frames
 
 One might assume that you could take a scene from a theatrical edition that is visually identical to a scene in its
 respective extended edition, and for them to be frame-by-frame pixel perfect matches. This is not the case, at least
@@ -278,3 +278,51 @@ minutes of the theatrical edition that have between 90%-100% similarity.
 Since most minutes contain at least one identical frame, we can be confident in using the MD5 hashes as anchors when
 finding the exact differences between editions. However, given the low percentage of common frames, we must also turn
 to imperfect image hashing algorithms to match visually identical frames.
+
+## Visually Identical Frames
+
+We can compare similar queries to those performed on MD5 above, but on the results of the various image hashing
+algorithms. MD5 understandably returns the lowest common unique frames, and is similar to the Marr Hildreth algorithm.
+The Block Mean hash returns the highest common unique frames. Though if we calculate the union of all the returned
+frames from all the algorithms, we can unique match over 82% of the theatrical edition, which is over 26% more than
+any single algorithm alone.
+
+| algorithm        | count   | percentage\_theatrical | percentage\_extended |
+|:-----------------|:--------|:-----------------------|:---------------------|
+| union\_all       | 212,803 | 82.45%                 | 62.84%               |
+| block\_mean      | 144,546 | 56.00%                 | 42.68%               |
+| perceptual       | 138,648 | 53.72%                 | 40.94%               |
+| average          | 133,522 | 51.73%                 | 39.43%               |
+| radial\_variance | 60,643  | 23.50%                 | 17.91%               |
+| marr\_hildreth   | 34,959  | 13.54%                 | 10.32%               |
+| md5              | 34,947  | 13.54%                 | 10.32%               |
+
+### Validity of Matches
+
+However, now that we're matching imperfectly, we need to be careful that our matches are valid. For example, we should
+consider ordering of frame indexes to ensure that the extended frame index always increases as the theatrical frame
+index increases. There may exist other invalid criteria, but this one is easy to look for.
+
+If we take frames ABC from the theatrical edition, and frames XYZ from the extended edition, matches of AX BY CZ are
+all of consecutive frames. But matches of AY BZ CX are out of order, and therefore probably invalid. That is assuming
+visually identical frames from different editions cannot exist out of order, which may be an incorrect depending on how
+the editions are spliced together.
+
+| algorithm        | invalid\_count | percentage\_invalid |
+|:-----------------|:---------------|:--------------------|
+| union\_all       | 387            | 0.15%               |
+| average          | 336            | 0.13%               |
+| perceptual       | 181            | 0.07%               |
+| block\_mean      | 45             | 0.02%               |
+| radial\_variance | 8              | 0.00%               |
+| marr\_hildreth   | 0              | 0.00%               |
+| md5              | 0              | 0.00%               |
+
+The Block Mean hash stands out when you consider it provides the most common unique frames, as well as having a
+relatively low count of invalid ordering, compared to other algorithms. Though, the percentages are all low, so we won't
+lose many matches if we exclude any index that appears in these invalid results.
+
+| Algorithm  | Count Unvalidated | Count Validated | Percentage Validated Theatrical | Percentage Validated Extended |
+|:-----------|:------------------|:----------------|:--------------------------------|:------------------------------|
+| union\_all | 212,803           | 211,971         | 82.13%                          | 62.59%                        |
+
