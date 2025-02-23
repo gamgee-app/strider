@@ -20,6 +20,10 @@ not for the 2020 remastered Blu-ray releases of The Lord of the Rings trilogy. I
 access to the same sources, they encoded the editions slightly differently, leading to visually identical, but not
 pixel perfect scenes.
 
+<p align="center">
+    <img src="docs/img/different_picture_meme.jpeg" alt="meme" width="400" />
+</p>
+
 Rather than comparing pixels, I chose to compute various hashes for each frame and store them in a SQLite database, as
 hashes are significantly smaller and easier to compare than full frames. The hashing algorithms I chose were MD5 (for
 pixel perfect comparisons), and a select number of image specific hashing algorithms
