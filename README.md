@@ -61,9 +61,12 @@ We can see that the majority of frames are unique in both editions.
 ### Unique Common Frames
 
 Using the definition of unique frames above, we can match frames between editions to find which are common to both.
-We know from a table above that the maximum possible common frames in the theatrical edition is 76.74%, since that is
-the difference in lengths of the two editions. If we compare that to the 13.54% of actually common frames here, then we
-potentially have up to 63.2% visually identical frames which are not pixel perfect.
+We know from a table above that the maximum possible common frames in the extended edition is 76.74%, since that is
+the difference in lengths of the two editions. If we compare that to the 10.32% of actually common frames here, then we
+potentially have up to 66.42% visually identical frames which are not pixel perfect.
+
+Bear in mind that the maximum possible common frames in the theatrical edition is 100%, which would be the case if the
+extended edition contained all the content that exists in the theatrical edition.
 
 | Unique Common Frames | Percentage Unique Common Theatrical | Percentage Unique Common Extended |
 |:---------------------|:------------------------------------|:----------------------------------|
