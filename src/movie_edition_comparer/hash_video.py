@@ -12,22 +12,18 @@ from progress.bar import Bar
 
 from algorithms import hashing_algorithms, get_column_name
 
-def create_database(db_path: str, table_name: str):
-    hash_columns = [f"{x} TEXT NOT NULL" for x in [get_column_name(x) for x in hashing_algorithms]]
-    index_columns = [f"CREATE INDEX idx_{table_name}_{x} ON {table_name} ({x})" for x in [get_column_name(x) for x in hashing_algorithms]]
-    create_table_query = f"""
-        CREATE TABLE IF NOT EXISTS {table_name} (
-            frame_index INTEGER PRIMARY KEY,
-            {",\n\t\t".join(hash_columns)}
-        )
-        
-        {"\n\t".join(index_columns)}
-    """
 
+def create_database(db_path: str, table_name: str):
+    column_names = [get_column_name(x) for x in hashing_algorithms]
     db_dir = os.path.dirname(db_path)
     os.makedirs(db_dir, exist_ok=True)
     with closing(sqlite3.connect(db_path)) as connection:
-        connection.execute(create_table_query)
+        connection.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (\n"
+                           f"    frame_index INTEGER NOT NULL PRIMARY KEY,\n"
+                           f"    {",\n\t".join([f"{x} TEXT NOT NULL" for x in column_names])}\n"
+                           f")")
+        for column_name in column_names:
+            connection.execute(f"CREATE INDEX IF NOT EXISTS idx_{table_name}_{column_name} ON {table_name} ({column_name})")
 
 
 def get_frame_hashes(index: int, frame: ndarray):
