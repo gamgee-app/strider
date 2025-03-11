@@ -6,11 +6,11 @@ import cv2
 from algorithms import deserialize
 
 
-def read_hashes():
-    conn = sqlite3.connect("data/frame_hashes.db")
+def read_hashes(db_path: str, table_a_name: str, table_b_name: str):
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT 
             frame_index,
             md5_hash, 
@@ -20,11 +20,11 @@ def read_hashes():
             radial_variance_hash, 
             block_mean_hash
         FROM
-            two_towers_theatrical
+            {table_a_name}
     """)
     theatrical = cursor.fetchall()
 
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT 
             frame_index,
             md5_hash, 
@@ -34,7 +34,7 @@ def read_hashes():
             radial_variance_hash, 
             block_mean_hash
         FROM
-            two_towers_extended
+            {table_b_name}
     """)
     extended = cursor.fetchall()
 
@@ -145,7 +145,7 @@ def find_difference(theatricals, i, extendeds, j):
 
 
 def main():
-    (theatrical, extended) = read_hashes()
+    (theatrical, extended) = read_hashes("data/frame_hashes.db", "two_towers_theatrical", "two_towers_extended")
     compare_hash_arrays(theatrical, extended)
 
 
