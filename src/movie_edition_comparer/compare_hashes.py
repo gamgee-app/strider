@@ -18,7 +18,7 @@ def read_hashes(db_path: str, table_a_name: str, table_b_name: str):
         FROM
             {table_a_name}
     """)
-    theatrical = cursor.fetchall()
+    hashes_a = cursor.fetchall()
 
     cursor.execute(f"""
         SELECT 
@@ -27,40 +27,41 @@ def read_hashes(db_path: str, table_a_name: str, table_b_name: str):
         FROM
             {table_b_name}
     """)
-    extended = cursor.fetchall()
+    hashes_b = cursor.fetchall()
 
     conn.close()
 
-    return theatrical, extended
+    return hashes_a, hashes_b
 
 
 def frame_to_time(frame):
     return str(datetime.timedelta(seconds=frame / 24))
 
 
-def compare_hash_arrays(theatricals, extendeds):
+def compare_hash_arrays(hash_array_a, hash_array_b):
     differences = []
     i = 0
     j = 0
-    while i < len(theatricals) and j < len(extendeds):
-        theatrical = theatricals[i]
-        extended = extendeds[j]
-        (a_index, a_md5, a_average, a_perceptual, a_marr_hildreth, a_radial_variance, a_block_mean) = theatrical
-        (b_index, b_md5, b_average, b_perceptual, b_marr_hildreth, b_radial_variance, b_block_mean) = extended
+    while i < len(hash_array_a) and j < len(hash_array_b):
+        hashes_a = hash_array_a[i]
+        a_index = hashes_a[0]
+
+        hashes_b = hash_array_b[j]
+        b_index = hashes_b[0]
 
         if a_index != i or b_index != j:
             raise Exception("Missing frames")
 
-        if compare_hashes(theatrical, extended) != HashEquality.DIFFERENT:
+        if compare_hashes(hashes_a, hashes_b) != HashEquality.DIFFERENT:
             i += 1
             j += 1
         else:
             print("Finding difference")
-            difference = find_difference(theatricals, i, extendeds, j)
+            difference = find_difference(hash_array_a, i, hash_array_b, j)
 
             if difference is None:
-                raise Exception(f"Different at theatrical {a_index} ({frame_to_time(a_index)}) "
-                                f"and extended {b_index} ({frame_to_time(b_index)})")
+                raise Exception(f"Different at A {a_index} ({frame_to_time(a_index)}) "
+                                f"and B {b_index} ({frame_to_time(b_index)})")
 
             (equivalent_a_index, equivalent_b_index) = difference
             differences.append(
@@ -86,9 +87,9 @@ class HashEquality(Enum):
     DIFFERENT = 4
 
 
-def compare_hashes(theatrical, extended, should_print=True):
-    (a_index, a_md5, a_average, a_perceptual, a_marr_hildreth, a_radial_variance, a_block_mean) = theatrical
-    (b_index, b_md5, b_average, b_perceptual, b_marr_hildreth, b_radial_variance, b_block_mean) = extended
+def compare_hashes(hashes_a, hashes_b, should_print=True):
+    (a_index, a_md5, a_average, a_perceptual, a_marr_hildreth, a_radial_variance, a_block_mean) = hashes_a
+    (b_index, b_md5, b_average, b_perceptual, b_marr_hildreth, b_radial_variance, b_block_mean) = hashes_b
 
     if a_md5 == b_md5:
         if should_print: print(
@@ -119,25 +120,25 @@ def compare_hashes(theatrical, extended, should_print=True):
     return HashEquality.DIFFERENT
 
 
-def find_difference(theatricals, i, extendeds, j):
-    next_5_theatrical = theatricals[i:i + (24 * 60 * 5)]
-    next_5_extended = extendeds[j:j + (24 * 60 * 5)]
+def find_difference(hash_array_a, i, hash_array_b, j):
+    next_5_hashes_a = hash_array_a[i:i + (24 * 60 * 5)]
+    next_5_hashes_b = hash_array_b[j:j + (24 * 60 * 5)]
 
-    for maybe_theatrical in next_5_theatrical:
-        maybe_theatrical_frame = maybe_theatrical[0]
-        print(f"{maybe_theatrical_frame} theatrical ({frame_to_time(maybe_theatrical_frame)})")
-        for maybe_extended in next_5_extended:
-            maybe_extended_frame = maybe_extended[0]
-            compared = compare_hashes(maybe_theatrical, maybe_extended, False)
+    for maybe_a_hashes in next_5_hashes_a:
+        maybe_a_hash = maybe_a_hashes[0]
+        print(f"{maybe_a_hash} A ({frame_to_time(maybe_a_hash)})")
+        for maybe_b_hashes in next_5_hashes_b:
+            maybe_b_hash = maybe_b_hashes[0]
+            compared = compare_hashes(maybe_a_hashes, maybe_b_hashes, False)
             if compared in (HashEquality.EQUAL, HashEquality.EQUIVALENT):
                 print(
-                    f"Got theatrical {maybe_theatrical_frame} ({frame_to_time(maybe_theatrical_frame)}) and extended {maybe_extended_frame} ({frame_to_time(maybe_extended_frame)})")
-                return maybe_theatrical_frame, maybe_extended_frame
+                    f"Got A {maybe_a_hash} ({frame_to_time(maybe_a_hash)}) and B {maybe_b_hash} ({frame_to_time(maybe_b_hash)})")
+                return maybe_a_hash, maybe_b_hash
 
 
 def main():
-    (theatrical, extended) = read_hashes("data/frame_hashes.db", "two_towers_theatrical", "two_towers_extended")
-    compare_hash_arrays(theatrical, extended)
+    (hashes_a, hashes_b) = read_hashes("data/frame_hashes.db", "two_towers_theatrical", "two_towers_extended")
+    compare_hash_arrays(hashes_a, hashes_b)
 
 
 if __name__ == "__main__":
