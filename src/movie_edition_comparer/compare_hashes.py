@@ -3,22 +3,18 @@ import sqlite3
 
 import cv2
 
-from algorithms import deserialize
+from algorithms import deserialize, hashing_algorithms, get_column_name
 
 
 def read_hashes(db_path: str, table_a_name: str, table_b_name: str):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
+    column_names = [get_column_name(x) for x in hashing_algorithms]
 
     cursor.execute(f"""
         SELECT 
             frame_index,
-            md5_hash, 
-            average_hash, 
-            perceptual_hash, 
-            marr_hildreth_hash, 
-            radial_variance_hash, 
-            block_mean_hash
+            {",".join(column_names)}
         FROM
             {table_a_name}
     """)
@@ -27,12 +23,7 @@ def read_hashes(db_path: str, table_a_name: str, table_b_name: str):
     cursor.execute(f"""
         SELECT 
             frame_index,
-            md5_hash, 
-            average_hash, 
-            perceptual_hash, 
-            marr_hildreth_hash, 
-            radial_variance_hash, 
-            block_mean_hash
+            {",".join(column_names)}
         FROM
             {table_b_name}
     """)
