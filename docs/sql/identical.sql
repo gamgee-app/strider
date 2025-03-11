@@ -1,151 +1,151 @@
-with md5_theatrical as (select md5_hash
+with md5_theatrical as (select hash_md5
                         from two_towers_theatrical
-                        group by md5_hash
+                        group by hash_md5
                         having count(1) = 1),
-     md5_extended as (select md5_hash
+     md5_extended as (select hash_md5
                       from two_towers_extended
-                      group by md5_hash
+                      group by hash_md5
                       having count(1) = 1),
-     md5_unique_hash as (select md5_hash
+     md5_unique_hash as (select hash_md5
                          from md5_theatrical
                          intersect
-                         select md5_hash
+                         select hash_md5
                          from md5_extended),
      md5_unique_index as (select two_towers_theatrical.frame_index as theatrical_index,
                                  two_towers_extended.frame_index   as extended_index
                           from two_towers_theatrical
                                    join two_towers_extended
-                                        on two_towers_theatrical.md5_hash = two_towers_extended.md5_hash
-                          where two_towers_theatrical.md5_hash in md5_unique_hash),
+                                        on two_towers_theatrical.hash_md5 = two_towers_extended.hash_md5
+                          where two_towers_theatrical.hash_md5 in md5_unique_hash),
      md5_invalid_orderings as (select *
                                from (select extended_index,
                                             LAG(extended_index) over (order by theatrical_index) as prev_extended
                                      from md5_unique_index) t
                                where extended_index < prev_extended),
 
-     average_theatrical as (select average_hash
+     average_theatrical as (select hash_average
                             from two_towers_theatrical
-                            group by average_hash
+                            group by hash_average
                             having count(1) = 1),
-     average_extended as (select average_hash
+     average_extended as (select hash_average
                           from two_towers_extended
-                          group by average_hash
+                          group by hash_average
                           having count(1) = 1),
-     average_unique_hash as (select average_hash
+     average_unique_hash as (select hash_average
                              from average_theatrical
                              intersect
-                             select average_hash
+                             select hash_average
                              from average_extended),
      average_unique_index as (select two_towers_theatrical.frame_index as theatrical_index,
                                      two_towers_extended.frame_index   as extended_index
                               from two_towers_theatrical
                                        join two_towers_extended
-                                            on two_towers_theatrical.average_hash = two_towers_extended.average_hash
-                              where two_towers_theatrical.average_hash in average_unique_hash),
+                                            on two_towers_theatrical.hash_average = two_towers_extended.hash_average
+                              where two_towers_theatrical.hash_average in average_unique_hash),
      average_invalid_orderings as (select *
                                    from (select extended_index,
                                                 LAG(extended_index) over (order by theatrical_index) as prev_extended
                                          from average_unique_index) t
                                    where extended_index < prev_extended),
 
-     perceptual_theatrical as (select perceptual_hash
+     perceptual_theatrical as (select hash_perceptual
                                from two_towers_theatrical
-                               group by perceptual_hash
+                               group by hash_perceptual
                                having count(1) = 1),
-     perceptual_extended as (select perceptual_hash
+     perceptual_extended as (select hash_perceptual
                              from two_towers_extended
-                             group by perceptual_hash
+                             group by hash_perceptual
                              having count(1) = 1),
-     perceptual_unique_hash as (select perceptual_hash
+     perceptual_unique_hash as (select hash_perceptual
                                 from perceptual_theatrical
                                 intersect
-                                select perceptual_hash
+                                select hash_perceptual
                                 from perceptual_extended),
      perceptual_unique_index as (select two_towers_theatrical.frame_index as theatrical_index,
                                         two_towers_extended.frame_index   as extended_index
                                  from two_towers_theatrical
                                           join two_towers_extended
-                                               on two_towers_theatrical.perceptual_hash =
-                                                  two_towers_extended.perceptual_hash
-                                 where two_towers_theatrical.perceptual_hash in perceptual_unique_hash),
+                                               on two_towers_theatrical.hash_perceptual =
+                                                  two_towers_extended.hash_perceptual
+                                 where two_towers_theatrical.hash_perceptual in perceptual_unique_hash),
      perceptual_invalid_orderings as (select *
                                       from (select extended_index,
                                                    LAG(extended_index) over (order by theatrical_index) as prev_extended
                                             from perceptual_unique_index) t
                                       where extended_index < prev_extended),
 
-     marr_hildreth_theatrical as (select marr_hildreth_hash
+     marr_hildreth_theatrical as (select hash_marr_hildreth
                                   from two_towers_theatrical
-                                  group by marr_hildreth_hash
+                                  group by hash_marr_hildreth
                                   having count(1) = 1),
-     marr_hildreth_extended as (select marr_hildreth_hash
+     marr_hildreth_extended as (select hash_marr_hildreth
                                 from two_towers_extended
-                                group by marr_hildreth_hash
+                                group by hash_marr_hildreth
                                 having count(1) = 1),
-     marr_hildreth_unique_hash as (select marr_hildreth_hash
+     marr_hildreth_unique_hash as (select hash_marr_hildreth
                                    from marr_hildreth_theatrical
                                    intersect
-                                   select marr_hildreth_hash
+                                   select hash_marr_hildreth
                                    from marr_hildreth_extended),
      marr_hildreth_unique_index as (select two_towers_theatrical.frame_index as theatrical_index,
                                            two_towers_extended.frame_index   as extended_index
                                     from two_towers_theatrical
                                              join two_towers_extended
-                                                  on two_towers_theatrical.marr_hildreth_hash =
-                                                     two_towers_extended.marr_hildreth_hash
-                                    where two_towers_theatrical.marr_hildreth_hash in marr_hildreth_unique_hash),
+                                                  on two_towers_theatrical.hash_marr_hildreth =
+                                                     two_towers_extended.hash_marr_hildreth
+                                    where two_towers_theatrical.hash_marr_hildreth in marr_hildreth_unique_hash),
      marr_hildreth_invalid_orderings as (select *
                                          from (select extended_index,
                                                       LAG(extended_index) over (order by theatrical_index) as prev_extended
                                                from marr_hildreth_unique_index) t
                                          where extended_index < prev_extended),
 
-     radial_variance_theatrical as (select radial_variance_hash
+     radial_variance_theatrical as (select hash_radial_variance
                                     from two_towers_theatrical
-                                    group by radial_variance_hash
+                                    group by hash_radial_variance
                                     having count(1) = 1),
-     radial_variance_extended as (select radial_variance_hash
+     radial_variance_extended as (select hash_radial_variance
                                   from two_towers_extended
-                                  group by radial_variance_hash
+                                  group by hash_radial_variance
                                   having count(1) = 1),
-     radial_variance_unique_hash as (select radial_variance_hash
+     radial_variance_unique_hash as (select hash_radial_variance
                                      from radial_variance_theatrical
                                      intersect
-                                     select radial_variance_hash
+                                     select hash_radial_variance
                                      from radial_variance_extended),
      radial_variance_unique_index as (select two_towers_theatrical.frame_index as theatrical_index,
                                              two_towers_extended.frame_index   as extended_index
                                       from two_towers_theatrical
                                                join two_towers_extended
-                                                    on two_towers_theatrical.radial_variance_hash =
-                                                       two_towers_extended.radial_variance_hash
-                                      where two_towers_theatrical.radial_variance_hash in radial_variance_unique_hash),
+                                                    on two_towers_theatrical.hash_radial_variance =
+                                                       two_towers_extended.hash_radial_variance
+                                      where two_towers_theatrical.hash_radial_variance in radial_variance_unique_hash),
      radial_variance_invalid_orderings as (select *
                                            from (select extended_index,
                                                         LAG(extended_index) over (order by theatrical_index) as prev_extended
                                                  from radial_variance_unique_index) t
                                            where extended_index < prev_extended),
 
-     block_mean_theatrical as (select block_mean_hash
+     block_mean_theatrical as (select hash_block_mean_0
                                from two_towers_theatrical
-                               group by block_mean_hash
+                               group by hash_block_mean_0
                                having count(1) = 1),
-     block_mean_extended as (select block_mean_hash
+     block_mean_extended as (select hash_block_mean_0
                              from two_towers_extended
-                             group by block_mean_hash
+                             group by hash_block_mean_0
                              having count(1) = 1),
-     block_mean_unique_hash as (select block_mean_hash
+     block_mean_unique_hash as (select hash_block_mean_0
                                 from block_mean_theatrical
                                 intersect
-                                select block_mean_hash
+                                select hash_block_mean_0
                                 from block_mean_extended),
      block_mean_unique_index as (select two_towers_theatrical.frame_index as theatrical_index,
                                         two_towers_extended.frame_index   as extended_index
                                  from two_towers_theatrical
                                           join two_towers_extended
-                                               on two_towers_theatrical.block_mean_hash =
-                                                  two_towers_extended.block_mean_hash
-                                 where two_towers_theatrical.block_mean_hash in block_mean_unique_hash),
+                                               on two_towers_theatrical.hash_block_mean_0 =
+                                                  two_towers_extended.hash_block_mean_0
+                                 where two_towers_theatrical.hash_block_mean_0 in block_mean_unique_hash),
      block_mean_invalid_orderings as (select *
                                       from (select extended_index,
                                                    LAG(extended_index) over (order by theatrical_index) as prev_extended
