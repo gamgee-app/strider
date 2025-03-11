@@ -12,7 +12,7 @@ class HashAlgorithm(Enum):
     PERCEPTUAL = 3
     MARR_HILDRETH = 4
     RADIAL_VARIANCE = 5
-    BLOCK_MEAN = 6
+    BLOCK_MEAN_0 = 6
 
 
 hashing_algorithms = {
@@ -21,7 +21,7 @@ hashing_algorithms = {
     HashAlgorithm.PERCEPTUAL: lambda img: serialize(cv2.img_hash.pHash(img)),
     HashAlgorithm.MARR_HILDRETH: lambda img: serialize(cv2.img_hash.marrHildrethHash(img)),
     HashAlgorithm.RADIAL_VARIANCE: lambda img: serialize(cv2.img_hash.radialVarianceHash(img)),
-    HashAlgorithm.BLOCK_MEAN: lambda img: serialize(cv2.img_hash.blockMeanHash(img)),
+    HashAlgorithm.BLOCK_MEAN_0: lambda img: serialize(cv2.img_hash.blockMeanHash(img, mode=0)),
 }
 
 
