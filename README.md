@@ -330,7 +330,7 @@ lose many matches if we exclude any index that appears in these invalid results.
 |:----------:|------------------:|----------------:|--------------------------------:|------------------------------:|
 | union\_all |           212,803 |         211,971 |                          82.13% |                        62.59% |
 
-## Missing Ranges
+### Missing Ranges
 
 Given we can now match at least 82% of theatrical frames, we can quickly estimate where the differences are. If we group
 by minute we can see 11 ranges in the extended edition that do not appear in the theatrical edition. Note that these
