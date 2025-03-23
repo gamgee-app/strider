@@ -14,16 +14,6 @@ useful to document here some of my findings when trying to solve this problem.
 
 ## Pixel Perfect Identical Frames
 
-One might assume that you could take a scene from a theatrical edition that is visually identical to a scene in its
-respective extended edition, and for them to be frame-by-frame pixel perfect matches. This is not the case, at least
-not for the 2020 remastered Blu-ray releases of The Lord of the Rings trilogy. It seems that even though the studio had
-access to the same sources, they encoded the editions slightly differently, leading to visually identical, but not
-pixel perfect scenes.
-
-<p align="center">
-    <img src="docs/img/different_picture_meme.jpeg" alt="meme" width="400" />
-</p>
-
 Rather than comparing pixels, I chose to compute various hashes for each frame and store them in a SQLite database, as
 hashes are significantly smaller and easier to compare than full frames. The hashing algorithms I chose were MD5 (for
 pixel perfect comparisons), and a select number of image specific hashing algorithms
@@ -284,6 +274,16 @@ finding the exact differences between editions. However, given the low percentag
 to imperfect image hashing algorithms to match visually identical frames.
 
 ## Visually Identical Frames
+
+One might assume that you could take a scene from a theatrical edition that is visually identical to a scene in its
+respective extended edition, and for them to be frame-by-frame pixel perfect matches. This is not the case, at least
+not for the 2020 remastered Blu-ray releases of The Lord of the Rings trilogy. It seems that even though the studio had
+access to the same sources, they encoded the editions slightly differently, leading to visually identical, but not
+pixel perfect scenes.
+
+<p align="center">
+    <img src="docs/img/memes/different_picture_meme.jpeg" alt="meme" width="400" />
+</p>
 
 We can compare similar queries to those performed on MD5 above, but on the results of the various image hashing
 algorithms. MD5 understandably returns the lowest common unique frames, and is similar to the Marr Hildreth algorithm.
