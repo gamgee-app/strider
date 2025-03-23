@@ -593,33 +593,43 @@ times each, and I was almost certain this was the case.
 
 ### The Taming of Golum
 
-However, I was proved wrong, just 11 minutes into the theatrical edition, and 13 minutes into the extended edition, during The Taming of Golum. Notice how the comparison script detected 2 overlapping scenes, from `13:41 -> 14:24` and `13:48 -> 14:44`. It doesn't make sense that 2 scenes from the same edition overlap so significantly, and it is caused by the script assuming that scenes will never match out of order.
+However, I was proved wrong, just 11 minutes into the theatrical edition, and 13 minutes into the extended edition,
+during The Taming of Golum. Notice how the comparison script detected 2 overlapping scenes, from `13:41 -> 14:24` and
+`13:48 -> 14:44`. It doesn't make sense that 2 scenes from the same edition overlap so significantly, and it is caused
+by the script assuming that scenes will never match out of order.
 
-| A Start        | A End          | A Type    | B Start        | B End          | B Type    | A Range        | B Range        | Range Difference   |
-|----------------|----------------|-----------|----------------|----------------|-----------|----------------|----------------|--------------------|
-| 0:11:21.842372 | 0:11:22.134328 | different | 0:13:41.188798 | 0:14:24.815365 | different | 0:00:00.291956 | 0:00:43.626567 | 0:00:43.334611     |
-| 0:11:25.971464 | 0:11:32.060832 | different | 0:13:48.571114 | 0:14:44.876913 | different | 0:00:06.089368 | 0:00:56.305799 | 0:00:50.216431     |
+| A Start        | A End          | A Type    | B Start        | B End          | B Type    | A Range        | B Range        | Range Difference |
+|----------------|----------------|-----------|----------------|----------------|-----------|----------------|----------------|------------------|
+| 0:11:21.842372 | 0:11:22.134328 | different | 0:13:41.188798 | 0:14:24.815365 | different | 0:00:00.291956 | 0:00:43.626567 | 0:00:43.334611   |
+| 0:11:25.971464 | 0:11:32.060832 | different | 0:13:48.571114 | 0:14:44.876913 | different | 0:00:06.089368 | 0:00:56.305799 | 0:00:50.216431   |
 
-The final frame shown in these tables is Uruk-hai Running, which is actually part of the first scene of the next chapter (The Uruk-hai), but has been included for context of what comes after The Taming of Golum.
+The final frame shown in these tables is Uruk-hai Running, which is actually part of the first scene of the next
+chapter (The Uruk-hai), but has been included for context of what comes after The Taming of Golum.
 
 **Theatrical Edition**
 
-|                                                                                    |                                                                              |                                                                                      |                                                                      |                                                                            |
-|------------------------------------------------------------------------------------|------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|----------------------------------------------------------------------|----------------------------------------------------------------------------|
-| 1. Frodo Commanding                                                                | 2. Golum Running                                                             | 3. Hobbits Following                                                                 | 4. Wide Shot                                                         | 5. Uruk-hai Running                                                            |
+|                                                                                    |                                                                              |                                                                                      |                                                                      |                                                                                |
+|------------------------------------------------------------------------------------|------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|----------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| 1. Frodo Commanding (start)                                                        | 2. Golum Running (moved)                                                     | 3. Hobbits Following (same)                                                          | 4. Wide Shot (same)                                                  | 5. Uruk-hai Running (end)                                                      |
 | ![frodo commanding](docs/img/snapshots/the_taming_of_golum/1_frodo-commanding.jpg) | ![golum running](docs/img/snapshots/the_taming_of_golum/6_golum-running.jpg) | ![hobbits following](docs/img/snapshots/the_taming_of_golum/3_hobbits-following.jpg) | ![wide shot](docs/img/snapshots/the_taming_of_golum/4_wide-shot.jpg) | ![orcs running](docs/img/snapshots/the_taming_of_golum/8_uruk-hai-running.jpg) |
 
 **Extended Edition**
 
-|                                                                                      |                                                                              |                                                                                          |                                                                            |
-|--------------------------------------------------------------------------------------|------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
-| 1. Frodo Commanding                                                                  | 2. Golum Leading                                                             | 3. Hobbits Following                                                                     | 4. Wide Shot                                                               |
-| ![frodo commanding](docs/img/snapshots/the_taming_of_golum/1_frodo-commanding.jpg)   | ![golum leading](docs/img/snapshots/the_taming_of_golum/2_golum-leading.jpg) | ![hobbits following](docs/img/snapshots/the_taming_of_golum/3_hobbits-following.jpg)     | ![wide shot](docs/img/snapshots/the_taming_of_golum/4_wide-shot.jpg)       |
-| 5. Golum Monologuing                                                                 | 6. Golum Running                                                             | 7. Hobbits Left Behind                                                                   | 8. Uruk-hai Running                                                        |
+|                                                                                      |                                                                              |                                                                                          |                                                                                |
+|--------------------------------------------------------------------------------------|------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| 1. Frodo Commanding (start)                                                          | 2. Golum Leading (new)                                                       | 3. Hobbits Following (same)                                                              | 4. Wide Shot (same)                                                            |
+| ![frodo commanding](docs/img/snapshots/the_taming_of_golum/1_frodo-commanding.jpg)   | ![golum leading](docs/img/snapshots/the_taming_of_golum/2_golum-leading.jpg) | ![hobbits following](docs/img/snapshots/the_taming_of_golum/3_hobbits-following.jpg)     | ![wide shot](docs/img/snapshots/the_taming_of_golum/4_wide-shot.jpg)           |
+| 5. Golum Monologuing (new)                                                           | 6. Golum Running (moved)                                                     | 7. Hobbits Left Behind (new)                                                             | 8. Uruk-hai Running (end)                                                      |
 | ![golum monologuing](docs/img/snapshots/the_taming_of_golum/5_golum-monologuing.jpg) | ![golum running](docs/img/snapshots/the_taming_of_golum/6_golum-running.jpg) | ![hobbits left behind](docs/img/snapshots/the_taming_of_golum/7_hobbits-left-behind.jpg) | ![orcs running](docs/img/snapshots/the_taming_of_golum/8_uruk-hai-running.jpg) |
 
 **Comparison**
 
-Both editions start with Frodo commanding Golum to take the hobbits to Mordor, and end with the Uruk-hai running to their master. However, the scenes are spliced slightly differently, with Golum Running moving from theatrical #2 to extended #6, and replaced with Golum Leading. Golum Running is not only at a different position in the editions, it also has different meaning. In the theatrical edition Golum is very quickly leading the hobbits to Morder, and in the extended edition Golum is attempting to escape from the hobbits. The extended edition also has a few additional scenes added in between the Wide Shot and the Uruk-hai running.
+Both editions start with Frodo commanding Golum to take the hobbits to Mordor, and end with the Uruk-hai running to
+their master. However, the scenes are spliced slightly differently, with Golum Running moving from theatrical #2 to
+extended #6, and replaced with Golum Leading. Golum Running is not only at a different position in the editions, it also
+has different meaning. In the theatrical edition Golum is very quickly leading the hobbits to Morder, and in the
+extended edition Golum is attempting to escape from the hobbits. The extended edition also has a few additional scenes
+added in between the Wide Shot and the Uruk-hai running.
 
-In short, we need to drop the assumption that scenes occur in the same order across editions, and rewrite the comparison script accordingly.
+In short, we need to drop the assumption that scenes occur in the same order across editions, and rewrite the comparison
+script accordingly.
