@@ -3,15 +3,13 @@
 import sys
 import os
 from datetime import timedelta
-from unittest.mock import patch
 
-import numpy as np
 import pytest
 
 # Ensure the source package is importable
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "movie_edition_comparer"))
 
-from compare_hashes import (
+from models import (
     ComparisonConfig,
     DifferenceType,
     FrameHash,
@@ -19,6 +17,8 @@ from compare_hashes import (
     HashFetcher,
     SceneDifference,
     TimeRange,
+)
+from comparison import (
     _lis_indices,
     _frames_are_similar,
     _refine_boundaries,
