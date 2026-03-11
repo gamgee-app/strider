@@ -6,8 +6,6 @@ Compares frame hashes from two editions of a movie to identify scenes that are:
 - Reordered between editions (same frames, different sequence)
 """
 
-import datetime
-import json
 import os.path
 import sqlite3
 from contextlib import closing
@@ -16,9 +14,6 @@ from datetime import timedelta
 from typing import Callable
 
 import cv2
-import ffmpeg
-from progress.bar import Bar
-from tabulate import tabulate
 
 from algorithms import deserialize
 
@@ -435,6 +430,8 @@ def trim_video(
     input_file: str, identifier: str, index: int,
     start: timedelta, end: timedelta, output_dir: str,
 ) -> str:
+    import ffmpeg
+
     _, ext = os.path.splitext(input_file)
     filename = (
         f"{output_dir}/{index}-"
@@ -455,6 +452,8 @@ def grab_frame(
     input_file: str, identifier: str, index: int,
     timestamp: timedelta, output_dir: str,
 ):
+    import ffmpeg
+
     filename = f"{output_dir}/{index}-{_time_to_filename(timestamp)}-{identifier}.png"
     if not os.path.isfile(filename):
         (
@@ -470,6 +469,11 @@ def grab_frame(
 # ---------------------------------------------------------------------------
 
 def main():
+    import json
+
+    from progress.bar import Bar
+    from tabulate import tabulate
+
     db_path = "data/frame_hashes.db"
 
     label_a = "theatrical"
