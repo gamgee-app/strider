@@ -169,18 +169,19 @@ class TestLisIndices:
         assert len(result) == 1
 
     def test_with_one_outlier(self):
-        # [1, 100, 2, 3, 4] — LIS is [1, 2, 3, 4]
-        result = _lis_indices([1, 100, 2, 3, 4])
-        values = [([1, 100, 2, 3, 4])[i] for i in result]
+        """LIS of [1, 100, 2, 3, 4] is [1, 2, 3, 4] — the outlier 100 is excluded."""
+        seq = [1, 100, 2, 3, 4]
+        result = _lis_indices(seq)
+        values = [seq[i] for i in result]
         assert len(result) == 4
         assert values == sorted(values)
-        # Must include the longer subsequence, not the one with 100
-        assert 1 not in result  # index 1 (value 100) excluded
+        assert 1 not in result, "index 1 (value 100) should be excluded"
 
     def test_scrambled(self):
-        # [3, 1, 5, 2, 4, 6]
-        result = _lis_indices([3, 1, 5, 2, 4, 6])
-        values = [[3, 1, 5, 2, 4, 6][i] for i in result]
+        """LIS of a scrambled sequence picks 4 elements in order."""
+        seq = [3, 1, 5, 2, 4, 6]
+        result = _lis_indices(seq)
+        values = [seq[i] for i in result]
         assert len(result) == 4
         assert values == sorted(values)
 
@@ -307,12 +308,12 @@ class TestAnalyzeMatchPairNoDifference:
 
     def test_similar_extra_frames_in_b(self):
         """Extra frames in B that are similar to anchors should be filtered out."""
-        prev = FrameMatch(FrameHash(10, _h(0)), FrameHash(10, _h(0)))
-        curr = FrameMatch(FrameHash(11, _h(0)), FrameHash(15, _h(0)))
+        prev = _fm(10, 10, hash_val=0)
+        curr = _fm(11, 15, hash_val=0)
         # a gap: 0 frames, b gap: 4 frames (indices 11–14)
         # All b frames have hash=0, same as anchors → similar
         b_store = {i: 0 for i in range(11, 15)}
-        config = ComparisonConfig(extended_similarity_threshold=12, perceptual_match_threshold=5.0)
+        config = ComparisonConfig(perceptual_match_threshold=5.0, extended_similarity_threshold=12)
         result = analyze_match_pair(
             prev, curr, _make_fetcher(), _make_fetcher(b_store), [], config,
         )
@@ -320,10 +321,10 @@ class TestAnalyzeMatchPairNoDifference:
 
     def test_similar_extra_frames_in_a(self):
         """Extra frames in A that are similar to anchors should be filtered out."""
-        prev = FrameMatch(FrameHash(10, _h(0)), FrameHash(10, _h(0)))
-        curr = FrameMatch(FrameHash(15, _h(0)), FrameHash(11, _h(0)))
+        prev = _fm(10, 10, hash_val=0)
+        curr = _fm(15, 11, hash_val=0)
         a_store = {i: 0 for i in range(11, 15)}
-        config = ComparisonConfig(extended_similarity_threshold=12, perceptual_match_threshold=5.0)
+        config = ComparisonConfig(perceptual_match_threshold=5.0, extended_similarity_threshold=12)
         result = analyze_match_pair(
             prev, curr, _make_fetcher(a_store), _make_fetcher(), [], config,
         )
@@ -414,8 +415,8 @@ class TestBoundaryRefinement:
         a_store = {**shared_hashes, 14: 0x0000, 15: 0x0000}
         b_store = {**shared_hashes, 14: 0xFFFF, 15: 0xFFFF, 16: 0xFFFF, 17: 0xFFFF, 18: 0xFFFF}
 
-        prev = FrameMatch(FrameHash(10, _h(99)), FrameHash(10, _h(99)))
-        curr = FrameMatch(FrameHash(16, _h(999)), FrameHash(19, _h(999)))
+        prev = _fm(10, 10, hash_val=99)
+        curr = _fm(16, 19, hash_val=999)
 
         config = ComparisonConfig(
             perceptual_match_threshold=5.0,
@@ -437,8 +438,8 @@ class TestBoundaryRefinement:
         returns None (boundaries cross or gap vanishes)."""
         # All frames in the gap are identical between editions
         shared = {i: i * 10 for i in range(11, 20)}
-        prev = FrameMatch(FrameHash(10, _h(99)), FrameHash(10, _h(99)))
-        curr = FrameMatch(FrameHash(20, _h(999)), FrameHash(25, _h(999)))
+        prev = _fm(10, 10, hash_val=99)
+        curr = _fm(20, 25, hash_val=999)
 
         config = ComparisonConfig(
             perceptual_match_threshold=5.0,
@@ -450,8 +451,8 @@ class TestBoundaryRefinement:
             [], config,
         )
         # After refinement eats through all matching frames, the gap
-        # collapses — should return None or a minimal result
-        # (the A side has 0 remaining frames after refinement)
+        # collapses and no meaningful difference remains
+        assert result is None
 
 
 # ---------------------------------------------------------------------------
@@ -623,8 +624,8 @@ class TestEdgeCases:
     def test_adjacent_matches_different_lag(self):
         """Two matches right next to each other with different lag.
         Gap has 0 frames in A, >0 in B."""
-        prev = FrameMatch(FrameHash(10, _h(0)), FrameHash(10, _h(0)))
-        curr = FrameMatch(FrameHash(11, _h(1)), FrameHash(14, _h(1)))
+        prev = _fm(10, 10, hash_val=0)
+        curr = _fm(11, 14, hash_val=1)
         # a gap: 0 frames, b gap: 3 frames
         config = ComparisonConfig(extended_similarity_threshold=2)
         result = analyze_match_pair(
@@ -635,8 +636,8 @@ class TestEdgeCases:
 
     def test_lag_decreases_returns_none_when_a_gap_zero(self):
         """When lag decreases (more content in A), and b has no extra frames."""
-        prev = FrameMatch(FrameHash(10, _h(0)), FrameHash(20, _h(0)))  # lag=10
-        curr = FrameMatch(FrameHash(16, _h(1)), FrameHash(21, _h(1)))  # lag=5
+        prev = _fm(10, 20, hash_val=0)  # lag=10
+        curr = _fm(16, 21, hash_val=1)  # lag=5
         # a gap: 5 frames (11–15), b gap: 0 frames
         config = ComparisonConfig(extended_similarity_threshold=3)
         result = analyze_match_pair(
