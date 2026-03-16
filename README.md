@@ -1,10 +1,104 @@
 # Strider - Movie Edition Ranger
 
-A simple python package for finding common and unique scenes in various editions of the same movie.
+A Python package for finding common and unique scenes across different editions of the same movie.
 
-- Calculate the hashes of each video frame, using various different image hashing algorithms
-- Store those hashes in a database, so as not to require rehashing with updates to the comparison logic
-- Compare the hashes, returning the ranges in which the videos differ
+- Calculate perceptual hashes for each video frame using multiple image hashing algorithms
+- Store hashes in a SQLite database so comparison logic can be updated without rehashing
+- Compare hashes to detect where editions differ, including inserted, removed, modified, and reordered scenes
+
+## Installation
+
+Requires Python 3.8+.
+
+```bash
+pip install -e .
+```
+
+### Dependencies
+
+- **numpy** and **opencv-contrib-python-headless** for image hashing and hamming distance calculations
+- **ffmpeg-python** for trimming video clips around detected differences
+- **progress** for CLI progress bars
+- **tabulate** for formatting comparison results
+
+## Usage
+
+### 1. Hash video frames
+
+Compute hashes for each frame and store them in a SQLite database:
+
+```bash
+mec-hash path/to/movie.mkv table_name --db data/frame_hashes.db --threads 4
+```
+
+### 2. Compare editions
+
+Compare two previously hashed editions to find scene differences:
+
+```bash
+mec-compare
+```
+
+The compare command reads unique frame matches from the database, filters them into monotonic order using a longest increasing subsequence algorithm, then analyzes gaps between matched frames to classify differences.
+
+### 3. Import chapters (optional)
+
+Import chapter metadata from an XML file for reference:
+
+```bash
+python -m movie_edition_comparer.import_chapters chapters.xml table_name --db data/frame_hashes.db
+```
+
+## Architecture
+
+```
+src/movie_edition_comparer/
+├── models.py          # Immutable dataclasses (FrameHash, FrameMatch, SceneDifference, etc.)
+├── algorithms.py      # Hashing algorithms (MD5, pHash, block mean, etc.) and serialization
+├── hash_video.py      # CLI: hash video frames into SQLite (mec-hash)
+├── db.py              # Database access layer for reading frame hashes and matches
+├── comparison.py      # Core comparison logic (pure functions, no I/O)
+├── compare_hashes.py  # CLI: compare editions and output results (mec-compare)
+└── import_chapters.py # CLI: import chapter XML into the database
+```
+
+### How comparison works
+
+1. **Match frames**: Find frame hashes that appear exactly once in each edition (unique common frames).
+2. **Order matches**: Sort by edition A's frame index, then extract the longest increasing subsequence of edition B's indices. Frames removed from this subsequence are flagged as reordered.
+3. **Analyze gaps**: For each pair of consecutive ordered matches, check the "lag" (B index minus A index). A change in lag indicates a difference. The gap is classified as:
+   - `unique_to_a` — frames only in edition A (e.g., theatrical-only content)
+   - `unique_to_b` — frames only in edition B (e.g., extended-only content)
+   - `modified` — both editions have frames in the gap but they differ
+   - `reordered` — frames from the ordering violation fall within the gap
+4. **Refine boundaries**: When both editions have frames in a gap, compare hashes at the edges to trim perceptually identical frames and narrow the reported difference range.
+5. **Filter noise**: Small runs of near-duplicate frames (encoding or frame-rate jitter) are filtered out using a configurable similarity threshold.
+
+### Configuration
+
+Comparison behaviour is controlled by `ComparisonConfig`:
+
+| Parameter | Default | Description |
+|---|---|---|
+| `fps` | 23.976216 | Frames per second, used to convert frame indices to timestamps |
+| `perceptual_match_threshold` | 5.0 | Maximum hamming distance to consider two frames perceptually identical |
+| `extended_similarity_threshold` | 12 | Maximum extra frames to tolerate as encoding jitter |
+| `maximum_inter_match_search` | 24 | How many frames to check at gap boundaries during refinement |
+
+## Development
+
+### Running tests
+
+```bash
+pip install pytest numpy opencv-contrib-python-headless tabulate
+pytest tests/ -v
+```
+
+### Project structure
+
+Tests live in `tests/test_compare_hashes.py` and cover the comparison module end-to-end with synthetic data (no video files or database required). The test helpers construct lightweight `FrameHash` and `FrameMatch` objects with hex-encoded two-byte hashes, allowing precise control over hamming distances.
+
+---
 
 # The Lord of the Rings
 
