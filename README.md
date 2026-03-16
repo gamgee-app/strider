@@ -28,7 +28,7 @@ pip install -e .
 Compute hashes for each frame and store them in a SQLite database:
 
 ```bash
-mec-hash path/to/movie.mkv table_name --db data/frame_hashes.db --threads 4
+strider-hash path/to/movie.mkv table_name --db data/frame_hashes.db --threads 4
 ```
 
 ### 2. Compare editions
@@ -36,7 +36,7 @@ mec-hash path/to/movie.mkv table_name --db data/frame_hashes.db --threads 4
 Compare two previously hashed editions to find scene differences:
 
 ```bash
-mec-compare
+strider-compare
 ```
 
 The compare command reads unique frame matches from the database, filters them into monotonic order using a longest increasing subsequence algorithm, then analyzes gaps between matched frames to classify differences.
@@ -55,10 +55,10 @@ python -m movie_edition_comparer.import_chapters chapters.xml table_name --db da
 src/movie_edition_comparer/
 ├── models.py          # Immutable dataclasses (FrameHash, FrameMatch, SceneDifference, etc.)
 ├── algorithms.py      # Hashing algorithms (MD5, pHash, block mean, etc.) and serialization
-├── hash_video.py      # CLI: hash video frames into SQLite (mec-hash)
+├── hash_video.py      # CLI: hash video frames into SQLite (strider-hash)
 ├── db.py              # Database access layer for reading frame hashes and matches
 ├── comparison.py      # Core comparison logic (pure functions, no I/O)
-├── compare_hashes.py  # CLI: compare editions and output results (mec-compare)
+├── compare_hashes.py  # CLI: compare editions and output results (strider-compare)
 └── import_chapters.py # CLI: import chapter XML into the database
 ```
 

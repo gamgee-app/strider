@@ -30,5 +30,5 @@ Homepage = "https://github.com/obroomhall/movie-edition-compare"
 Issues = "https://github.com/obroomhall/movie-edition-compare/issues"
 
 [project.scripts]
-mec-hash = "movie_edition_comparer.hash_video:main"
-mec-compare = "movie_edition_comparer.compare_hashes:main"
+strider-hash = "movie_edition_comparer.hash_video:main"
+strider-compare = "movie_edition_comparer.compare_hashes:main"
