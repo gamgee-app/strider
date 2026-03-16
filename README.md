@@ -36,7 +36,16 @@ strider hash path/to/movie.mkv table_name --db data/frame_hashes.db --threads 4
 Compare two previously hashed editions to find scene differences:
 
 ```bash
-strider compare
+strider compare theatrical_table extended_table --db data/frame_hashes.db
+```
+
+To also extract video clips and reference frames around each difference:
+
+```bash
+strider compare theatrical_table extended_table \
+    --movie-a path/to/theatrical.mkv --label-a theatrical \
+    --movie-b path/to/extended.mkv --label-b extended \
+    --output-dir out --padding 5
 ```
 
 The compare command reads unique frame matches from the database, filters them into monotonic order using a longest increasing subsequence algorithm, then analyzes gaps between matched frames to classify differences.

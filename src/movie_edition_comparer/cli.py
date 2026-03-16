@@ -2,6 +2,10 @@
 
 import argparse
 
+from movie_edition_comparer.compare_hashes import (
+    configure_parser as configure_compare_parser,
+    run as run_compare,
+)
 from movie_edition_comparer.hash_video import (
     configure_parser as configure_hash_parser,
     run as run_hash,
@@ -27,10 +31,11 @@ def main():
     configure_hash_parser(hash_parser)
 
     # --- compare subcommand ---
-    subparsers.add_parser(
+    compare_parser = subparsers.add_parser(
         "compare",
         help="Compare two hashed editions and report differences",
     )
+    configure_compare_parser(compare_parser)
 
     # --- import-chapters subcommand ---
     import_chapters_parser = subparsers.add_parser(
@@ -44,8 +49,7 @@ def main():
     if args.command == "hash":
         run_hash(args)
     elif args.command == "compare":
-        from movie_edition_comparer.compare_hashes import main as compare_main
-        compare_main()
+        run_compare(args)
     elif args.command == "import-chapters":
         run_import_chapters(args)
     else:
