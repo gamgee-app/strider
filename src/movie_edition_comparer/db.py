@@ -3,7 +3,7 @@
 import sqlite3
 from contextlib import closing
 
-from models import FrameHash, FrameMatch, HashFetcher
+from movie_edition_comparer.models import FrameHash, FrameMatch, HashFetcher
 
 
 def read_hashes_from_db(

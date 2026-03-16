@@ -6,8 +6,8 @@ them straightforward to test with synthetic data.
 
 import cv2
 
-from algorithms import deserialize
-from models import (
+from movie_edition_comparer.algorithms import deserialize
+from movie_edition_comparer.models import (
     ComparisonConfig,
     DifferenceType,
     FrameHash,

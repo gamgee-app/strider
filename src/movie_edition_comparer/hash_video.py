@@ -10,7 +10,7 @@ import cv2
 from numpy import ndarray
 from progress.bar import Bar
 
-from algorithms import hashing_algorithms, get_column_name
+from movie_edition_comparer.algorithms import hashing_algorithms, get_column_name
 
 
 def create_database(db_path: str, table_name: str):
@@ -67,24 +67,31 @@ def hash_video_frames_to_db(video_path: str, db_path: str, table_name: str, work
     cap.release()
 
 
+def configure_parser(parser: argparse.ArgumentParser):
+    """Add hash-video arguments to an argument parser."""
+    parser.add_argument('video', help="Path to the video file")
+    parser.add_argument('table', help="Name of the table to save data to")
+    parser.add_argument('--db', default="data/frame_hashes.db", help="Path to database file")
+    parser.add_argument('--threads', default=4, type=int, help="Number of threads to use")
+
+
+def run(args):
+    """Run the hash-video command with parsed arguments."""
+    start_time = datetime.now()
+    create_database(args.db, args.table)
+    hash_video_frames_to_db(args.video, args.db, args.table, args.threads)
+    print(f"Took {datetime.now() - start_time}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog='Hash Video',
         description='Calculates the hashes for each frame of a video, and saves the results to a database'
     )
-
-    parser.add_argument('video', help="Path to the video file")
-    parser.add_argument('table', help="Name of the table to save data to")
-    parser.add_argument('--db', default="data/frame_hashes.db", help="Path to database file")
-    parser.add_argument('--threads', default=4, type=int, help="Number of threads to use")
+    configure_parser(parser)
     args = parser.parse_args()
 
-    start_time = datetime.now()
-
-    create_database(args.db, args.table)
-    hash_video_frames_to_db(args.video, args.db, args.table, args.threads)
-
-    print(f"Took {datetime.now() - start_time}")
+    run(args)
 
 
 if __name__ == "__main__":

@@ -46,7 +46,7 @@ The compare command reads unique frame matches from the database, filters them i
 Import chapter metadata from an XML file for reference:
 
 ```bash
-python -m movie_edition_comparer.import_chapters chapters.xml table_name --db data/frame_hashes.db
+strider import-chapters chapters.xml table_name --db data/frame_hashes.db
 ```
 
 ## Architecture

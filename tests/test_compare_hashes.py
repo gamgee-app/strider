@@ -7,9 +7,9 @@ from datetime import timedelta
 import pytest
 
 # Ensure the source package is importable
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "movie_edition_comparer"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from models import (
+from movie_edition_comparer.models import (
     ComparisonConfig,
     DifferenceType,
     FrameHash,
@@ -18,7 +18,7 @@ from models import (
     SceneDifference,
     TimeRange,
 )
-from comparison import (
+from movie_edition_comparer.comparison import (
     _lis_indices,
     _frames_are_similar,
     _refine_boundaries,

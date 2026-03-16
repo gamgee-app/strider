@@ -21,7 +21,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install pytest
-          pip install numpy opencv-contrib-python-headless tabulate
+          pip install -e .
 
       - name: Run tests
         run: pytest tests/ -v

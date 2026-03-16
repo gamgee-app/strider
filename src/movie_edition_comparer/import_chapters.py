@@ -52,20 +52,28 @@ def save_chapters_to_table(chapters: list[tuple[str, str]], db_path: str, table_
         connection.commit()
 
 
+def configure_parser(parser: argparse.ArgumentParser):
+    """Add import-chapters arguments to an argument parser."""
+    parser.add_argument('chapters', help="Path to the chapters XML file")
+    parser.add_argument('table', help="Name of the table to save data to")
+    parser.add_argument('--db', default="data/frame_hashes.db", help="Path to database file")
+
+
+def run(args):
+    """Run the import-chapters command with parsed arguments."""
+    create_table(args.db, args.table)
+    chapters = list(read_chapters(args.chapters))
+    save_chapters_to_table(chapters, args.db, args.table)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog='Import Chapters',
         description='Saves chapter information to a database'
     )
-
-    parser.add_argument('chapters', help="Path to the chapters file")
-    parser.add_argument('table', help="Name of the table to save data to")
-    parser.add_argument('--db', default="data/frame_hashes.db", help="Path to database file")
+    configure_parser(parser)
     args = parser.parse_args()
-
-    create_table(args.db, args.table)
-    chapters = list(read_chapters(args.chapters))
-    save_chapters_to_table(chapters, args.db, args.table)
+    run(args)
 
 
 if __name__ == "__main__":

@@ -3,9 +3,9 @@
 import os.path
 from datetime import timedelta
 
-from comparison import find_all_differences
-from db import make_db_fetcher, read_unique_matches
-from models import ComparisonConfig, SceneDifference
+from movie_edition_comparer.comparison import find_all_differences
+from movie_edition_comparer.db import make_db_fetcher, read_unique_matches
+from movie_edition_comparer.models import ComparisonConfig, SceneDifference
 
 
 def _time_to_filename(t: timedelta) -> str:
