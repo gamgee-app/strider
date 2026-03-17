@@ -29,16 +29,16 @@ def read_chapters(chapters) -> list[tuple[str, str]]:
     root = tree.getroot()
 
     if root.tag != 'Chapters':
-        raise Exception('Expected XML document with root element Chapters')
+        raise ValueError('Expected XML document with root element Chapters')
 
     edition_entry = root.find('EditionEntry')
     if not edition_entry:
-        raise Exception('Expected XML tag EditionEntry under Chapters')
+        raise ValueError('Expected XML tag EditionEntry under Chapters')
 
     for chapter in edition_entry.findall('ChapterAtom'):
         chapter_display = chapter.find('ChapterDisplay')
         if not chapter_display:
-            raise Exception('Expected XML tag ChapterDisplay for ChapterAtom')
+            raise ValueError('Expected XML tag ChapterDisplay for ChapterAtom')
 
         time_start = chapter.findtext('ChapterTimeStart')
         title = chapter_display.findtext('ChapterString')

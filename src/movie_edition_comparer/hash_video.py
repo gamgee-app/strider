@@ -75,7 +75,7 @@ def configure_parser(parser: argparse.ArgumentParser):
     parser.add_argument('video', help="Path to the video file")
     parser.add_argument('--edition', required=True, help="Edition name (e.g. 'theatrical', 'extended')")
     parser.add_argument('--db', default="data/frame_hashes.db", help="Path to database file")
-    parser.add_argument('--threads', default=4, type=int, help="Number of threads to use")
+    parser.add_argument('--threads', default=os.cpu_count() or 4, type=int, help="Number of threads to use")
 
 
 def run(args):
