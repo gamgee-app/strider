@@ -3,6 +3,7 @@
 import sqlite3
 from contextlib import closing
 
+from movie_edition_comparer.algorithms import HASH_COLUMN
 from movie_edition_comparer.models import FrameHash, FrameMatch, HashFetcher
 
 FRAME_HASHES_TABLE = "frame_hashes"
@@ -16,7 +17,7 @@ def read_hashes_from_db(
     with closing(sqlite3.connect(db_path)) as connection:
         cursor = connection.cursor()
         cursor.execute(
-            f"SELECT frame_index, hash_block_mean_0 "
+            f"SELECT frame_index, {HASH_COLUMN} "
             f"FROM {FRAME_HASHES_TABLE} "
             f"WHERE edition = ? AND frame_index >= ? AND frame_index < ?",
             (edition, start, end),
@@ -44,14 +45,14 @@ def read_unique_matches(
         cursor = connection.cursor()
         cursor.execute(f"""
             WITH a_unique AS (
-                    SELECT hash_block_mean_0 AS hash
+                    SELECT {HASH_COLUMN} AS hash
                     FROM {FRAME_HASHES_TABLE}
                     WHERE edition = ?
                     GROUP BY hash
                     HAVING count(1) = 1
                 ),
                 b_unique AS (
-                    SELECT hash_block_mean_0 AS hash
+                    SELECT {HASH_COLUMN} AS hash
                     FROM {FRAME_HASHES_TABLE}
                     WHERE edition = ?
                     GROUP BY hash
@@ -63,13 +64,13 @@ def read_unique_matches(
                     SELECT hash FROM b_unique
                 )
             SELECT
-                a.frame_index, a.hash_block_mean_0,
-                b.frame_index, b.hash_block_mean_0
+                a.frame_index, a.{HASH_COLUMN},
+                b.frame_index, b.{HASH_COLUMN}
             FROM {FRAME_HASHES_TABLE} a
-            JOIN {FRAME_HASHES_TABLE} b ON a.hash_block_mean_0 = b.hash_block_mean_0
+            JOIN {FRAME_HASHES_TABLE} b ON a.{HASH_COLUMN} = b.{HASH_COLUMN}
             WHERE a.edition = ?
               AND b.edition = ?
-              AND a.hash_block_mean_0 IN (SELECT hash FROM common)
+              AND a.{HASH_COLUMN} IN (SELECT hash FROM common)
             ORDER BY a.frame_index
         """, (edition_a, edition_b, edition_a, edition_b))
         return [

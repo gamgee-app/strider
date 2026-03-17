@@ -10,12 +10,11 @@ import cv2
 from numpy import ndarray
 from progress.bar import Bar
 
-from movie_edition_comparer.algorithms import hashing_algorithms, get_column_name
+from movie_edition_comparer.algorithms import HASH_COLUMN, hash_frame
 from movie_edition_comparer.db import FRAME_HASHES_TABLE
 
 
 def create_database(db_path: str):
-    column_names = [get_column_name(x) for x in hashing_algorithms]
     db_dir = os.path.dirname(db_path)
     if db_dir:
         os.makedirs(db_dir, exist_ok=True)
@@ -24,19 +23,18 @@ def create_database(db_path: str):
             f"CREATE TABLE IF NOT EXISTS {FRAME_HASHES_TABLE} (\n"
             f"    edition TEXT NOT NULL,\n"
             f"    frame_index INTEGER NOT NULL,\n"
-            f"    {','.join(f'{x} TEXT NOT NULL' for x in column_names)},\n"
+            f"    {HASH_COLUMN} TEXT NOT NULL,\n"
             f"    PRIMARY KEY (edition, frame_index)\n"
             f")"
         )
-        for column_name in column_names:
-            connection.execute(
-                f"CREATE INDEX IF NOT EXISTS idx_{FRAME_HASHES_TABLE}_{column_name} "
-                f"ON {FRAME_HASHES_TABLE} (edition, {column_name})"
-            )
+        connection.execute(
+            f"CREATE INDEX IF NOT EXISTS idx_{FRAME_HASHES_TABLE}_{HASH_COLUMN} "
+            f"ON {FRAME_HASHES_TABLE} (edition, {HASH_COLUMN})"
+        )
 
 
-def get_frame_hashes(index: int, frame: ndarray):
-    return index, {name: func(frame) for name, func in hashing_algorithms.items()}
+def hash_frame_at(index: int, frame: ndarray) -> tuple[int, str]:
+    return index, hash_frame(frame)
 
 
 def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers: int):
@@ -53,22 +51,18 @@ def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers
                 if not ret:
                     break
 
-                future = executor.submit(get_frame_hashes, frame_index, frame)
+                future = executor.submit(hash_frame_at, frame_index, frame)
                 futures.append(future)
                 bar.next()
 
         with Bar('Inserting', max=len(futures)) as bar:
             for future in concurrent.futures.as_completed(futures):
-                index, hashes = future.result()
-                values = [edition, index] + list(hashes.values())
-
-                column_names = f"edition, frame_index, {', '.join(get_column_name(x) for x in hashes.keys())}"
-                values_names = ", ".join(["?" for _ in values])
-
-                connection.execute(f"""
-                    INSERT INTO {FRAME_HASHES_TABLE} ({column_names})
-                    VALUES ({values_names})
-                """, values)
+                index, frame_hash = future.result()
+                connection.execute(
+                    f"INSERT INTO {FRAME_HASHES_TABLE} (edition, frame_index, {HASH_COLUMN}) "
+                    f"VALUES (?, ?, ?)",
+                    (edition, index, frame_hash),
+                )
                 bar.next()
 
         connection.commit()

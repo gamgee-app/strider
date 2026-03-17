@@ -9,6 +9,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
+from movie_edition_comparer.algorithms import HASH_COLUMN
 from movie_edition_comparer.db import (
     FRAME_HASHES_TABLE,
     make_db_fetcher,
@@ -31,12 +32,12 @@ def db_path(tmp_path):
             CREATE TABLE {FRAME_HASHES_TABLE} (
                 edition TEXT NOT NULL,
                 frame_index INTEGER NOT NULL,
-                hash_block_mean_0 TEXT NOT NULL,
+                {HASH_COLUMN} TEXT NOT NULL,
                 PRIMARY KEY (edition, frame_index)
             )
         """)
         conn.executemany(
-            f"INSERT INTO {FRAME_HASHES_TABLE} (edition, frame_index, hash_block_mean_0) VALUES (?, ?, ?)",
+            f"INSERT INTO {FRAME_HASHES_TABLE} (edition, frame_index, {HASH_COLUMN}) VALUES (?, ?, ?)",
             [
                 # Edition A: frames 0–4 with unique hashes
                 ("theatrical", 0, "aaaa"),
@@ -127,7 +128,7 @@ class TestReadUniqueMatches:
         # Insert a duplicate hash in theatrical
         with closing(sqlite3.connect(db_path)) as conn:
             conn.execute(
-                f"INSERT INTO {FRAME_HASHES_TABLE} (edition, frame_index, hash_block_mean_0) VALUES (?, ?, ?)",
+                f"INSERT INTO {FRAME_HASHES_TABLE} (edition, frame_index, {HASH_COLUMN}) VALUES (?, ?, ?)",
                 ("theatrical", 5, "aaaa"),  # aaaa now appears twice in theatrical
             )
             conn.commit()
@@ -139,7 +140,7 @@ class TestReadUniqueMatches:
         """Editions with no common hashes return empty list."""
         with closing(sqlite3.connect(db_path)) as conn:
             conn.execute(
-                f"INSERT INTO {FRAME_HASHES_TABLE} (edition, frame_index, hash_block_mean_0) VALUES (?, ?, ?)",
+                f"INSERT INTO {FRAME_HASHES_TABLE} (edition, frame_index, {HASH_COLUMN}) VALUES (?, ?, ?)",
                 ("directors_cut", 0, "zzzz"),
             )
             conn.commit()
@@ -154,7 +155,7 @@ class TestReadUniqueMatches:
                 CREATE TABLE {FRAME_HASHES_TABLE} (
                     edition TEXT NOT NULL,
                     frame_index INTEGER NOT NULL,
-                    hash_block_mean_0 TEXT NOT NULL,
+                    {HASH_COLUMN} TEXT NOT NULL,
                     PRIMARY KEY (edition, frame_index)
                 )
             """)
