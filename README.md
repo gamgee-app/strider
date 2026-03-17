@@ -28,21 +28,25 @@ pip install -e .
 Compute hashes for each frame and store them in a SQLite database:
 
 ```bash
-strider hash path/to/movie.mkv table_name --db data/frame_hashes.db --threads 4
+strider hash path/to/theatrical.mkv --edition theatrical --db data/two_towers.db
+strider hash path/to/extended.mkv --edition extended --db data/two_towers.db
 ```
+
+Each movie gets its own database file. Edition names distinguish the frame hashes within that database.
 
 ### 2. Compare editions
 
 Compare two previously hashed editions to find scene differences:
 
 ```bash
-strider compare theatrical_table extended_table --db data/frame_hashes.db
+strider compare --edition-a theatrical --edition-b extended --db data/two_towers.db
 ```
 
 To also extract video clips and reference frames around each difference:
 
 ```bash
-strider compare theatrical_table extended_table \
+strider compare --edition-a theatrical --edition-b extended \
+    --db data/two_towers.db \
     --movie-a path/to/theatrical.mkv --label-a theatrical \
     --movie-b path/to/extended.mkv --label-b extended \
     --output-dir out --padding 5
@@ -55,7 +59,7 @@ The compare command reads unique frame matches from the database, filters them i
 Import chapter metadata from an XML file for reference:
 
 ```bash
-strider import-chapters chapters.xml table_name --db data/frame_hashes.db
+strider import-chapters chapters.xml --edition theatrical --db data/two_towers.db
 ```
 
 ## Architecture

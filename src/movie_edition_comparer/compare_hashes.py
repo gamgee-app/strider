@@ -53,8 +53,8 @@ def grab_frame(
 
 def configure_parser(parser: argparse.ArgumentParser):
     """Add compare arguments to an argument parser."""
-    parser.add_argument("table_a", help="Database table name for edition A")
-    parser.add_argument("table_b", help="Database table name for edition B")
+    parser.add_argument("--edition-a", required=True, help="Edition name for edition A (e.g. 'theatrical')")
+    parser.add_argument("--edition-b", required=True, help="Edition name for edition B (e.g. 'extended')")
     parser.add_argument("--db", default="data/frame_hashes.db", help="Path to database file")
     parser.add_argument("--label-a", default="a", help="Short label for edition A (used in filenames)")
     parser.add_argument("--label-b", default="b", help="Short label for edition B (used in filenames)")
@@ -75,9 +75,9 @@ def run(args):
     config = ComparisonConfig()
 
     print("Reading unique matches…")
-    all_matches = read_unique_matches(args.db, args.table_a, args.table_b)
-    a_fetcher = make_db_fetcher(args.db, args.table_a)
-    b_fetcher = make_db_fetcher(args.db, args.table_b)
+    all_matches = read_unique_matches(args.db, args.edition_a, args.edition_b)
+    a_fetcher = make_db_fetcher(args.db, args.edition_a)
+    b_fetcher = make_db_fetcher(args.db, args.edition_b)
 
     print("Finding differences…")
     differences = find_all_differences(all_matches, a_fetcher, b_fetcher, config)
