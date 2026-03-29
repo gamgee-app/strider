@@ -251,13 +251,13 @@ def generate_report(
             before_to_first_b = ""
             if diff.first_inner_a:
                 d = hamming_distance(sm.a.hash, diff.first_inner_a.hash)
-                before_to_first_a = f'<span class="adj-hd"><span class="hd-display"><span class="hd-arrow">&darr;</span> <strong>{d:.0f}</strong></span></span>'
+                before_to_first_a = f'<span class="adj-hd"><span class="hd-display">&darr; <strong>{d:.0f}</strong></span></span>'
             if diff.first_inner_b:
                 d = hamming_distance(sm.b.hash, diff.first_inner_b.hash)
-                before_to_first_b = f'<span class="adj-hd"><span class="hd-display"><span class="hd-arrow">&darr;</span> <strong>{d:.0f}</strong></span></span>'
+                before_to_first_b = f'<span class="adj-hd"><span class="hd-display">&darr; <strong>{d:.0f}</strong></span></span>'
             start_a_hash = f'<div class="frame-info"><span class="frame-num">frame {sm.a.index}</span></div>{before_to_first_a}'
             start_b_hash = f'<div class="frame-info"><span class="frame-num">frame {sm.b.index}</span></div>{before_to_first_b}'
-            start_diff_hash = f'<div class="frame-info"><span class="hd-display"><span class="hd-arrow">&harr;</span> <strong>{start_hd:.0f}</strong></span></div>'
+            start_diff_hash = f'<div class="frame-info"><span class="hd-display">&harr; <strong>{start_hd:.0f}</strong></span></div>'
 
         # After row: frame number + (no ↓ needed, it's the last row)
         end_a_hash = end_b_hash = end_diff_hash = ""
@@ -266,7 +266,7 @@ def generate_report(
             end_hd = hamming_distance(em.a.hash, em.b.hash)
             end_a_hash = f'<div class="frame-info"><span class="frame-num">frame {em.a.index}</span></div>'
             end_b_hash = f'<div class="frame-info"><span class="frame-num">frame {em.b.index}</span></div>'
-            end_diff_hash = f'<div class="frame-info"><span class="hd-display"><span class="hd-arrow">&harr;</span> <strong>{end_hd:.0f}</strong></span></div>'
+            end_diff_hash = f'<div class="frame-info"><span class="hd-display">&harr; <strong>{end_hd:.0f}</strong></span></div>'
 
         # First row: frame number
         first_a_label = first_b_label = first_diff_label = ""
@@ -276,7 +276,7 @@ def generate_report(
             first_b_label = f'<div class="frame-info"><span class="frame-num">frame {diff.first_inner_b.index}</span></div>'
         if diff.first_inner_a and diff.first_inner_b:
             first_hd = hamming_distance(diff.first_inner_a.hash, diff.first_inner_b.hash)
-            first_diff_label = f'<div class="frame-info"><span class="hd-display"><span class="hd-arrow">&harr;</span> <strong>{first_hd:.0f}</strong></span></div>'
+            first_diff_label = f'<div class="frame-info"><span class="hd-display">&harr; <strong>{first_hd:.0f}</strong></span></div>'
 
         # Last row: frame number + ↓ distance to After
         last_a_label = last_b_label = last_diff_label = ""
@@ -284,17 +284,17 @@ def generate_report(
             last_to_after_a = ""
             if diff.end_match:
                 d = hamming_distance(diff.last_inner_a.hash, diff.end_match.a.hash)
-                last_to_after_a = f'<span class="adj-hd"><span class="hd-display"><span class="hd-arrow">&darr;</span> <strong>{d:.0f}</strong></span></span>'
+                last_to_after_a = f'<span class="adj-hd"><span class="hd-display">&darr; <strong>{d:.0f}</strong></span></span>'
             last_a_label = f'<div class="frame-info"><span class="frame-num">frame {diff.last_inner_a.index}</span></div>{last_to_after_a}'
         if diff.last_inner_b:
             last_to_after_b = ""
             if diff.end_match:
                 d = hamming_distance(diff.last_inner_b.hash, diff.end_match.b.hash)
-                last_to_after_b = f'<span class="adj-hd"><span class="hd-display"><span class="hd-arrow">&darr;</span> <strong>{d:.0f}</strong></span></span>'
+                last_to_after_b = f'<span class="adj-hd"><span class="hd-display">&darr; <strong>{d:.0f}</strong></span></span>'
             last_b_label = f'<div class="frame-info"><span class="frame-num">frame {diff.last_inner_b.index}</span></div>{last_to_after_b}'
         if diff.last_inner_a and diff.last_inner_b:
             last_hd = hamming_distance(diff.last_inner_a.hash, diff.last_inner_b.hash)
-            last_diff_label = f'<div class="frame-info"><span class="hd-display"><span class="hd-arrow">&harr;</span> <strong>{last_hd:.0f}</strong></span></div>'
+            last_diff_label = f'<div class="frame-info"><span class="hd-display">&harr; <strong>{last_hd:.0f}</strong></span></div>'
 
         # Min hamming distance across all boundary pairs for filtering.
         # Includes cross-edition (first A vs first B) and same-edition
@@ -427,8 +427,7 @@ def generate_report(
   .frame-info {{ margin-top: 6px; font-family: monospace; font-size: 0.85em; text-align: center; }}
   .frame-info .frame-num {{ color: #666; }}
   .frame-info strong {{ color: #e0e0e0; }}
-  .hd-display {{ font-size: 1.2em; display: inline-flex; align-items: center; gap: 4px; }}
-  .hd-arrow {{ font-size: 3em; line-height: 0.5; }}
+  .hd-display {{ font-size: 2em; }}
   .adj-hd {{ display: block; text-align: right; color: #888; font-family: monospace; margin-top: 2px; }}
   .hd-display strong {{ color: #e0e0e0; }}
   .video-row {{ display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }}
