@@ -258,9 +258,9 @@ def generate_report(
             if frame is not None:
                 parts.append(f'<div class="b-frame">frame {frame}</div>')
             if cross_hd is not None:
-                parts.append(f'<div class="b-hd">&harr; {cross_hd:.0f}</div>')
+                parts.append(f'<div class="b-hd"><span>&harr;</span> <strong>{cross_hd:.0f}</strong></div>')
             if adj_hd is not None:
-                parts.append(f'<div class="b-adj">&darr; {adj_hd:.0f}</div>')
+                parts.append(f'<div class="b-adj"><span>&darr;</span> <strong>{adj_hd:.0f}</strong></div>')
             parts.append('</div>')
             return ''.join(parts)
 
@@ -405,10 +405,10 @@ def generate_report(
   .b-cell-meta {{ text-align: center; }}
   .b-frame {{ font-family: monospace; font-size: 0.85em; color: #666; margin-top: 2px; }}
   .b-frame:empty {{ display: none; }}
-  .b-hd {{ font-family: monospace; font-size: 2em; color: #888; }}
+  .b-hd {{ display: inline-flex; align-items: center; gap: 4px; font-family: monospace; font-size: 2em; color: #888; }}
   .b-hd:empty {{ display: none; }}
   .b-hd strong {{ color: #e0e0e0; }}
-  .b-adj {{ font-family: monospace; font-size: 2em; color: #888; text-align: right; }}
+  .b-adj {{ display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; width: 100%; font-family: monospace; font-size: 1.5em; color: #888; }}
   .b-adj:empty {{ display: none; }}
   .b-adj strong {{ color: #e0e0e0; }}
   .contact-sheet {{ display: flex; flex-wrap: wrap; gap: 6px; }}
