@@ -242,14 +242,25 @@ def generate_report(
         after_diff = _diff_img_tag(diff_images_dir, diff.a_range.end, diff.b_range.end)
 
         # Hash info from boundary matches — shown beneath each image
+        # Before row: frame number + ↓ distance to First
         start_a_hash = start_b_hash = start_diff_hash = ""
-        end_a_hash = end_b_hash = end_diff_hash = ""
         if diff.start_match:
             sm = diff.start_match
             start_hd = hamming_distance(sm.a.hash, sm.b.hash)
-            start_a_hash = f'<span class="hash-label">frame {sm.a.index}</span>'
-            start_b_hash = f'<span class="hash-label">frame {sm.b.index}</span>'
+            before_to_first_a = ""
+            before_to_first_b = ""
+            if diff.first_inner_a:
+                d = hamming_distance(sm.a.hash, diff.first_inner_a.hash)
+                before_to_first_a = f'<span class="adj-hd">&darr; <strong>{d:.0f}</strong></span>'
+            if diff.first_inner_b:
+                d = hamming_distance(sm.b.hash, diff.first_inner_b.hash)
+                before_to_first_b = f'<span class="adj-hd">&darr; <strong>{d:.0f}</strong></span>'
+            start_a_hash = f'<span class="hash-label">frame {sm.a.index}{before_to_first_a}</span>'
+            start_b_hash = f'<span class="hash-label">frame {sm.b.index}{before_to_first_b}</span>'
             start_diff_hash = f'<span class="hash-label">hamming: <strong>{start_hd:.0f}</strong></span>'
+
+        # After row: frame number + (no ↓ needed, it's the last row)
+        end_a_hash = end_b_hash = end_diff_hash = ""
         if diff.end_match:
             em = diff.end_match
             end_hd = hamming_distance(em.a.hash, em.b.hash)
@@ -257,8 +268,8 @@ def generate_report(
             end_b_hash = f'<span class="hash-label">frame {em.b.index}</span>'
             end_diff_hash = f'<span class="hash-label">hamming: <strong>{end_hd:.0f}</strong></span>'
 
+        # First row: frame number
         first_a_label = first_b_label = first_diff_label = ""
-        last_a_label = last_b_label = last_diff_label = ""
         if diff.first_inner_a:
             first_a_label = f'<span class="hash-label">frame {diff.first_inner_a.index}</span>'
         if diff.first_inner_b:
@@ -266,10 +277,21 @@ def generate_report(
         if diff.first_inner_a and diff.first_inner_b:
             first_hd = hamming_distance(diff.first_inner_a.hash, diff.first_inner_b.hash)
             first_diff_label = f'<span class="hash-label">hamming: <strong>{first_hd:.0f}</strong></span>'
+
+        # Last row: frame number + ↓ distance to After
+        last_a_label = last_b_label = last_diff_label = ""
         if diff.last_inner_a:
-            last_a_label = f'<span class="hash-label">frame {diff.last_inner_a.index}</span>'
+            last_to_after_a = ""
+            if diff.end_match:
+                d = hamming_distance(diff.last_inner_a.hash, diff.end_match.a.hash)
+                last_to_after_a = f'<span class="adj-hd">&darr; <strong>{d:.0f}</strong></span>'
+            last_a_label = f'<span class="hash-label">frame {diff.last_inner_a.index}{last_to_after_a}</span>'
         if diff.last_inner_b:
-            last_b_label = f'<span class="hash-label">frame {diff.last_inner_b.index}</span>'
+            last_to_after_b = ""
+            if diff.end_match:
+                d = hamming_distance(diff.last_inner_b.hash, diff.end_match.b.hash)
+                last_to_after_b = f'<span class="adj-hd">&darr; <strong>{d:.0f}</strong></span>'
+            last_b_label = f'<span class="hash-label">frame {diff.last_inner_b.index}{last_to_after_b}</span>'
         if diff.last_inner_a and diff.last_inner_b:
             last_hd = hamming_distance(diff.last_inner_a.hash, diff.last_inner_b.hash)
             last_diff_label = f'<span class="hash-label">hamming: <strong>{last_hd:.0f}</strong></span>'
@@ -402,8 +424,9 @@ def generate_report(
   .hamming-group {{ display: flex; align-items: center; gap: 8px; }}
   .hamming-group input[type=range] {{ width: 120px; accent-color: #60a5fa; }}
   #hamming-value {{ color: #e0e0e0; font-family: monospace; min-width: 2ch; }}
-  .hash-label {{ font-size: 0.8em; color: #666; display: block; margin-top: 4px; font-family: monospace; }}
+  .hash-label {{ font-size: 0.8em; color: #666; display: flex; justify-content: space-between; margin-top: 4px; font-family: monospace; }}
   .hash-label strong {{ color: #e0e0e0; font-size: 1.2em; }}
+  .adj-hd {{ color: #888; margin-left: 12px; }}
   .video-row {{ display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }}
   .video-col {{ flex: 1; min-width: 300px; }}
   .video-col h4 {{ color: #aaa; font-size: 0.85em; margin-bottom: 6px; font-weight: normal; }}
