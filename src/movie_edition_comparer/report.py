@@ -257,7 +257,7 @@ def generate_report(
                 before_to_first_b = f'<span class="adj-hd">&darr; <strong>{d:.0f}</strong></span>'
             start_a_hash = f'<span class="hash-label">frame {sm.a.index}{before_to_first_a}</span>'
             start_b_hash = f'<span class="hash-label">frame {sm.b.index}{before_to_first_b}</span>'
-            start_diff_hash = f'<span class="hash-label">hamming: <strong>{start_hd:.0f}</strong></span>'
+            start_diff_hash = f'<span class="hash-label">&harr; <strong>{start_hd:.0f}</strong></span>'
 
         # After row: frame number + (no ↓ needed, it's the last row)
         end_a_hash = end_b_hash = end_diff_hash = ""
@@ -266,7 +266,7 @@ def generate_report(
             end_hd = hamming_distance(em.a.hash, em.b.hash)
             end_a_hash = f'<span class="hash-label">frame {em.a.index}</span>'
             end_b_hash = f'<span class="hash-label">frame {em.b.index}</span>'
-            end_diff_hash = f'<span class="hash-label">hamming: <strong>{end_hd:.0f}</strong></span>'
+            end_diff_hash = f'<span class="hash-label">&harr; <strong>{end_hd:.0f}</strong></span>'
 
         # First row: frame number
         first_a_label = first_b_label = first_diff_label = ""
@@ -276,7 +276,7 @@ def generate_report(
             first_b_label = f'<span class="hash-label">frame {diff.first_inner_b.index}</span>'
         if diff.first_inner_a and diff.first_inner_b:
             first_hd = hamming_distance(diff.first_inner_a.hash, diff.first_inner_b.hash)
-            first_diff_label = f'<span class="hash-label">hamming: <strong>{first_hd:.0f}</strong></span>'
+            first_diff_label = f'<span class="hash-label">&harr; <strong>{first_hd:.0f}</strong></span>'
 
         # Last row: frame number + ↓ distance to After
         last_a_label = last_b_label = last_diff_label = ""
@@ -294,7 +294,7 @@ def generate_report(
             last_b_label = f'<span class="hash-label">frame {diff.last_inner_b.index}{last_to_after_b}</span>'
         if diff.last_inner_a and diff.last_inner_b:
             last_hd = hamming_distance(diff.last_inner_a.hash, diff.last_inner_b.hash)
-            last_diff_label = f'<span class="hash-label">hamming: <strong>{last_hd:.0f}</strong></span>'
+            last_diff_label = f'<span class="hash-label">&harr; <strong>{last_hd:.0f}</strong></span>'
 
         # Min hamming distance across all boundary pairs for filtering.
         # Includes cross-edition (first A vs first B) and same-edition
