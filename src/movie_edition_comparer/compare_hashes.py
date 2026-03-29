@@ -25,7 +25,6 @@ def configure_parser(parser: argparse.ArgumentParser):
     parser.add_argument("--padding", type=float, default=5, help="Seconds of padding around video clips")
     parser.add_argument("--report", default=None, metavar="FILE", help="Generate an HTML visual verification report")
     parser.add_argument("--contact-frames", type=int, default=8, help="Frames per contact sheet in the report (default: 8)")
-    parser.add_argument("--thumbnail-width", type=int, default=320, help="Thumbnail width in pixels for the report (default: 320)")
     parser.add_argument("--frames-dir", default="frames", help="Directory for extracted report frames (default: frames)")
 
 
@@ -90,7 +89,6 @@ def run(args):
             args.label_a, args.label_b, args.report,
             frames_dir=args.frames_dir,
             contact_frames=args.contact_frames,
-            thumbnail_width=args.thumbnail_width,
         )
 
     do_trim = not args.no_trim and args.movie_a and args.movie_b

@@ -65,12 +65,12 @@ def _read_frame_at(cap, frame_index: int):
 def _generate_diff_images(
     differences: list[SceneDifference],
     movie_a: str, movie_b: str,
-    diff_dir: str, thumbnail_width: int,
+    diff_dir: str,
 ):
     """Generate difference images from full-resolution frames.
 
-    Reads frames at native resolution from the video files, computes the
-    per-pixel absolute difference, then downscales the result for the report.
+    Reads frames at native resolution from the video files and computes the
+    per-pixel absolute difference.
     """
     import cv2
     from progress.bar import Bar
@@ -118,13 +118,6 @@ def _generate_diff_images(
 
                     diff_img = cv2.absdiff(frame_a, frame_b)
                     diff_img = cv2.normalize(diff_img, None, 0, 255, cv2.NORM_MINMAX)
-
-                    h, w = diff_img.shape[:2]
-                    if w != thumbnail_width:
-                        scale = thumbnail_width / w
-                        new_h = int(h * scale)
-                        diff_img = cv2.resize(diff_img, (thumbnail_width, new_h),
-                                              interpolation=cv2.INTER_AREA)
 
                     out_path = os.path.join(diff_dir, _diff_filename(idx_a, idx_b))
                     cv2.imwrite(out_path, diff_img)
@@ -180,7 +173,6 @@ def generate_report(
     output_path: str,
     frames_dir: str = "frames",
     contact_frames: int = 8,
-    thumbnail_width: int = 320,
 ):
     """Generate an HTML report referencing extracted frame images.
 
@@ -194,13 +186,13 @@ def generate_report(
     a_frame_indices, b_frame_indices = _collect_frames(differences, contact_frames)
 
     print(f"Extracting {label_a} frames...")
-    extract_frames(movie_a, a_frame_indices, a_frames_dir, width=thumbnail_width)
+    extract_frames(movie_a, a_frame_indices, a_frames_dir)
     print(f"Extracting {label_b} frames...")
-    extract_frames(movie_b, b_frame_indices, b_frames_dir, width=thumbnail_width)
+    extract_frames(movie_b, b_frame_indices, b_frames_dir)
 
     diff_images_dir = os.path.join(frames_dir, "diff")
     print("Generating boundary diffs...")
-    _generate_diff_images(differences, movie_a, movie_b, diff_images_dir, thumbnail_width)
+    _generate_diff_images(differences, movie_a, movie_b, diff_images_dir)
 
     # Generate HTML
     sections = []
@@ -346,10 +338,10 @@ def generate_report(
   table.boundary td, table.boundary th {{ padding: 6px 10px; text-align: center; vertical-align: middle; }}
   table.boundary th {{ color: #aaa; font-weight: normal; }}
   table.boundary td:first-child {{ color: #666; font-size: 0.85em; text-align: right; }}
-  table.boundary img {{ max-width: {thumbnail_width}px; border-radius: 4px; }}
+  table.boundary img {{ max-width: 480px; border-radius: 4px; }}
   .contact-sheet {{ display: flex; flex-wrap: wrap; gap: 6px; }}
   .cs-frame {{ display: flex; flex-direction: column; align-items: center; }}
-  .cs-frame img {{ max-width: {thumbnail_width}px; border-radius: 4px; }}
+  .cs-frame img {{ max-width: 480px; border-radius: 4px; }}
   .cs-ts {{ font-size: 0.7em; color: #666; font-family: monospace; margin-top: 2px; }}
   .controls {{ display: flex; gap: 16px; align-items: center; margin-bottom: 20px; padding: 12px 16px; background: #222; border-radius: 6px; flex-wrap: wrap; }}
   .controls label {{ color: #aaa; font-size: 0.85em; }}

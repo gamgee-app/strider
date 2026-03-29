@@ -60,12 +60,12 @@ def grab_frame(
 
 def extract_frames(
     input_file: str, frame_indices: list[int],
-    output_dir: str, width: int = 320,
+    output_dir: str,
 ):
     """Extract frames at the given indices, skipping any that already exist.
 
     Opens the video once with OpenCV and seeks by frame index for exact
-    frame extraction.
+    frame extraction. Frames are saved at native resolution.
     """
     import cv2
     from progress.bar import Bar
@@ -91,12 +91,6 @@ def extract_frames(
                 cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
                 ret, frame = cap.read()
                 if ret:
-                    h, w = frame.shape[:2]
-                    if w != width:
-                        scale = width / w
-                        new_h = int(h * scale)
-                        frame = cv2.resize(frame, (width, new_h),
-                                           interpolation=cv2.INTER_AREA)
                     out_path = os.path.join(output_dir, _frame_filename(idx))
                     cv2.imwrite(out_path, frame)
                 bar.next()
