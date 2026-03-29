@@ -9,10 +9,20 @@ from movie_edition_comparer.video import _frame_filename, extract_frames
 
 
 def _ts(t: timedelta) -> str:
+    """Format a timestamp as HH:MM:SS."""
     total = int(t.total_seconds())
     h, remainder = divmod(total, 3600)
     m, s = divmod(remainder, 60)
-    return f"{h}:{m:02d}:{s:02d}"
+    return f"{h:02d}:{m:02d}:{s:02d}"
+
+
+def _dur(frames: int, fps: float) -> str:
+    """Format a duration as human-readable text with frame count."""
+    seconds = frames / fps
+    if seconds < 60:
+        return f"{seconds:.1f} seconds ({frames} frames)"
+    minutes = seconds / 60
+    return f"{minutes:.1f} minutes ({frames} frames)"
 
 
 def _sample_frames(frame_range: FrameRange, n: int) -> list[int]:
@@ -291,9 +301,9 @@ def generate_report(
         <span class="diff-num">#{i + 1}</span>
         <span class="diff-type {type_cls}">{type_lbl}</span>
         <span class="diff-meta">
-          {label_a}: {_ts(diff.to_time(diff.a_range.start))}&ndash;{_ts(diff.to_time(diff.a_range.end))} ({_ts(timedelta(seconds=diff.a_range.frame_count / diff.fps))})
+          {label_a}: {_ts(diff.to_time(diff.a_range.start))}&ndash;{_ts(diff.to_time(diff.a_range.end))} ({_dur(diff.a_range.frame_count, diff.fps)})
           &nbsp;|&nbsp;
-          {label_b}: {_ts(diff.to_time(diff.b_range.start))}&ndash;{_ts(diff.to_time(diff.b_range.end))} ({_ts(timedelta(seconds=diff.b_range.frame_count / diff.fps))})
+          {label_b}: {_ts(diff.to_time(diff.b_range.start))}&ndash;{_ts(diff.to_time(diff.b_range.end))} ({_dur(diff.b_range.frame_count, diff.fps)})
         </span>
       </summary>
       <div class="diff-body">
