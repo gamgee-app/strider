@@ -56,7 +56,8 @@ def _diff_filename(idx_a: int, idx_b: int) -> str:
 
 def _read_frame_at(cap, frame_index: int):
     """Seek and read a single frame from an open VideoCapture."""
-    cap.set(2, max(frame_index, 0))  # cv2.CAP_PROP_POS_FRAMES = 2, avoid import at module level
+    import cv2
+    cap.set(cv2.CAP_PROP_POS_FRAMES, max(frame_index, 0))
     ret, frame = cap.read()
     return frame if ret else None
 
