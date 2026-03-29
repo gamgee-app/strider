@@ -403,7 +403,7 @@ def generate_report(
   .hint {{ color: #666; font-size: 0.8em; margin-bottom: 8px; }}
   .boundary-grid {{ display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 2px 16px; align-items: start; }}
   .b-label {{ color: #aaa; font-weight: normal; font-size: 0.85em; text-align: center; padding-bottom: 4px; }}
-  .b-row-label {{ color: #666; font-size: 0.85em; text-align: right; padding-top: 4px; align-self: start; }}
+  .b-row-label {{ color: #666; font-size: 0.85em; text-align: right; align-self: center; }}
   .b-cell {{ text-align: center; }}
   .b-cell img {{ width: 100%; border-radius: 4px; aspect-ratio: 2.39 / 1; object-fit: cover; }}
   .b-frame {{ font-family: monospace; font-size: 0.85em; color: #666; margin-top: 2px; }}
