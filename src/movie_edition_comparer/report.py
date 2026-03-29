@@ -261,6 +261,8 @@ def generate_report(
                 parts.append(f'<div class="b-hd"><span>&harr;</span> <strong>{cross_hd:.0f}</strong></div>')
             if adj_hd is not None:
                 parts.append(f'<div class="b-adj"><span>&darr;</span> <strong>{adj_hd:.0f}</strong></div>')
+            else:
+                parts.append('<div class="b-adj-spacer"></div>')
             parts.append('</div>')
             return ''.join(parts)
 
@@ -407,11 +409,12 @@ def generate_report(
   .b-frame:empty {{ display: none; }}
   .b-hd {{ display: inline-flex; align-items: center; gap: 4px; font-family: monospace; font-size: 1.5em; color: #888; }}
   .b-hd:empty {{ display: none; }}
-  .b-hd span {{ position: relative; top: -0.1em; }}
+  .b-hd span {{ position: relative; top: -0.15em; }}
   .b-hd strong {{ color: #e0e0e0; }}
   .b-adj {{ display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; width: 100%; font-family: monospace; font-size: 1.5em; color: #888; }}
   .b-adj:empty {{ display: none; }}
   .b-adj strong {{ color: #e0e0e0; }}
+  .b-adj-spacer {{ height: 1.5em; }}
   .contact-sheet {{ display: flex; flex-wrap: wrap; gap: 6px; }}
   .cs-frame {{ display: flex; flex-direction: column; align-items: center; }}
   .cs-frame img {{ max-width: 480px; width: 100%; border-radius: 4px; aspect-ratio: 2.39 / 1; object-fit: cover; }}
