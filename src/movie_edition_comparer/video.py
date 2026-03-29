@@ -98,6 +98,80 @@ def extract_frames(
         cap.release()
 
 
+def _clip_filename(start_frame: int, end_frame: int) -> str:
+    """Generate a deterministic filename for a clip by its frame range."""
+    return f"clip_{start_frame:012d}_{end_frame:012d}.mp4"
+
+
+def extract_clip(
+    input_file: str, start_frame: int, end_frame: int,
+    output_dir: str, fps: float,
+):
+    """Extract a frame-exact clip as 720p H.264 MP4.
+
+    Uses ffmpeg with output-side -ss for frame-exact seeking, then
+    re-encodes to H.264+AAC at 720p for browser playback.
+    Skips if the output file already exists.
+    """
+    import subprocess
+
+    os.makedirs(output_dir, exist_ok=True)
+    out_path = os.path.join(output_dir, _clip_filename(start_frame, end_frame))
+    if os.path.isfile(out_path):
+        return out_path
+
+    start_time = start_frame / fps
+    duration = (end_frame - start_frame) / fps
+
+    subprocess.run(
+        [
+            "ffmpeg", "-y",
+            "-i", input_file,
+            "-ss", f"{start_time:.6f}",
+            "-t", f"{duration:.6f}",
+            "-vf", "scale=1280:-2",
+            "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+            "-c:a", "aac", "-b:a", "192k",
+            "-movflags", "+faststart",
+            out_path,
+        ],
+        check=True, capture_output=True,
+    )
+    return out_path
+
+
+def extract_clips(
+    differences: list[SceneDifference],
+    movie_a: str, movie_b: str,
+    label_a: str, label_b: str,
+    clips_dir: str,
+):
+    """Extract clips for all differences, skipping already-extracted ones."""
+    from progress.bar import Bar
+
+    a_clips_dir = os.path.join(clips_dir, label_a)
+    b_clips_dir = os.path.join(clips_dir, label_b)
+
+    to_extract = []
+    for diff in differences:
+        if diff.a_range.inner_count > 0:
+            out = os.path.join(a_clips_dir, _clip_filename(diff.a_range.start, diff.a_range.end))
+            if not os.path.isfile(out):
+                to_extract.append((movie_a, diff.a_range.start, diff.a_range.end, a_clips_dir, diff.fps))
+        if diff.b_range.inner_count > 0:
+            out = os.path.join(b_clips_dir, _clip_filename(diff.b_range.start, diff.b_range.end))
+            if not os.path.isfile(out):
+                to_extract.append((movie_b, diff.b_range.start, diff.b_range.end, b_clips_dir, diff.fps))
+
+    if not to_extract:
+        return
+
+    with Bar("Extracting clips", max=len(to_extract)) as bar:
+        for input_file, start, end, out_dir, fps in to_extract:
+            extract_clip(input_file, start, end, out_dir, fps)
+            bar.next()
+
+
 def cut_differences(
     differences: list[SceneDifference],
     movie_a: str, movie_b: str,
