@@ -2,6 +2,7 @@
 
 import os
 from datetime import timedelta
+from urllib.parse import quote
 
 from movie_edition_comparer.comparison import hamming_distance
 from movie_edition_comparer.models import DifferenceType, FrameRange, SceneDifference
@@ -189,6 +190,8 @@ def generate_report(
     """
     a_frames_dir = os.path.join(frames_dir, label_a)
     b_frames_dir = os.path.join(frames_dir, label_b)
+    movie_a_uri = "file://" + quote(os.path.abspath(movie_a))
+    movie_b_uri = "file://" + quote(os.path.abspath(movie_b))
 
     # Collect and extract all needed frames
     a_frame_indices, b_frame_indices = _collect_frames(differences, contact_frames)
@@ -318,6 +321,12 @@ def generate_report(
         </table>
         {"<h3>Content &mdash; " + label_a + "</h3><div class='contact-sheet'>" + cs_a + "</div>" if cs_a else ""}
         {"<h3>Content &mdash; " + label_b + "</h3><div class='contact-sheet'>" + cs_b + "</div>" if cs_b else ""}
+        <h3>Video</h3>
+        <p class="hint">Seeking may not be frame-perfect due to keyframe alignment in the browser.</p>
+        <div class="video-row">
+          {"<div class='video-col'><h4>" + label_a + "</h4><video controls preload='none' src='" + movie_a_uri + "#t=" + f'{diff.to_time(diff.a_range.start).total_seconds():.3f},{diff.to_time(diff.a_range.end).total_seconds():.3f}' + "'></video></div>" if a_has_content else ""}
+          {"<div class='video-col'><h4>" + label_b + "</h4><video controls preload='none' src='" + movie_b_uri + "#t=" + f'{diff.to_time(diff.b_range.start).total_seconds():.3f},{diff.to_time(diff.b_range.end).total_seconds():.3f}' + "'></video></div>" if b_has_content else ""}
+        </div>
       </div>
     </details>""")
 
@@ -368,6 +377,10 @@ def generate_report(
   .diff.hidden {{ display: none; }}
   .hash-label {{ font-size: 0.8em; color: #666; display: block; margin-top: 4px; font-family: monospace; }}
   .hash-label strong {{ color: #e0e0e0; font-size: 1.2em; }}
+  .video-row {{ display: flex; gap: 16px; flex-wrap: wrap; }}
+  .video-col {{ flex: 1; min-width: 300px; }}
+  .video-col h4 {{ color: #aaa; font-size: 0.85em; margin-bottom: 6px; font-weight: normal; }}
+  .video-col video {{ width: 100%; border-radius: 4px; }}
 </style>
 </head>
 <body>
