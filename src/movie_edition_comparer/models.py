@@ -52,6 +52,13 @@ class SceneDifference:
     a_range: TimeRange
     b_range: TimeRange
     difference_type: str
+    fps: float = 23.976216
+    start_match: FrameMatch | None = None
+    end_match: FrameMatch | None = None
+    first_inner_a: FrameHash | None = None
+    first_inner_b: FrameHash | None = None
+    last_inner_a: FrameHash | None = None
+    last_inner_b: FrameHash | None = None
 
     @property
     def duration_difference(self) -> timedelta:

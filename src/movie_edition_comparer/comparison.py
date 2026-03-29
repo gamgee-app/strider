@@ -251,7 +251,13 @@ def analyze_match_pair(
         ]
         diff_type = DifferenceType.REORDERED if reordered_in_gap else DifferenceType.MODIFIED
 
-    return SceneDifference(a_range, b_range, diff_type)
+    return SceneDifference(
+        a_range, b_range, diff_type, prev_match, curr_match,
+        first_inner_a=a_hashes[0] if a_hashes else None,
+        first_inner_b=b_hashes[0] if b_hashes else None,
+        last_inner_a=a_hashes[-1] if a_hashes else None,
+        last_inner_b=b_hashes[-1] if b_hashes else None,
+    )
 
 
 def find_all_differences(
