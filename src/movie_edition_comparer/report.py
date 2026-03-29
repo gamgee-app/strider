@@ -252,9 +252,12 @@ def generate_report(
         def _bcell(img: str = "", frame: int | None = None,
                    cross_hd: float | None = None, adj_hd: float | None = None) -> str:
             parts = [f'<div class="b-cell">{img}']
-            parts.append(f'<div class="b-frame">frame {frame}</div>' if frame is not None else '<div class="b-frame"></div>')
-            parts.append(f'<div class="b-hd">&harr; {cross_hd:.0f}</div>' if cross_hd is not None else '<div class="b-hd"></div>')
-            parts.append(f'<div class="b-adj">&darr; {adj_hd:.0f}</div>' if adj_hd is not None else '<div class="b-adj"></div>')
+            if frame is not None:
+                parts.append(f'<div class="b-frame">frame {frame}</div>')
+            if cross_hd is not None:
+                parts.append(f'<div class="b-hd">&harr; {cross_hd:.0f}</div>')
+            if adj_hd is not None:
+                parts.append(f'<div class="b-adj">&darr; {adj_hd:.0f}</div>')
             parts.append('</div>')
             return ''.join(parts)
 
@@ -398,19 +401,22 @@ def generate_report(
   h3 {{ margin: 16px 0 8px; color: #aaa; font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.05em; }}
   h3:first-child {{ margin-top: 0; }}
   .hint {{ color: #666; font-size: 0.8em; margin-bottom: 8px; }}
-  .boundary-grid {{ display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 8px 16px; align-items: start; }}
+  .boundary-grid {{ display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 2px 16px; align-items: start; }}
   .b-label {{ color: #aaa; font-weight: normal; font-size: 0.85em; text-align: center; padding-bottom: 4px; }}
   .b-row-label {{ color: #666; font-size: 0.85em; text-align: right; padding-top: 4px; align-self: start; }}
   .b-cell {{ text-align: center; }}
-  .b-cell img {{ max-width: 100%; border-radius: 4px; aspect-ratio: 2.39; object-fit: cover; }}
-  .b-frame {{ font-family: monospace; font-size: 0.85em; color: #666; margin-top: 4px; min-height: 1.2em; }}
-  .b-hd {{ font-family: monospace; font-size: 2em; color: #888; min-height: 1.5em; }}
+  .b-cell img {{ width: 100%; border-radius: 4px; aspect-ratio: 2.39 / 1; object-fit: cover; }}
+  .b-frame {{ font-family: monospace; font-size: 0.85em; color: #666; margin-top: 2px; }}
+  .b-frame:empty {{ display: none; }}
+  .b-hd {{ font-family: monospace; font-size: 2em; color: #888; }}
+  .b-hd:empty {{ display: none; }}
   .b-hd strong {{ color: #e0e0e0; }}
-  .b-adj {{ font-family: monospace; font-size: 2em; color: #888; text-align: right; min-height: 1.5em; }}
+  .b-adj {{ font-family: monospace; font-size: 2em; color: #888; text-align: right; }}
+  .b-adj:empty {{ display: none; }}
   .b-adj strong {{ color: #e0e0e0; }}
   .contact-sheet {{ display: flex; flex-wrap: wrap; gap: 6px; }}
   .cs-frame {{ display: flex; flex-direction: column; align-items: center; }}
-  .cs-frame img {{ max-width: 480px; border-radius: 4px; aspect-ratio: 2.39; object-fit: cover; }}
+  .cs-frame img {{ max-width: 480px; width: 100%; border-radius: 4px; aspect-ratio: 2.39 / 1; object-fit: cover; }}
   .cs-ts {{ font-size: 0.7em; color: #666; font-family: monospace; margin-top: 2px; }}
   .controls {{ display: flex; gap: 16px; align-items: center; margin-bottom: 20px; padding: 12px 16px; background: #222; border-radius: 6px; flex-wrap: wrap; }}
   .controls label {{ color: #aaa; font-size: 0.85em; }}
