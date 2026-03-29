@@ -249,9 +249,12 @@ def generate_report(
         #     <div class="b-hd">↔ 3</div>             (or empty)
         #     <div class="b-adj">↓ 5</div>            (or empty)
         #   </div>
-        def _bcell(img: str = "", frame: int | None = None,
-                   cross_hd: float | None = None, adj_hd: float | None = None) -> str:
-            parts = [f'<div class="b-cell">{img}']
+        def _bcell_img(img: str = "") -> str:
+            return f'<div class="b-cell">{img}</div>'
+
+        def _bcell_meta(frame: int | None = None,
+                        cross_hd: float | None = None, adj_hd: float | None = None) -> str:
+            parts = ['<div class="b-cell-meta">']
             if frame is not None:
                 parts.append(f'<div class="b-frame">frame {frame}</div>')
             if cross_hd is not None:
@@ -272,29 +275,17 @@ def generate_report(
         before_adj_a = hamming_distance(sm.a.hash, fia.hash) if sm and fia else None
         before_adj_b = hamming_distance(sm.b.hash, fib.hash) if sm and fib else None
         before_cross = hamming_distance(sm.a.hash, sm.b.hash) if sm else None
-        cell_before_a = _bcell(before_a, sm.a.index if sm else None, adj_hd=before_adj_a)
-        cell_before_b = _bcell(before_b, sm.b.index if sm else None, adj_hd=before_adj_b)
-        cell_before_d = _bcell(before_diff, cross_hd=before_cross)
 
         # First row
         first_cross = hamming_distance(fia.hash, fib.hash) if fia and fib else None
-        cell_first_a = _bcell(first_a, fia.index if fia else None)
-        cell_first_b = _bcell(first_b, fib.index if fib else None)
-        cell_first_d = _bcell(first_diff, cross_hd=first_cross)
 
         # Last row
         last_adj_a = hamming_distance(lia.hash, em.a.hash) if lia and em else None
         last_adj_b = hamming_distance(lib.hash, em.b.hash) if lib and em else None
         last_cross = hamming_distance(lia.hash, lib.hash) if lia and lib else None
-        cell_last_a = _bcell(last_a, lia.index if lia else None, adj_hd=last_adj_a)
-        cell_last_b = _bcell(last_b, lib.index if lib else None, adj_hd=last_adj_b)
-        cell_last_d = _bcell(last_diff, cross_hd=last_cross)
 
         # After row
         after_cross = hamming_distance(em.a.hash, em.b.hash) if em else None
-        cell_after_a = _bcell(after_a, em.a.index if em else None)
-        cell_after_b = _bcell(after_b, em.b.index if em else None)
-        cell_after_d = _bcell(after_diff, cross_hd=after_cross)
 
         # Min hamming distance across all boundary pairs for filtering.
         # Includes cross-edition (first A vs first B) and same-edition
@@ -362,10 +353,14 @@ def generate_report(
         <p class="hint">Before/After are the last/first matching frames. First/Last are the start/end of the difference.</p>
         <div class="boundary-grid">
           <div class="b-label"></div><div class="b-label">{label_a}</div><div class="b-label">{label_b}</div><div class="b-label">Difference</div>
-          <div class="b-row-label">Before</div>{cell_before_a}{cell_before_b}{cell_before_d}
-          <div class="b-row-label">First</div>{cell_first_a}{cell_first_b}{cell_first_d}
-          <div class="b-row-label">Last</div>{cell_last_a}{cell_last_b}{cell_last_d}
-          <div class="b-row-label">After</div>{cell_after_a}{cell_after_b}{cell_after_d}
+          <div class="b-row-label">Before</div>{_bcell_img(before_a)}{_bcell_img(before_b)}{_bcell_img(before_diff)}
+          <div></div>{_bcell_meta(sm.a.index if sm else None, adj_hd=before_adj_a)}{_bcell_meta(sm.b.index if sm else None, adj_hd=before_adj_b)}{_bcell_meta(cross_hd=before_cross)}
+          <div class="b-row-label">First</div>{_bcell_img(first_a)}{_bcell_img(first_b)}{_bcell_img(first_diff)}
+          <div></div>{_bcell_meta(fia.index if fia else None)}{_bcell_meta(fib.index if fib else None)}{_bcell_meta(cross_hd=first_cross)}
+          <div class="b-row-label">Last</div>{_bcell_img(last_a)}{_bcell_img(last_b)}{_bcell_img(last_diff)}
+          <div></div>{_bcell_meta(lia.index if lia else None, adj_hd=last_adj_a)}{_bcell_meta(lib.index if lib else None, adj_hd=last_adj_b)}{_bcell_meta(cross_hd=last_cross)}
+          <div class="b-row-label">After</div>{_bcell_img(after_a)}{_bcell_img(after_b)}{_bcell_img(after_diff)}
+          <div></div>{_bcell_meta(em.a.index if em else None)}{_bcell_meta(em.b.index if em else None)}{_bcell_meta(cross_hd=after_cross)}
         </div>
         {"<h3>Content &mdash; " + label_a + "</h3><div class='contact-sheet'>" + cs_a + "</div>" if cs_a else ""}
         {"<h3>Content &mdash; " + label_b + "</h3><div class='contact-sheet'>" + cs_b + "</div>" if cs_b else ""}
@@ -401,11 +396,13 @@ def generate_report(
   h3 {{ margin: 16px 0 8px; color: #aaa; font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.05em; }}
   h3:first-child {{ margin-top: 0; }}
   .hint {{ color: #666; font-size: 0.8em; margin-bottom: 8px; }}
-  .boundary-grid {{ display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 2px 16px; align-items: start; }}
+  .boundary-grid {{ display: grid; grid-template-columns: 4em 1fr 1fr 1fr; gap: 0 16px; }}
   .b-label {{ color: #aaa; font-weight: normal; font-size: 0.85em; text-align: center; padding-bottom: 4px; }}
   .b-row-label {{ color: #666; font-size: 0.85em; text-align: right; align-self: center; }}
+  .b-meta-spacer {{ display: none; }}
   .b-cell {{ text-align: center; }}
   .b-cell img {{ width: 100%; border-radius: 4px; aspect-ratio: 2.39 / 1; object-fit: cover; }}
+  .b-cell-meta {{ text-align: center; }}
   .b-frame {{ font-family: monospace; font-size: 0.85em; color: #666; margin-top: 2px; }}
   .b-frame:empty {{ display: none; }}
   .b-hd {{ font-family: monospace; font-size: 2em; color: #888; }}
