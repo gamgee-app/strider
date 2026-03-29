@@ -149,6 +149,35 @@ class TestCountLeadingMatches:
     def test_single_element_above(self):
         assert count_leading_matches([7.0], 5.0) == 0
 
+    def test_gap_tolerance_skips_single_outlier(self):
+        # Frame at index 2 is above threshold but below gap_max,
+        # and frame 3 is back below threshold → outlier is forgiven
+        assert count_leading_matches(
+            [1.0, 2.0, 7.0, 3.0, 50.0], 5.0, gap_tolerance=1, gap_max_distance=10.0,
+        ) == 4
+
+    def test_gap_tolerance_stops_at_two_consecutive_outliers(self):
+        assert count_leading_matches(
+            [1.0, 7.0, 8.0, 3.0], 5.0, gap_tolerance=1, gap_max_distance=10.0,
+        ) == 1
+
+    def test_gap_tolerance_stops_when_outlier_exceeds_max(self):
+        # Outlier is within tolerance count but exceeds gap_max_distance
+        assert count_leading_matches(
+            [1.0, 2.0, 15.0, 3.0], 5.0, gap_tolerance=1, gap_max_distance=10.0,
+        ) == 2
+
+    def test_gap_tolerance_outlier_at_end_not_counted(self):
+        # Outlier at the end with no following match — not forgiven
+        assert count_leading_matches(
+            [1.0, 2.0, 7.0], 5.0, gap_tolerance=1, gap_max_distance=10.0,
+        ) == 2
+
+    def test_gap_tolerance_zero_behaves_as_before(self):
+        assert count_leading_matches(
+            [1.0, 2.0, 7.0, 3.0], 5.0, gap_tolerance=0,
+        ) == 2
+
 
 # ---------------------------------------------------------------------------
 # _lis_indices (longest increasing subsequence)

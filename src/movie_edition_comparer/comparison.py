@@ -29,12 +29,32 @@ def hamming_distance(hash_a: str, hash_b: str) -> float:
     return cv2.norm(array_a, array_b, cv2.NORM_HAMMING)
 
 
-def count_leading_matches(distances: list[float], threshold: float) -> int:
-    """Count how many consecutive values from the start are at or below the threshold."""
-    for i, d in enumerate(distances):
-        if d > threshold:
-            return i
-    return len(distances)
+def count_leading_matches(
+    distances: list[float], threshold: float,
+    gap_tolerance: int = 0, gap_max_distance: float = float("inf"),
+) -> int:
+    """Count how many values from the start are at or below the threshold,
+    allowing up to gap_tolerance consecutive outliers if each is below
+    gap_max_distance.
+
+    An outlier run is only forgiven if a value at or below threshold follows.
+    """
+    matched = 0
+    gap_run = 0
+
+    for d in distances:
+        if d <= threshold:
+            # Good frame — accept it and any preceding outliers
+            matched += gap_run + 1
+            gap_run = 0
+        elif d <= gap_max_distance and gap_run < gap_tolerance:
+            # Outlier within tolerance — tentatively continue
+            gap_run += 1
+        else:
+            # Outlier too far or too many in a row — stop
+            break
+
+    return matched
 
 
 # ---------------------------------------------------------------------------
@@ -147,9 +167,12 @@ def _refine_boundaries(
     start_dists = [hamming_distance(a, b) for a, b in zip(a_start, b_start)]
     end_dists = [hamming_distance(a, b) for a, b in zip(a_end, b_end)]
 
+    gap_tol = config.boundary_gap_tolerance
+    gap_max = config.boundary_gap_max_distance
+
     return (
-        count_leading_matches(start_dists, threshold),
-        count_leading_matches(end_dists, threshold),
+        count_leading_matches(start_dists, threshold, gap_tol, gap_max),
+        count_leading_matches(end_dists, threshold, gap_tol, gap_max),
     )
 
 

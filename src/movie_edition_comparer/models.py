@@ -12,6 +12,8 @@ class ComparisonConfig:
     perceptual_match_threshold: float = 5.0
     extended_similarity_threshold: int = 12
     maximum_inter_match_search: int = 24
+    boundary_gap_tolerance: int = 1
+    boundary_gap_max_distance: float = 10.0
 
 
 @dataclass(frozen=True)
