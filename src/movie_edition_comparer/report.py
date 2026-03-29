@@ -289,27 +289,21 @@ def generate_report(
         # After row
         after_cross = hamming_distance(em.a.hash, em.b.hash) if em else None
 
-        # Min hamming distance across all boundary pairs for filtering.
-        # Includes cross-edition (first A vs first B) and same-edition
-        # adjacent frames (before A vs first A, etc.) to flag potential
-        # boundary detection errors.
-        # -1 means not applicable (no inner frames on either side).
-        all_hds = []
-        # Cross-edition: first/last inner frames
-        if diff.first_inner_a and diff.first_inner_b:
-            all_hds.append(hamming_distance(diff.first_inner_a.hash, diff.first_inner_b.hash))
-        if diff.last_inner_a and diff.last_inner_b:
-            all_hds.append(hamming_distance(diff.last_inner_a.hash, diff.last_inner_b.hash))
-        # Same-edition adjacent: before vs first, last vs after
-        if diff.start_match and diff.first_inner_a:
-            all_hds.append(hamming_distance(diff.start_match.a.hash, diff.first_inner_a.hash))
-        if diff.start_match and diff.first_inner_b:
-            all_hds.append(hamming_distance(diff.start_match.b.hash, diff.first_inner_b.hash))
-        if diff.end_match and diff.last_inner_a:
-            all_hds.append(hamming_distance(diff.end_match.a.hash, diff.last_inner_a.hash))
-        if diff.end_match and diff.last_inner_b:
-            all_hds.append(hamming_distance(diff.end_match.b.hash, diff.last_inner_b.hash))
-        min_inner_hd = min(all_hds) if all_hds else -1
+        # Filter metric: minimum difference between cross-edition distance
+        # at a boundary and the adjacent same-edition distance.
+        # A small value means the inner frame is almost as "matching" as
+        # the boundary frame, suggesting the boundary may be misplaced.
+        # -1 means not applicable (no inner frames).
+        boundary_diffs = []
+        if before_cross is not None and before_adj_a is not None:
+            boundary_diffs.append(abs(before_adj_a - before_cross))
+        if before_cross is not None and before_adj_b is not None:
+            boundary_diffs.append(abs(before_adj_b - before_cross))
+        if after_cross is not None and last_adj_a is not None:
+            boundary_diffs.append(abs(last_adj_a - after_cross))
+        if after_cross is not None and last_adj_b is not None:
+            boundary_diffs.append(abs(last_adj_b - after_cross))
+        min_inner_hd = min(boundary_diffs) if boundary_diffs else -1
 
         # Contact sheets
         cs_a = ""
