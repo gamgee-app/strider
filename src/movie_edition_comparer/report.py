@@ -81,14 +81,12 @@ def _generate_diff_images(
     for diff in differences:
         # Before (boundary match)
         pairs.append((diff.a_range.start, diff.b_range.start))
-        # First inner
-        first_a = diff.first_inner_a.index if diff.first_inner_a else diff.a_range.start + 1
-        first_b = diff.first_inner_b.index if diff.first_inner_b else diff.b_range.start + 1
-        pairs.append((first_a, first_b))
-        # Last inner
-        last_a = diff.last_inner_a.index if diff.last_inner_a else diff.a_range.end - 1
-        last_b = diff.last_inner_b.index if diff.last_inner_b else diff.b_range.end - 1
-        pairs.append((last_a, last_b))
+        # First inner — only when both sides have gap frames
+        if diff.first_inner_a and diff.first_inner_b:
+            pairs.append((diff.first_inner_a.index, diff.first_inner_b.index))
+        # Last inner — only when both sides have gap frames
+        if diff.last_inner_a and diff.last_inner_b:
+            pairs.append((diff.last_inner_a.index, diff.last_inner_b.index))
         # After (boundary match)
         pairs.append((diff.a_range.end, diff.b_range.end))
 
@@ -205,19 +203,21 @@ def generate_report(
         before_b = _img_tag(b_frames_dir, diff.b_range.start)
         before_diff = _diff_img_tag(diff_images_dir, diff.a_range.start, diff.b_range.start)
 
-        # First inner frame
-        first_a_idx = diff.first_inner_a.index if diff.first_inner_a else diff.a_range.start + 1
-        first_b_idx = diff.first_inner_b.index if diff.first_inner_b else diff.b_range.start + 1
-        first_a = _img_tag(a_frames_dir, first_a_idx)
-        first_b = _img_tag(b_frames_dir, first_b_idx)
-        first_diff = _diff_img_tag(diff_images_dir, first_a_idx, first_b_idx)
+        # First inner frame — empty cell if that side has no gap frames
+        first_a = _img_tag(a_frames_dir, diff.first_inner_a.index) if diff.first_inner_a else ""
+        first_b = _img_tag(b_frames_dir, diff.first_inner_b.index) if diff.first_inner_b else ""
+        if diff.first_inner_a and diff.first_inner_b:
+            first_diff = _diff_img_tag(diff_images_dir, diff.first_inner_a.index, diff.first_inner_b.index)
+        else:
+            first_diff = ""
 
-        # Last inner frame
-        last_a_idx = diff.last_inner_a.index if diff.last_inner_a else diff.a_range.end - 1
-        last_b_idx = diff.last_inner_b.index if diff.last_inner_b else diff.b_range.end - 1
-        last_a = _img_tag(a_frames_dir, last_a_idx)
-        last_b = _img_tag(b_frames_dir, last_b_idx)
-        last_diff = _diff_img_tag(diff_images_dir, last_a_idx, last_b_idx)
+        # Last inner frame — empty cell if that side has no gap frames
+        last_a = _img_tag(a_frames_dir, diff.last_inner_a.index) if diff.last_inner_a else ""
+        last_b = _img_tag(b_frames_dir, diff.last_inner_b.index) if diff.last_inner_b else ""
+        if diff.last_inner_a and diff.last_inner_b:
+            last_diff = _diff_img_tag(diff_images_dir, diff.last_inner_a.index, diff.last_inner_b.index)
+        else:
+            last_diff = ""
 
         # After = boundary match frame (end of range)
         after_a = _img_tag(a_frames_dir, diff.a_range.end)
