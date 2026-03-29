@@ -1,5 +1,6 @@
 """Video trimming and frame extraction utilities."""
 
+import os
 import os.path
 from datetime import timedelta
 
@@ -8,6 +9,12 @@ from movie_edition_comparer.models import SceneDifference
 
 def _time_to_filename(t: timedelta) -> str:
     return str(t).replace(":", ".")
+
+
+def _frame_filename(timestamp: timedelta) -> str:
+    """Generate a deterministic filename for a frame at a given timestamp."""
+    total_ms = int(timestamp.total_seconds() * 1000)
+    return f"frame_{total_ms:012d}.png"
 
 
 def trim_video(
@@ -46,6 +53,54 @@ def grab_frame(
             .output(filename, vframes=1)
             .run(quiet=True)
         )
+
+
+def extract_frames(
+    input_file: str, timestamps: list[timedelta],
+    output_dir: str, width: int = 320,
+):
+    """Extract frames at the given timestamps, skipping any that already exist.
+
+    Opens the video once with OpenCV and seeks forward through sorted timestamps,
+    avoiding per-frame process overhead.
+    """
+    import cv2
+    from progress.bar import Bar
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Deduplicate, clamp to zero, and sort for sequential seeking
+    unique_ts = sorted(set(max(ts, timedelta(0)) for ts in timestamps))
+
+    # Filter out already-extracted frames
+    to_extract = [
+        ts for ts in unique_ts
+        if not os.path.isfile(os.path.join(output_dir, _frame_filename(ts)))
+    ]
+
+    if not to_extract:
+        return
+
+    cap = cv2.VideoCapture(input_file)
+    try:
+        with Bar("  Extracting", max=len(to_extract)) as bar:
+            for ts in to_extract:
+                ms = ts.total_seconds() * 1000
+                cap.set(cv2.CAP_PROP_POS_MSEC, ms)
+                ret, frame = cap.read()
+                if ret:
+                    # Scale to target width, preserving aspect ratio
+                    h, w = frame.shape[:2]
+                    if w != width:
+                        scale = width / w
+                        new_h = int(h * scale)
+                        frame = cv2.resize(frame, (width, new_h),
+                                           interpolation=cv2.INTER_AREA)
+                    out_path = os.path.join(output_dir, _frame_filename(ts))
+                    cv2.imwrite(out_path, frame)
+                bar.next()
+    finally:
+        cap.release()
 
 
 def cut_differences(
