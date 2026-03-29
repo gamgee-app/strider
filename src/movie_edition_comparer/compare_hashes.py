@@ -1,54 +1,12 @@
 """CLI entry point for comparing movie edition hashes."""
 
 import argparse
-import os.path
 from datetime import timedelta
 
 from movie_edition_comparer.comparison import find_all_differences
 from movie_edition_comparer.db import make_db_fetcher, read_unique_matches
 from movie_edition_comparer.models import ComparisonConfig, SceneDifference
-
-
-def _time_to_filename(t: timedelta) -> str:
-    return str(t).replace(":", ".")
-
-
-def trim_video(
-    input_file: str, identifier: str, index: int,
-    start: timedelta, end: timedelta, output_dir: str,
-) -> str:
-    import ffmpeg
-
-    _, ext = os.path.splitext(input_file)
-    filename = (
-        f"{output_dir}/{index}-"
-        f"{_time_to_filename(start)}-{_time_to_filename(end)}-"
-        f"{identifier}{ext}"
-    )
-    if not os.path.isfile(filename):
-        (
-            ffmpeg
-            .input(input_file)
-            .output(filename, ss=start, to=end, c="copy")
-            .run(quiet=True)
-        )
-    return filename
-
-
-def grab_frame(
-    input_file: str, identifier: str, index: int,
-    timestamp: timedelta, output_dir: str,
-):
-    import ffmpeg
-
-    filename = f"{output_dir}/{index}-{_time_to_filename(timestamp)}-{identifier}.png"
-    if not os.path.isfile(filename):
-        (
-            ffmpeg
-            .input(input_file, ss=timestamp)
-            .output(filename, vframes=1)
-            .run(quiet=True)
-        )
+from movie_edition_comparer.video import cut_differences
 
 
 def configure_parser(parser: argparse.ArgumentParser):
@@ -69,7 +27,6 @@ def configure_parser(parser: argparse.ArgumentParser):
 
 def run(args):
     """Run the compare command with parsed arguments."""
-    from progress.bar import Bar
     from tabulate import tabulate
 
     config = ComparisonConfig()
@@ -120,32 +77,18 @@ def run(args):
             ]
             print(json.dumps(ranges))
 
-    trim_videos = not args.no_trim and args.movie_a and args.movie_b
-    grab_frames = not args.no_frames and args.movie_a and args.movie_b
+    do_trim = not args.no_trim and args.movie_a and args.movie_b
+    do_frames = not args.no_frames and args.movie_a and args.movie_b
 
-    if trim_videos or grab_frames:
+    if do_trim or do_frames:
         print()
-        video_padding = timedelta(seconds=args.padding)
-        with Bar("Cutting", max=len(sorted_diffs)) as bar:
-            for index, diff in enumerate(sorted_diffs):
-                if trim_videos:
-                    trim_video(args.movie_a, args.label_a, index,
-                               diff.a_range.start - video_padding,
-                               diff.a_range.start, args.output_dir)
-                    trim_video(args.movie_a, args.label_a, index,
-                               diff.a_range.end - diff.a_range.duration,
-                               diff.a_range.end + video_padding, args.output_dir)
-                    trim_video(args.movie_b, args.label_b, index,
-                               diff.b_range.start - video_padding,
-                               diff.b_range.end + video_padding, args.output_dir)
-
-                if grab_frames:
-                    grab_frame(args.movie_a, args.label_a, index, diff.a_range.start, args.output_dir)
-                    grab_frame(args.movie_b, args.label_b, index, diff.b_range.start, args.output_dir)
-                    grab_frame(args.movie_a, args.label_a, index, diff.a_range.end, args.output_dir)
-                    grab_frame(args.movie_b, args.label_b, index, diff.b_range.end, args.output_dir)
-
-                bar.next()
+        cut_differences(
+            sorted_diffs,
+            args.movie_a, args.movie_b,
+            args.label_a, args.label_b,
+            args.output_dir, args.padding,
+            do_trim=bool(do_trim), do_frames=bool(do_frames),
+        )
 
 
 def main():
