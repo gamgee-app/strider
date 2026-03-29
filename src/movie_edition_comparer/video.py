@@ -58,19 +58,61 @@ def grab_frame(
             cap.release()
 
 
+def _seek_and_verify(cap, target_idx: int, expected_hash: str | None,
+                     max_correction: int = 5):
+    """Seek to a frame index and verify by hash if available.
+
+    If expected_hash is provided, the extracted frame's hash is compared.
+    If it doesn't match, reads forward up to max_correction frames to
+    find the correct one.
+
+    Returns (frame, correction_applied) or (None, 0) on failure.
+    """
+    from movie_edition_comparer.algorithms import hash_frame
+
+    cap.set(1, target_idx)  # cv2.CAP_PROP_POS_FRAMES = 1
+    ret, frame = cap.read()
+    if not ret:
+        return None, 0
+
+    if not expected_hash:
+        return frame, 0
+
+    if hash_frame(frame) == expected_hash:
+        return frame, 0
+
+    # Seek landed on wrong frame — read forward to find the right one
+    for correction in range(1, max_correction + 1):
+        ret, frame = cap.read()
+        if not ret:
+            break
+        if hash_frame(frame) == expected_hash:
+            return frame, correction
+
+    # Couldn't find it — return the original seek result
+    cap.set(1, target_idx)
+    ret, frame = cap.read()
+    return (frame if ret else None), 0
+
+
 def extract_frames(
     input_file: str, frame_indices: list[int],
     output_dir: str,
+    expected_hashes: dict[int, str] | None = None,
 ):
     """Extract frames at the given indices, skipping any that already exist.
 
-    Opens the video once with OpenCV and seeks by frame index for exact
-    frame extraction. Frames are saved at native resolution.
+    Opens the video once with OpenCV and seeks by frame index. When
+    expected_hashes is provided (mapping frame_index to hash string),
+    verifies each frame and corrects seek errors by reading forward.
     """
     import cv2
     from progress.bar import Bar
 
     os.makedirs(output_dir, exist_ok=True)
+
+    if expected_hashes is None:
+        expected_hashes = {}
 
     # Deduplicate, clamp to zero, and sort for sequential seeking
     unique_frames = sorted(set(max(idx, 0) for idx in frame_indices))
@@ -88,9 +130,10 @@ def extract_frames(
     try:
         with Bar("  Extracting", max=len(to_extract)) as bar:
             for idx in to_extract:
-                cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-                ret, frame = cap.read()
-                if ret:
+                frame, _ = _seek_and_verify(
+                    cap, idx, expected_hashes.get(idx),
+                )
+                if frame is not None:
                     out_path = os.path.join(output_dir, _frame_filename(idx))
                     cv2.imwrite(out_path, frame)
                 bar.next()
