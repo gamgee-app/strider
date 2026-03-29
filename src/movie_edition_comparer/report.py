@@ -274,14 +274,27 @@ def generate_report(
             last_hd = hamming_distance(diff.last_inner_a.hash, diff.last_inner_b.hash)
             last_diff_label = f'<span class="hash-label">hamming: <strong>{last_hd:.0f}</strong></span>'
 
-        # Min hamming distance across first/last for filtering.
-        # -1 means not applicable (one side has no inner frames).
-        inner_hds = []
+        # Min hamming distance across all boundary pairs for filtering.
+        # Includes cross-edition (first A vs first B) and same-edition
+        # adjacent frames (before A vs first A, etc.) to flag potential
+        # boundary detection errors.
+        # -1 means not applicable (no inner frames on either side).
+        all_hds = []
+        # Cross-edition: first/last inner frames
         if diff.first_inner_a and diff.first_inner_b:
-            inner_hds.append(hamming_distance(diff.first_inner_a.hash, diff.first_inner_b.hash))
+            all_hds.append(hamming_distance(diff.first_inner_a.hash, diff.first_inner_b.hash))
         if diff.last_inner_a and diff.last_inner_b:
-            inner_hds.append(hamming_distance(diff.last_inner_a.hash, diff.last_inner_b.hash))
-        min_inner_hd = min(inner_hds) if inner_hds else -1
+            all_hds.append(hamming_distance(diff.last_inner_a.hash, diff.last_inner_b.hash))
+        # Same-edition adjacent: before vs first, last vs after
+        if diff.start_match and diff.first_inner_a:
+            all_hds.append(hamming_distance(diff.start_match.a.hash, diff.first_inner_a.hash))
+        if diff.start_match and diff.first_inner_b:
+            all_hds.append(hamming_distance(diff.start_match.b.hash, diff.first_inner_b.hash))
+        if diff.end_match and diff.last_inner_a:
+            all_hds.append(hamming_distance(diff.end_match.a.hash, diff.last_inner_a.hash))
+        if diff.end_match and diff.last_inner_b:
+            all_hds.append(hamming_distance(diff.end_match.b.hash, diff.last_inner_b.hash))
+        min_inner_hd = min(all_hds) if all_hds else -1
 
         # Contact sheets
         cs_a = ""
