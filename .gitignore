@@ -1,6 +1,8 @@
 /data/*.db
 /dist/
 /out/
+/frames/
 __pycache__/
 *.pyc
 .coverage
+.idea/
