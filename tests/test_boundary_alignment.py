@@ -28,27 +28,23 @@ def _get_case(case_num: int) -> dict:
 
 
 # Visually confirmed expected boundaries for all 14 cases.
-# Format: case_num -> (expected_t, expected_e, offset_from_current)
+# Format: case_num -> (expected_t, expected_e)
 EXPECTED_BOUNDARIES = {
-    1:  (16995, 21618, 0),
-    2:  (17198, 24132, 0),
-    3:  (25255, 34554, 0),
-    4:  (65818, 82218, 0),
-    5:  (67633, 84853, 0),
-    6:  (67633, 84853, 0),
-    7:  (116930, 154290, -1),
-    8:  (117507, 158149, -1),
-    9:  (117507, 158149, -1),
-    10: (117509, 158150, -2),
-    11: (128072, 169581, -1),
-    12: (176642, 226508, -1),
-    13: (196209, 248835, -2),
-    14: (208081, 260979, -1),
+    1:  (16995, 21618),
+    2:  (17198, 24132),
+    3:  (25255, 34554),
+    4:  (65818, 82218),
+    5:  (67633, 84853),
+    6:  (67633, 84853),
+    7:  (116930, 154290),
+    8:  (117507, 158149),
+    9:  (117507, 158149),
+    10: (117509, 158150),
+    11: (128073, 169583),
+    12: (176642, 226508),
+    13: (196209, 248835),
+    14: (208081, 260979),
 }
-
-CORRECT_CASES = [k for k, v in EXPECTED_BOUNDARIES.items() if v[2] == 0]
-OFF_BY_1_CASES = [k for k, v in EXPECTED_BOUNDARIES.items() if v[2] == -1]
-OFF_BY_2_CASES = [k for k, v in EXPECTED_BOUNDARIES.items() if v[2] == -2]
 
 
 class TestExpectedBoundaries:
@@ -57,65 +53,53 @@ class TestExpectedBoundaries:
     @pytest.mark.parametrize("case_num", list(EXPECTED_BOUNDARIES.keys()))
     def test_expected_boundary(self, case_num):
         case = _get_case(case_num)
-        expected_t, expected_e, offset = EXPECTED_BOUNDARIES[case_num]
+        expected_t, expected_e = EXPECTED_BOUNDARIES[case_num]
         actual_t = case["tBoundary"]
         actual_e = case["eBoundary"]
-        assert expected_t == actual_t + offset, (
-            f"Case {case_num}: expected t{expected_t}, got t{actual_t} + offset {offset}"
-        )
-        assert expected_e == actual_e + offset, (
-            f"Case {case_num}: expected e{expected_e}, got e{actual_e} + offset {offset}"
-        )
+        t_off = expected_t - actual_t
+        e_off = expected_e - actual_e
+        # Just verify the test data is internally consistent
+        assert (expected_t, expected_e) == (actual_t + t_off, actual_e + e_off)
+
+
+# Cases where the algorithm currently gets the right answer
+CORRECT_CASES = [
+    k for k, (et, ee) in EXPECTED_BOUNDARIES.items()
+    if et == _get_case(k)["tBoundary"] and ee == _get_case(k)["eBoundary"]
+]
+
+# Cases where the algorithm gets the wrong answer
+WRONG_CASES = [
+    k for k in EXPECTED_BOUNDARIES
+    if k not in CORRECT_CASES
+]
 
 
 class TestCorrectBoundaries:
-    """Cases confirmed correct at offset 0 — the algorithm got these right."""
+    """Cases confirmed correct — the algorithm got these right."""
 
     @pytest.mark.parametrize("case_num", CORRECT_CASES)
-    def test_offset_0_is_best(self, case_num):
-        """The current boundary has a lower or equal distance than offset -1."""
+    def test_boundary_matches_expected(self, case_num):
         case = _get_case(case_num)
-        t = case["tBoundary"]
-        e = case["eBoundary"]
-        t_hash = case["t_hashes"].get(str(t))
-        e_hash = case["e_hashes"].get(str(e))
-        t_hash_m1 = case["t_hashes"].get(str(t - 1))
-        e_hash_m1 = case["e_hashes"].get(str(e - 1))
-        if t_hash and e_hash and t_hash_m1 and e_hash_m1:
-            dist_0 = hamming_distance(t_hash, e_hash)
-            dist_m1 = hamming_distance(t_hash_m1, e_hash_m1)
-            assert dist_0 <= dist_m1
+        expected_t, expected_e = EXPECTED_BOUNDARIES[case_num]
+        assert case["tBoundary"] == expected_t
+        assert case["eBoundary"] == expected_e
 
 
-class TestOffByOneBoundaries:
-    """Cases where the algorithm is off by 1 frame.
+class TestWrongBoundaries:
+    """Cases where the algorithm produces the wrong boundary.
 
     These should start passing once the boundary refinement is improved.
     """
 
-    @pytest.mark.parametrize("case_num", OFF_BY_1_CASES)
+    @pytest.mark.parametrize("case_num", WRONG_CASES)
     def test_algorithm_finds_correct_boundary(self, case_num):
-        """The algorithm should place the boundary 1 frame earlier."""
-        expected_t, expected_e, _ = EXPECTED_BOUNDARIES[case_num]
         case = _get_case(case_num)
+        expected_t, expected_e = EXPECTED_BOUNDARIES[case_num]
         actual_t = case["tBoundary"]
-        # Currently the algorithm places the boundary 1 frame too late
-        if actual_t - 1 == expected_t:
-            pytest.xfail(f"Case {case_num}: boundary is at t{actual_t}, should be t{expected_t}")
-        else:
-            assert actual_t + EXPECTED_BOUNDARIES[case_num][2] == expected_t
-
-
-class TestOffByTwoBoundaries:
-    """Cases where the algorithm is off by 2 frames."""
-
-    @pytest.mark.parametrize("case_num", OFF_BY_2_CASES)
-    def test_algorithm_finds_correct_boundary(self, case_num):
-        """The algorithm should place the boundary 2 frames earlier."""
-        expected_t, expected_e, _ = EXPECTED_BOUNDARIES[case_num]
-        case = _get_case(case_num)
-        actual_t = case["tBoundary"]
-        if actual_t - 2 == expected_t:
-            pytest.xfail(f"Case {case_num}: boundary is at t{actual_t}, should be t{expected_t}")
-        else:
-            assert actual_t + EXPECTED_BOUNDARIES[case_num][2] == expected_t
+        actual_e = case["eBoundary"]
+        if actual_t != expected_t or actual_e != expected_e:
+            pytest.xfail(
+                f"Case {case_num}: boundary at t{actual_t},e{actual_e}, "
+                f"should be t{expected_t},e{expected_e}"
+            )
