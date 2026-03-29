@@ -332,7 +332,7 @@ def generate_report(
   h1 {{ margin-bottom: 8px; }}
   .subtitle {{ color: #888; margin-bottom: 24px; }}
   details {{ margin-bottom: 8px; border: 1px solid #333; border-radius: 6px; overflow: hidden; }}
-  summary {{ padding: 12px 16px; cursor: pointer; background: #222; display: flex; align-items: center; gap: 12px; }}
+  summary {{ padding: 12px 16px; cursor: pointer; background: #222; display: grid; grid-template-columns: 3em 7em 1fr; align-items: center; gap: 8px; }}
   summary:hover {{ background: #2a2a2a; }}
   .diff-num {{ color: #666; font-family: monospace; min-width: 3em; }}
   .diff-type {{ padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600; }}
@@ -340,8 +340,7 @@ def generate_report(
   .type-removed {{ background: #3a1a1a; color: #f87171; }}
   .type-modified {{ background: #3a3a1a; color: #facc15; }}
   .type-reordered {{ background: #1a2a3a; color: #60a5fa; }}
-  .diff-meta {{ color: #888; font-size: 0.85em; font-family: monospace; display: flex; align-items: center; gap: 8px; }}
-  .meta-a {{ min-width: 42ch; text-align: left; }}
+  .diff-meta {{ color: #888; font-size: 0.85em; font-family: monospace; display: grid; grid-template-columns: 50ch auto 1fr; align-items: center; gap: 8px; }}
   .meta-sep {{ color: #444; }}
   .diff-body {{ padding: 16px; }}
   h3 {{ margin: 16px 0 8px; color: #aaa; font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.05em; }}
