@@ -126,13 +126,24 @@ class TestBoundaryAlignmentOffBy1:
             )
 
 
-class TestBoundaryAlignmentNeedsLargerOffset:
-    """Cases where the correct offset could not be determined within ±1.
+class TestBoundaryAlignmentOffBy2:
+    """Cases where the boundary should be 2 frames earlier (offset -2)."""
 
-    These need further investigation with a wider offset range.
-    """
+    EXPECTED = {
+        10: (117509, 158150),
+        13: (196209, 248835),
+    }
 
     @pytest.mark.parametrize("case_num", [10, 13])
-    def test_needs_investigation(self, case_num):
-        """Placeholder — correct alignment not yet determined."""
-        pytest.skip(f"Case {case_num}: needs investigation with larger offset range")
+    def test_expected_boundary(self, case_num):
+        """The correct boundary match, as confirmed by visual inspection."""
+        case = _get_case(case_num)
+        expected_t, expected_e = self.EXPECTED[case_num]
+        actual_t = case["tBoundary"]
+        actual_e = case["eBoundary"]
+        assert expected_t == actual_t - 2, (
+            f"Case {case_num}: expected t{expected_t}, got t{actual_t}"
+        )
+        assert expected_e == actual_e - 2, (
+            f"Case {case_num}: expected e{expected_e}, got e{actual_e}"
+        )
