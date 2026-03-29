@@ -4,11 +4,8 @@ import os
 from datetime import timedelta
 
 from movie_edition_comparer.comparison import hamming_distance
-from movie_edition_comparer.models import DifferenceType, SceneDifference, TimeRange
+from movie_edition_comparer.models import DifferenceType, FrameRange, SceneDifference
 from movie_edition_comparer.video import _frame_filename, extract_frames
-
-ZERO = timedelta(0)
-ONE_FRAME = timedelta(milliseconds=42)  # ~1 frame at 23.976 fps
 
 
 def _ts(t: timedelta) -> str:
@@ -18,14 +15,15 @@ def _ts(t: timedelta) -> str:
     return f"{h}:{m:02d}:{s:02d}"
 
 
-def _sample_timestamps(time_range: TimeRange, n: int) -> list[timedelta]:
-    """Return n evenly-spaced timestamps within the range (excluding endpoints)."""
-    if time_range.duration <= ZERO or n <= 0:
+def _sample_frames(frame_range: FrameRange, n: int) -> list[int]:
+    """Return n evenly-spaced frame indices within the range (excluding endpoints)."""
+    count = frame_range.frame_count
+    if count <= 0 or n <= 0:
         return []
     if n == 1:
-        return [time_range.start + time_range.duration / 2]
-    step = time_range.duration / (n + 1)
-    return [time_range.start + step * (i + 1) for i in range(n)]
+        return [frame_range.start + count // 2]
+    step = count / (n + 1)
+    return [frame_range.start + int(step * (i + 1)) for i in range(n)]
 
 
 def _type_class(difference_type: str) -> str:
@@ -46,22 +44,19 @@ def _type_label(difference_type: str) -> str:
     }.get(difference_type, difference_type)
 
 
-def _img_tag(frames_dir: str, timestamp: timedelta) -> str:
+def _img_tag(frames_dir: str, frame_index: int) -> str:
     """Return an <img> tag referencing a frame file, relative to the report."""
-    path = os.path.join(frames_dir, _frame_filename(max(timestamp, ZERO)))
+    path = os.path.join(frames_dir, _frame_filename(max(frame_index, 0)))
     return f'<img src="{path}">'
 
 
-def _diff_filename(ts_a: timedelta, ts_b: timedelta) -> str:
-    ms_a = int(max(ts_a, ZERO).total_seconds() * 1000)
-    ms_b = int(max(ts_b, ZERO).total_seconds() * 1000)
-    return f"diff_{ms_a:012d}_{ms_b:012d}.png"
+def _diff_filename(idx_a: int, idx_b: int) -> str:
+    return f"diff_{max(idx_a, 0):012d}_{max(idx_b, 0):012d}.png"
 
 
-def _read_frame_at(cap, timestamp: timedelta):
+def _read_frame_at(cap, frame_index: int):
     """Seek and read a single frame from an open VideoCapture."""
-    import cv2
-    cap.set(cv2.CAP_PROP_POS_MSEC, max(timestamp, ZERO).total_seconds() * 1000)
+    cap.set(2, max(frame_index, 0))  # cv2.CAP_PROP_POS_FRAMES = 2, avoid import at module level
     ret, frame = cap.read()
     return frame if ret else None
 
@@ -81,32 +76,40 @@ def _generate_diff_images(
 
     os.makedirs(diff_dir, exist_ok=True)
 
-    pairs = []
+    pairs: list[tuple[int, int]] = []
     for diff in differences:
-        pairs.append((diff.a_range.start - ONE_FRAME, diff.b_range.start - ONE_FRAME))
+        # Before (boundary match)
         pairs.append((diff.a_range.start, diff.b_range.start))
+        # First inner
+        first_a = diff.first_inner_a.index if diff.first_inner_a else diff.a_range.start + 1
+        first_b = diff.first_inner_b.index if diff.first_inner_b else diff.b_range.start + 1
+        pairs.append((first_a, first_b))
+        # Last inner
+        last_a = diff.last_inner_a.index if diff.last_inner_a else diff.a_range.end - 1
+        last_b = diff.last_inner_b.index if diff.last_inner_b else diff.b_range.end - 1
+        pairs.append((last_a, last_b))
+        # After (boundary match)
         pairs.append((diff.a_range.end, diff.b_range.end))
-        pairs.append((diff.a_range.end + ONE_FRAME, diff.b_range.end + ONE_FRAME))
 
     # Filter out already-generated diffs
     to_generate = [
-        (ts_a, ts_b) for ts_a, ts_b in pairs
-        if not os.path.isfile(os.path.join(diff_dir, _diff_filename(ts_a, ts_b)))
+        (a, b) for a, b in pairs
+        if not os.path.isfile(os.path.join(diff_dir, _diff_filename(a, b)))
     ]
 
     if not to_generate:
         return
 
-    # Sort by movie A timestamp for efficient forward seeking
-    to_generate.sort(key=lambda p: max(p[0], ZERO))
+    # Sort by movie A frame for efficient forward seeking
+    to_generate.sort(key=lambda p: max(p[0], 0))
 
     cap_a = cv2.VideoCapture(movie_a)
     cap_b = cv2.VideoCapture(movie_b)
     try:
         with Bar("  Generating", max=len(to_generate)) as bar:
-            for ts_a, ts_b in to_generate:
-                frame_a = _read_frame_at(cap_a, ts_a)
-                frame_b = _read_frame_at(cap_b, ts_b)
+            for idx_a, idx_b in to_generate:
+                frame_a = _read_frame_at(cap_a, idx_a)
+                frame_b = _read_frame_at(cap_b, idx_b)
 
                 if frame_a is not None and frame_b is not None:
                     if frame_a.shape != frame_b.shape:
@@ -115,7 +118,6 @@ def _generate_diff_images(
                     diff_img = cv2.absdiff(frame_a, frame_b)
                     diff_img = cv2.normalize(diff_img, None, 0, 255, cv2.NORM_MINMAX)
 
-                    # Downscale for the report
                     h, w = diff_img.shape[:2]
                     if w != thumbnail_width:
                         scale = thumbnail_width / w
@@ -123,7 +125,7 @@ def _generate_diff_images(
                         diff_img = cv2.resize(diff_img, (thumbnail_width, new_h),
                                               interpolation=cv2.INTER_AREA)
 
-                    out_path = os.path.join(diff_dir, _diff_filename(ts_a, ts_b))
+                    out_path = os.path.join(diff_dir, _diff_filename(idx_a, idx_b))
                     cv2.imwrite(out_path, diff_img)
 
                 bar.next()
@@ -132,38 +134,42 @@ def _generate_diff_images(
         cap_b.release()
 
 
-def _diff_img_tag(diff_dir: str, ts_a: timedelta, ts_b: timedelta) -> str:
-    path = os.path.join(diff_dir, _diff_filename(ts_a, ts_b))
+def _diff_img_tag(diff_dir: str, idx_a: int, idx_b: int) -> str:
+    path = os.path.join(diff_dir, _diff_filename(idx_a, idx_b))
     return f'<img src="{path}">'
 
 
-def _collect_timestamps(
+def _collect_frames(
     differences: list[SceneDifference], contact_frames: int,
-) -> tuple[list[timedelta], list[timedelta]]:
-    """Collect all timestamps needed for both movies."""
-    a_timestamps: list[timedelta] = []
-    b_timestamps: list[timedelta] = []
+) -> tuple[list[int], list[int]]:
+    """Collect all frame indices needed for both movies."""
+    a_frames: list[int] = []
+    b_frames: list[int] = []
 
     for diff in differences:
-        # Boundary frames (outer + inner)
-        a_timestamps.extend([
-            diff.a_range.start - ONE_FRAME, diff.a_range.start,
-            diff.a_range.end, diff.a_range.end + ONE_FRAME,
-        ])
-        b_timestamps.extend([
-            diff.b_range.start - ONE_FRAME, diff.b_range.start,
-            diff.b_range.end, diff.b_range.end + ONE_FRAME,
-        ])
+        # Before (boundary match) and After (boundary match)
+        a_frames.extend([diff.a_range.start, diff.a_range.end])
+        b_frames.extend([diff.b_range.start, diff.b_range.end])
+
+        # First/Last inner frames
+        if diff.first_inner_a:
+            a_frames.append(diff.first_inner_a.index)
+        if diff.first_inner_b:
+            b_frames.append(diff.first_inner_b.index)
+        if diff.last_inner_a:
+            a_frames.append(diff.last_inner_a.index)
+        if diff.last_inner_b:
+            b_frames.append(diff.last_inner_b.index)
 
         # Contact sheet frames
-        if diff.a_range.duration > ZERO:
-            n = min(contact_frames, max(1, int(diff.a_range.duration / ONE_FRAME)))
-            a_timestamps.extend(_sample_timestamps(diff.a_range, n))
-        if diff.b_range.duration > ZERO:
-            n = min(contact_frames, max(1, int(diff.b_range.duration / ONE_FRAME)))
-            b_timestamps.extend(_sample_timestamps(diff.b_range, n))
+        if diff.a_range.frame_count > 0:
+            n = min(contact_frames, max(1, diff.a_range.frame_count))
+            a_frames.extend(_sample_frames(diff.a_range, n))
+        if diff.b_range.frame_count > 0:
+            n = min(contact_frames, max(1, diff.b_range.frame_count))
+            b_frames.extend(_sample_frames(diff.b_range, n))
 
-    return a_timestamps, b_timestamps
+    return a_frames, b_frames
 
 
 def generate_report(
@@ -184,12 +190,12 @@ def generate_report(
     b_frames_dir = os.path.join(frames_dir, label_b)
 
     # Collect and extract all needed frames
-    a_timestamps, b_timestamps = _collect_timestamps(differences, contact_frames)
+    a_frame_indices, b_frame_indices = _collect_frames(differences, contact_frames)
 
     print(f"Extracting {label_a} frames...")
-    extract_frames(movie_a, a_timestamps, a_frames_dir, width=thumbnail_width)
+    extract_frames(movie_a, a_frame_indices, a_frames_dir, width=thumbnail_width)
     print(f"Extracting {label_b} frames...")
-    extract_frames(movie_b, b_timestamps, b_frames_dir, width=thumbnail_width)
+    extract_frames(movie_b, b_frame_indices, b_frames_dir, width=thumbnail_width)
 
     diff_images_dir = os.path.join(frames_dir, "diff")
     print("Generating boundary diffs...")
@@ -198,29 +204,32 @@ def generate_report(
     # Generate HTML
     sections = []
     for i, diff in enumerate(differences):
-        a_has_content = diff.a_range.duration > ZERO
-        b_has_content = diff.b_range.duration > ZERO
+        a_has_content = diff.a_range.frame_count > 0
+        b_has_content = diff.b_range.frame_count > 0
 
-        before_a = _img_tag(a_frames_dir, diff.a_range.start - ONE_FRAME)
-        before_b = _img_tag(b_frames_dir, diff.b_range.start - ONE_FRAME)
-        before_diff = _diff_img_tag(diff_images_dir,
-                                    diff.a_range.start - ONE_FRAME,
-                                    diff.b_range.start - ONE_FRAME)
-        first_a = _img_tag(a_frames_dir, diff.a_range.start)
-        first_b = _img_tag(b_frames_dir, diff.b_range.start)
-        first_diff = _diff_img_tag(diff_images_dir,
-                                   diff.a_range.start,
-                                   diff.b_range.start)
-        last_a = _img_tag(a_frames_dir, diff.a_range.end)
-        last_b = _img_tag(b_frames_dir, diff.b_range.end)
-        last_diff = _diff_img_tag(diff_images_dir,
-                                  diff.a_range.end,
-                                  diff.b_range.end)
-        after_a = _img_tag(a_frames_dir, diff.a_range.end + ONE_FRAME)
-        after_b = _img_tag(b_frames_dir, diff.b_range.end + ONE_FRAME)
-        after_diff = _diff_img_tag(diff_images_dir,
-                                   diff.a_range.end + ONE_FRAME,
-                                   diff.b_range.end + ONE_FRAME)
+        # Before = boundary match frame (start of range)
+        before_a = _img_tag(a_frames_dir, diff.a_range.start)
+        before_b = _img_tag(b_frames_dir, diff.b_range.start)
+        before_diff = _diff_img_tag(diff_images_dir, diff.a_range.start, diff.b_range.start)
+
+        # First inner frame
+        first_a_idx = diff.first_inner_a.index if diff.first_inner_a else diff.a_range.start + 1
+        first_b_idx = diff.first_inner_b.index if diff.first_inner_b else diff.b_range.start + 1
+        first_a = _img_tag(a_frames_dir, first_a_idx)
+        first_b = _img_tag(b_frames_dir, first_b_idx)
+        first_diff = _diff_img_tag(diff_images_dir, first_a_idx, first_b_idx)
+
+        # Last inner frame
+        last_a_idx = diff.last_inner_a.index if diff.last_inner_a else diff.a_range.end - 1
+        last_b_idx = diff.last_inner_b.index if diff.last_inner_b else diff.b_range.end - 1
+        last_a = _img_tag(a_frames_dir, last_a_idx)
+        last_b = _img_tag(b_frames_dir, last_b_idx)
+        last_diff = _diff_img_tag(diff_images_dir, last_a_idx, last_b_idx)
+
+        # After = boundary match frame (end of range)
+        after_a = _img_tag(a_frames_dir, diff.a_range.end)
+        after_b = _img_tag(b_frames_dir, diff.b_range.end)
+        after_diff = _diff_img_tag(diff_images_dir, diff.a_range.end, diff.b_range.end)
 
         # Hash info from boundary matches — shown beneath each image
         start_a_hash = start_b_hash = start_diff_hash = ""
@@ -258,44 +267,44 @@ def generate_report(
         # Contact sheets
         cs_a = ""
         if a_has_content:
-            n = min(contact_frames, max(1, int(diff.a_range.duration / ONE_FRAME)))
-            for ts in _sample_timestamps(diff.a_range, n):
+            n = min(contact_frames, max(1, diff.a_range.frame_count))
+            for idx in _sample_frames(diff.a_range, n):
                 cs_a += (
-                    f'<div class="cs-frame">{_img_tag(a_frames_dir, ts)}'
-                    f'<span class="cs-ts">{_ts(ts)}</span></div>'
+                    f'<div class="cs-frame">{_img_tag(a_frames_dir, idx)}'
+                    f'<span class="cs-ts">{_ts(diff.to_time(idx))}</span></div>'
                 )
 
         cs_b = ""
         if b_has_content:
-            n = min(contact_frames, max(1, int(diff.b_range.duration / ONE_FRAME)))
-            for ts in _sample_timestamps(diff.b_range, n):
+            n = min(contact_frames, max(1, diff.b_range.frame_count))
+            for idx in _sample_frames(diff.b_range, n):
                 cs_b += (
-                    f'<div class="cs-frame">{_img_tag(b_frames_dir, ts)}'
-                    f'<span class="cs-ts">{_ts(ts)}</span></div>'
+                    f'<div class="cs-frame">{_img_tag(b_frames_dir, idx)}'
+                    f'<span class="cs-ts">{_ts(diff.to_time(idx))}</span></div>'
                 )
 
         type_cls = _type_class(diff.difference_type)
         type_lbl = _type_label(diff.difference_type)
 
-        a_start_s = diff.a_range.start.total_seconds()
-        b_start_s = diff.b_range.start.total_seconds()
-        dur_s = max(diff.a_range.duration, diff.b_range.duration).total_seconds()
+        a_start_t = diff.to_time(diff.a_range.start).total_seconds()
+        b_start_t = diff.to_time(diff.b_range.start).total_seconds()
+        dur_frames = max(diff.a_range.frame_count, diff.b_range.frame_count)
 
         sections.append(f"""
     <details class="diff" data-type="{diff.difference_type}"
-             data-a-start="{a_start_s}" data-b-start="{b_start_s}" data-duration="{dur_s}">
+             data-a-start="{a_start_t}" data-b-start="{b_start_t}" data-duration="{dur_frames}">
       <summary class="{type_cls}">
         <span class="diff-num">#{i + 1}</span>
         <span class="diff-type {type_cls}">{type_lbl}</span>
         <span class="diff-meta">
-          {label_a}: {_ts(diff.a_range.start)}&ndash;{_ts(diff.a_range.end)} ({_ts(diff.a_range.duration)})
+          {label_a}: {_ts(diff.to_time(diff.a_range.start))}&ndash;{_ts(diff.to_time(diff.a_range.end))} ({_ts(timedelta(seconds=diff.a_range.frame_count / diff.fps))})
           &nbsp;|&nbsp;
-          {label_b}: {_ts(diff.b_range.start)}&ndash;{_ts(diff.b_range.end)} ({_ts(diff.b_range.duration)})
+          {label_b}: {_ts(diff.to_time(diff.b_range.start))}&ndash;{_ts(diff.to_time(diff.b_range.end))} ({_ts(timedelta(seconds=diff.b_range.frame_count / diff.fps))})
         </span>
       </summary>
       <div class="diff-body">
         <h3>Boundary Verification</h3>
-        <p class="hint">Before/After are the last/first matching frames. First/Last are the start/end of the difference. HD = hamming distance (0 = identical hash).</p>
+        <p class="hint">Before/After are the last/first matching frames. First/Last are the start/end of the difference.</p>
         <table class="boundary">
           <tr><th></th><th>{label_a}</th><th>{label_b}</th><th>Difference</th></tr>
           <tr><td>Before</td><td>{before_a}{start_a_hash}</td><td>{before_b}{start_b_hash}</td><td>{before_diff}{start_diff_hash}</td></tr>

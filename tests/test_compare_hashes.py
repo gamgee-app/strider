@@ -14,9 +14,10 @@ from movie_edition_comparer.models import (
     DifferenceType,
     FrameHash,
     FrameMatch,
+    FrameRange,
     HashFetcher,
     SceneDifference,
-    TimeRange,
+    frame_to_time,
 )
 from movie_edition_comparer.comparison import (
     _lis_indices,
@@ -26,7 +27,6 @@ from movie_edition_comparer.comparison import (
     count_leading_matches,
     filter_to_monotonic,
     find_all_differences,
-    frame_to_time,
     hamming_distance,
 )
 
@@ -431,7 +431,7 @@ class TestBoundaryRefinement:
         # 3 matching frames, resulting in a smaller reported difference
         assert result is not None
         # Start time should be after frame 10 (the original prev match)
-        assert result.a_range.start > frame_to_time(10, config.fps)
+        assert result.a_range.start > 10
 
     def test_full_refinement_returns_none(self):
         """If all gap frames match between editions, refinement eventually
@@ -456,17 +456,21 @@ class TestBoundaryRefinement:
 
 
 # ---------------------------------------------------------------------------
-# TimeRange
+# FrameRange
 # ---------------------------------------------------------------------------
 
-class TestTimeRange:
-    def test_duration(self):
-        r = TimeRange(timedelta(seconds=10), timedelta(seconds=15))
-        assert r.duration == timedelta(seconds=5)
+class TestFrameRange:
+    def test_frame_count(self):
+        r = FrameRange(10, 15)
+        assert r.frame_count == 5
 
-    def test_zero_duration(self):
-        r = TimeRange(timedelta(seconds=5), timedelta(seconds=5))
-        assert r.duration == timedelta(0)
+    def test_zero_frame_count(self):
+        r = FrameRange(5, 5)
+        assert r.frame_count == 0
+
+    def test_negative_clamped_to_zero(self):
+        r = FrameRange(10, 5)
+        assert r.frame_count == 0
 
 
 # ---------------------------------------------------------------------------
@@ -476,19 +480,31 @@ class TestTimeRange:
 class TestSceneDifference:
     def test_duration_difference(self):
         d = SceneDifference(
-            a_range=TimeRange(timedelta(seconds=0), timedelta(seconds=10)),
-            b_range=TimeRange(timedelta(seconds=0), timedelta(seconds=15)),
+            a_range=FrameRange(0, 240),
+            b_range=FrameRange(0, 360),
             difference_type=DifferenceType.MODIFIED,
+            fps=24.0,
         )
-        assert d.duration_difference == timedelta(seconds=5)
+        assert abs(d.duration_difference.total_seconds() - 5.0) < 0.01
 
     def test_duration_difference_is_absolute(self):
         d = SceneDifference(
-            a_range=TimeRange(timedelta(seconds=0), timedelta(seconds=15)),
-            b_range=TimeRange(timedelta(seconds=0), timedelta(seconds=10)),
+            a_range=FrameRange(0, 360),
+            b_range=FrameRange(0, 240),
             difference_type=DifferenceType.MODIFIED,
+            fps=24.0,
         )
-        assert d.duration_difference == timedelta(seconds=5)
+        assert abs(d.duration_difference.total_seconds() - 5.0) < 0.01
+
+    def test_to_time(self):
+        d = SceneDifference(
+            a_range=FrameRange(0, 24),
+            b_range=FrameRange(0, 24),
+            difference_type=DifferenceType.MODIFIED,
+            fps=24.0,
+        )
+        assert d.to_time(24) == timedelta(seconds=1)
+        assert d.to_time(0) == timedelta(0)
 
 
 # ---------------------------------------------------------------------------

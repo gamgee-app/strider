@@ -43,16 +43,18 @@ def run(args):
     print("Finding differences…")
     differences = find_all_differences(all_matches, a_fetcher, b_fetcher, config)
 
-    def sort_key(d: SceneDifference) -> timedelta:
-        return max(d.a_range.duration, d.b_range.duration)
+    def sort_key(d: SceneDifference) -> int:
+        return max(d.a_range.frame_count, d.b_range.frame_count)
 
     sorted_diffs = sorted(differences, key=sort_key)
 
     tabulated = tabulate(
         [(
-            d.a_range.start, d.a_range.end, d.difference_type,
-            d.b_range.start, d.b_range.end, d.difference_type,
-            d.a_range.duration, d.b_range.duration, d.duration_difference,
+            d.to_time(d.a_range.start), d.to_time(d.a_range.end), d.difference_type,
+            d.to_time(d.b_range.start), d.to_time(d.b_range.end), d.difference_type,
+            timedelta(seconds=d.a_range.frame_count / d.fps),
+            timedelta(seconds=d.b_range.frame_count / d.fps),
+            d.duration_difference,
         ) for d in sorted_diffs],
         headers=[
             "A Start", "A End", "A Type",
@@ -72,12 +74,12 @@ def run(args):
         for attr in ["a_range", "b_range"]:
             ranges = [
                 {
-                    "start_time": str(getattr(d, attr).start),
-                    "end_time": str(getattr(d, attr).end),
+                    "start_time": str(d.to_time(getattr(d, attr).start)),
+                    "end_time": str(d.to_time(getattr(d, attr).end)),
                     "type": d.difference_type,
                 }
                 for d in differences
-                if getattr(d, attr).duration > timedelta(0)
+                if getattr(d, attr).frame_count > 0
             ]
             print(json.dumps(ranges))
 

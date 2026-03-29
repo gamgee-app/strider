@@ -12,21 +12,15 @@ from movie_edition_comparer.models import (
     DifferenceType,
     FrameHash,
     FrameMatch,
+    FrameRange,
     HashFetcher,
     SceneDifference,
-    TimeRange,
 )
 
 
 # ---------------------------------------------------------------------------
 # Pure utility functions
 # ---------------------------------------------------------------------------
-
-def frame_to_time(frame: int, fps: float):
-    """Convert a frame index to a timedelta timestamp."""
-    from datetime import timedelta
-    return timedelta(seconds=frame / fps)
-
 
 def hamming_distance(hash_a: str, hash_b: str) -> float:
     """Compute the hamming distance between two hex-encoded hashes."""
@@ -228,13 +222,8 @@ def analyze_match_pair(
             )
 
     # Classify the difference
-    a_time_start = frame_to_time(prev_match.a.index, config.fps)
-    a_time_end = frame_to_time(curr_match.a.index, config.fps)
-    b_time_start = frame_to_time(prev_match.b.index, config.fps)
-    b_time_end = frame_to_time(curr_match.b.index, config.fps)
-
-    a_range = TimeRange(a_time_start, a_time_end)
-    b_range = TimeRange(b_time_start, b_time_end)
+    a_range = FrameRange(prev_match.a.index, curr_match.a.index)
+    b_range = FrameRange(prev_match.b.index, curr_match.b.index)
 
     if a_frame_count == 0:
         diff_type = DifferenceType.UNIQUE_TO_B
@@ -252,7 +241,12 @@ def analyze_match_pair(
         diff_type = DifferenceType.REORDERED if reordered_in_gap else DifferenceType.MODIFIED
 
     return SceneDifference(
-        a_range, b_range, diff_type, prev_match, curr_match,
+        a_range=a_range,
+        b_range=b_range,
+        difference_type=diff_type,
+        fps=config.fps,
+        start_match=prev_match,
+        end_match=curr_match,
         first_inner_a=a_hashes[0] if a_hashes else None,
         first_inner_b=b_hashes[0] if b_hashes else None,
         last_inner_a=a_hashes[-1] if a_hashes else None,

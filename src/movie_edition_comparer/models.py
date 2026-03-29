@@ -36,21 +36,30 @@ class DifferenceType:
 
 
 @dataclass(frozen=True)
-class TimeRange:
-    """A time range within a video."""
-    start: timedelta
-    end: timedelta
+class FrameRange:
+    """A range of frame indices within a video.
+
+    start and end are the boundary match frame indices (the last matching
+    frame before the difference and the first matching frame after).
+    """
+    start: int
+    end: int
 
     @property
-    def duration(self) -> timedelta:
-        return self.end - self.start
+    def frame_count(self) -> int:
+        return max(0, self.end - self.start)
+
+
+def frame_to_time(frame: int, fps: float) -> timedelta:
+    """Convert a frame index to a timedelta timestamp."""
+    return timedelta(seconds=frame / fps)
 
 
 @dataclass(frozen=True)
 class SceneDifference:
     """A detected difference between two movie editions."""
-    a_range: TimeRange
-    b_range: TimeRange
+    a_range: FrameRange
+    b_range: FrameRange
     difference_type: str
     fps: float = 23.976216
     start_match: FrameMatch | None = None
@@ -60,9 +69,15 @@ class SceneDifference:
     last_inner_a: FrameHash | None = None
     last_inner_b: FrameHash | None = None
 
+    def to_time(self, frame: int) -> timedelta:
+        """Convert a frame index to a timedelta using this difference's fps."""
+        return frame_to_time(frame, self.fps)
+
     @property
     def duration_difference(self) -> timedelta:
-        return abs(self.b_range.duration - self.a_range.duration)
+        a_dur = self.a_range.frame_count / self.fps
+        b_dur = self.b_range.frame_count / self.fps
+        return timedelta(seconds=abs(b_dur - a_dur))
 
 
 # Type alias: given (start_index_inclusive, end_index_exclusive), returns frame hashes

@@ -11,10 +11,9 @@ def _time_to_filename(t: timedelta) -> str:
     return str(t).replace(":", ".")
 
 
-def _frame_filename(timestamp: timedelta) -> str:
-    """Generate a deterministic filename for a frame at a given timestamp."""
-    total_ms = int(timestamp.total_seconds() * 1000)
-    return f"frame_{total_ms:012d}.png"
+def _frame_filename(frame_index: int) -> str:
+    """Generate a deterministic filename for a frame by its index."""
+    return f"frame_{frame_index:012d}.png"
 
 
 def trim_video(
@@ -41,28 +40,32 @@ def trim_video(
 
 def grab_frame(
     input_file: str, identifier: str, index: int,
-    timestamp: timedelta, output_dir: str,
+    frame_index: int, output_dir: str, fps: float,
 ):
-    import ffmpeg
+    """Extract a single frame by index using OpenCV."""
+    import cv2
 
+    timestamp = timedelta(seconds=frame_index / fps)
     filename = f"{output_dir}/{index}-{_time_to_filename(timestamp)}-{identifier}.png"
     if not os.path.isfile(filename):
-        (
-            ffmpeg
-            .input(input_file, ss=timestamp)
-            .output(filename, vframes=1)
-            .run(quiet=True)
-        )
+        cap = cv2.VideoCapture(input_file)
+        try:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+            ret, frame = cap.read()
+            if ret:
+                cv2.imwrite(filename, frame)
+        finally:
+            cap.release()
 
 
 def extract_frames(
-    input_file: str, timestamps: list[timedelta],
+    input_file: str, frame_indices: list[int],
     output_dir: str, width: int = 320,
 ):
-    """Extract frames at the given timestamps, skipping any that already exist.
+    """Extract frames at the given indices, skipping any that already exist.
 
-    Opens the video once with OpenCV and seeks forward through sorted timestamps,
-    avoiding per-frame process overhead.
+    Opens the video once with OpenCV and seeks by frame index for exact
+    frame extraction.
     """
     import cv2
     from progress.bar import Bar
@@ -70,12 +73,12 @@ def extract_frames(
     os.makedirs(output_dir, exist_ok=True)
 
     # Deduplicate, clamp to zero, and sort for sequential seeking
-    unique_ts = sorted(set(max(ts, timedelta(0)) for ts in timestamps))
+    unique_frames = sorted(set(max(idx, 0) for idx in frame_indices))
 
     # Filter out already-extracted frames
     to_extract = [
-        ts for ts in unique_ts
-        if not os.path.isfile(os.path.join(output_dir, _frame_filename(ts)))
+        idx for idx in unique_frames
+        if not os.path.isfile(os.path.join(output_dir, _frame_filename(idx)))
     ]
 
     if not to_extract:
@@ -84,19 +87,17 @@ def extract_frames(
     cap = cv2.VideoCapture(input_file)
     try:
         with Bar("  Extracting", max=len(to_extract)) as bar:
-            for ts in to_extract:
-                ms = ts.total_seconds() * 1000
-                cap.set(cv2.CAP_PROP_POS_MSEC, ms)
+            for idx in to_extract:
+                cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
                 ret, frame = cap.read()
                 if ret:
-                    # Scale to target width, preserving aspect ratio
                     h, w = frame.shape[:2]
                     if w != width:
                         scale = width / w
                         new_h = int(h * scale)
                         frame = cv2.resize(frame, (width, new_h),
                                            interpolation=cv2.INTER_AREA)
-                    out_path = os.path.join(output_dir, _frame_filename(ts))
+                    out_path = os.path.join(output_dir, _frame_filename(idx))
                     cv2.imwrite(out_path, frame)
                 bar.next()
     finally:
@@ -115,21 +116,26 @@ def cut_differences(
     video_padding = timedelta(seconds=padding)
     with Bar("Cutting", max=len(differences)) as bar:
         for index, diff in enumerate(differences):
+            a_start = diff.to_time(diff.a_range.start)
+            a_end = diff.to_time(diff.a_range.end)
+            b_start = diff.to_time(diff.b_range.start)
+            b_end = diff.to_time(diff.b_range.end)
+
             if do_trim:
                 trim_video(movie_a, label_a, index,
-                           diff.a_range.start - video_padding,
-                           diff.a_range.start, output_dir)
+                           a_start - video_padding,
+                           a_start, output_dir)
                 trim_video(movie_a, label_a, index,
-                           diff.a_range.end - diff.a_range.duration,
-                           diff.a_range.end + video_padding, output_dir)
+                           a_end - timedelta(seconds=diff.a_range.frame_count / diff.fps),
+                           a_end + video_padding, output_dir)
                 trim_video(movie_b, label_b, index,
-                           diff.b_range.start - video_padding,
-                           diff.b_range.end + video_padding, output_dir)
+                           b_start - video_padding,
+                           b_end + video_padding, output_dir)
 
             if do_frames:
-                grab_frame(movie_a, label_a, index, diff.a_range.start, output_dir)
-                grab_frame(movie_b, label_b, index, diff.b_range.start, output_dir)
-                grab_frame(movie_a, label_a, index, diff.a_range.end, output_dir)
-                grab_frame(movie_b, label_b, index, diff.b_range.end, output_dir)
+                grab_frame(movie_a, label_a, index, diff.a_range.start, output_dir, diff.fps)
+                grab_frame(movie_b, label_b, index, diff.b_range.start, output_dir, diff.fps)
+                grab_frame(movie_a, label_a, index, diff.a_range.end, output_dir, diff.fps)
+                grab_frame(movie_b, label_b, index, diff.b_range.end, output_dir, diff.fps)
 
             bar.next()
