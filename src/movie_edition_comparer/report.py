@@ -57,7 +57,7 @@ def _type_label(difference_type: str) -> str:
 def _img_tag(frames_dir: str, frame_index: int) -> str:
     """Return an <img> tag referencing a frame file, relative to the report."""
     path = os.path.join(frames_dir, _frame_filename(max(frame_index, 0)))
-    return f'<img src="{path}">'
+    return f'<img loading="lazy" src="{path}">'
 
 
 def _diff_filename(idx_a: int, idx_b: int) -> str:
@@ -138,7 +138,7 @@ def _generate_diff_images(
 
 def _diff_img_tag(diff_dir: str, idx_a: int, idx_b: int) -> str:
     path = os.path.join(diff_dir, _diff_filename(idx_a, idx_b))
-    return f'<img src="{path}">'
+    return f'<img loading="lazy" src="{path}">'
 
 
 def _collect_frames(
