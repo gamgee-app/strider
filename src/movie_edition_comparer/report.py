@@ -402,7 +402,7 @@ def generate_report(
   .b-label {{ color: #aaa; font-weight: normal; font-size: 0.85em; text-align: center; padding-bottom: 4px; }}
   .b-row-label {{ color: #666; font-size: 0.85em; text-align: right; padding-top: 4px; align-self: start; }}
   .b-cell {{ text-align: center; }}
-  .b-cell img {{ max-width: 100%; border-radius: 4px; }}
+  .b-cell img {{ max-width: 100%; border-radius: 4px; aspect-ratio: 2.39; object-fit: cover; }}
   .b-frame {{ font-family: monospace; font-size: 0.85em; color: #666; margin-top: 4px; min-height: 1.2em; }}
   .b-hd {{ font-family: monospace; font-size: 2em; color: #888; min-height: 1.5em; }}
   .b-hd strong {{ color: #e0e0e0; }}
@@ -410,7 +410,7 @@ def generate_report(
   .b-adj strong {{ color: #e0e0e0; }}
   .contact-sheet {{ display: flex; flex-wrap: wrap; gap: 6px; }}
   .cs-frame {{ display: flex; flex-direction: column; align-items: center; }}
-  .cs-frame img {{ max-width: 480px; border-radius: 4px; }}
+  .cs-frame img {{ max-width: 480px; border-radius: 4px; aspect-ratio: 2.39; object-fit: cover; }}
   .cs-ts {{ font-size: 0.7em; color: #666; font-family: monospace; margin-top: 2px; }}
   .controls {{ display: flex; gap: 16px; align-items: center; margin-bottom: 20px; padding: 12px 16px; background: #222; border-radius: 6px; flex-wrap: wrap; }}
   .controls label {{ color: #aaa; font-size: 0.85em; }}
