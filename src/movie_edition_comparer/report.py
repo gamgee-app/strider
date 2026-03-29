@@ -195,8 +195,9 @@ def generate_report(
     # Generate HTML
     sections = []
     for i, diff in enumerate(differences):
-        a_has_content = diff.a_range.frame_count > 0
-        b_has_content = diff.b_range.frame_count > 0
+        # Inner frames exist when there's more than 1 frame between boundary matches
+        a_has_content = diff.a_range.frame_count > 1
+        b_has_content = diff.b_range.frame_count > 1
 
         # Before = boundary match frame (start of range)
         before_a = _img_tag(a_frames_dir, diff.a_range.start)
