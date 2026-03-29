@@ -86,6 +86,71 @@ class TestCorrectBoundaries:
         assert case["eBoundary"] == expected_e
 
 
+class TestCase11Insertion:
+    """Case 11: 7-frame insertion in extended edition (e169576-e169582).
+
+    Visually confirmed:
+    - t128072 matches e169575 (last frame before insertion)
+    - e169576-e169582 are unique to extended (7 frames)
+    - t128073 matches e169583 (first frame after insertion)
+
+    The algorithm incorrectly matches t128073 with e169582 (last frame
+    of the insertion) due to a hash collision — they have identical
+    block_mean_0 hashes despite being different content.
+    """
+
+    def test_before_insertion_match(self):
+        """t128072 and e169575 are visually identical but have high hash distance.
+
+        This is a limitation of block_mean_0 — distance 25 despite being
+        the same frame. The algorithm cannot match these by exact hash.
+        """
+        case = _get_case(11)
+        t_hash = case["t_hashes"]["128072"]
+        e_hash = case["e_hashes"]["169575"]
+        dist = hamming_distance(t_hash, e_hash)
+        # Visually confirmed match, but hash distance is too high for
+        # the current threshold (5.0). This is a known limitation.
+        assert dist == 25, f"Expected distance 25 for this known case, got {dist}"
+
+    def test_after_insertion_match(self):
+        """t128073 and e169583 are visually identical but have distance 12."""
+        case = _get_case(11)
+        t_hash = case["t_hashes"]["128073"]
+        e_hash = case["e_hashes"]["169583"]
+        dist = hamming_distance(t_hash, e_hash)
+        assert dist == 12, f"Expected distance 12 for this known case, got {dist}"
+
+    def test_hash_collision(self):
+        """t128073 and e169582 have identical hashes but are different content.
+
+        e169582 is part of the 7-frame insertion unique to extended, but
+        its block_mean_0 hash coincidentally matches t128073.
+        """
+        case = _get_case(11)
+        t_hash = case["t_hashes"]["128073"]
+        e_hash = case["e_hashes"]["169582"]
+        assert t_hash == e_hash, "Expected identical hashes (the collision)"
+
+    def test_insertion_is_7_frames(self):
+        """e169576 through e169582 are unique to the extended edition.
+
+        These 7 frames exist between the matching pairs:
+        - t128072 ↔ e169575 (before insertion)
+        - t128073 ↔ e169583 (after insertion)
+        """
+        # The insertion spans exactly 7 extended frames
+        before_e = 169575
+        after_e = 169583
+        insertion_length = after_e - before_e - 1
+        assert insertion_length == 7
+
+        # The theatrical side has no gap — consecutive frames
+        before_t = 128072
+        after_t = 128073
+        assert after_t - before_t == 1
+
+
 class TestWrongBoundaries:
     """Cases where the algorithm produces the wrong boundary.
 
