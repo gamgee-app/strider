@@ -301,8 +301,9 @@ def generate_report(
         <span class="diff-num">#{i + 1}</span>
         <span class="diff-type {type_cls}">{type_lbl}</span>
         <span class="diff-meta">
-          <span class="meta-row"><span class="meta-label">{label_a}:</span> {_ts(diff.to_time(diff.a_range.start)) + "&ndash;" + _ts(diff.to_time(diff.a_range.end)) + " (" + _dur(diff.a_range.inner_count, diff.fps) + ")" if diff.a_range.inner_count > 0 else _ts(diff.to_time(diff.a_range.start))}</span>
-          <span class="meta-row"><span class="meta-label">{label_b}:</span> {_ts(diff.to_time(diff.b_range.start)) + "&ndash;" + _ts(diff.to_time(diff.b_range.end)) + " (" + _dur(diff.b_range.inner_count, diff.fps) + ")" if diff.b_range.inner_count > 0 else _ts(diff.to_time(diff.b_range.start))}</span>
+          <span class="meta-a">{label_a}: {_ts(diff.to_time(diff.a_range.start)) + "&ndash;" + _ts(diff.to_time(diff.a_range.end)) + " (" + _dur(diff.a_range.inner_count, diff.fps) + ")" if diff.a_range.inner_count > 0 else _ts(diff.to_time(diff.a_range.start))}</span>
+          <span class="meta-sep">|</span>
+          <span class="meta-b">{label_b}: {_ts(diff.to_time(diff.b_range.start)) + "&ndash;" + _ts(diff.to_time(diff.b_range.end)) + " (" + _dur(diff.b_range.inner_count, diff.fps) + ")" if diff.b_range.inner_count > 0 else _ts(diff.to_time(diff.b_range.start))}</span>
         </span>
       </summary>
       <div class="diff-body">
@@ -339,9 +340,9 @@ def generate_report(
   .type-removed {{ background: #3a1a1a; color: #f87171; }}
   .type-modified {{ background: #3a3a1a; color: #facc15; }}
   .type-reordered {{ background: #1a2a3a; color: #60a5fa; }}
-  .diff-meta {{ color: #888; font-size: 0.85em; font-family: monospace; display: flex; flex-direction: column; gap: 2px; }}
-  .meta-row {{ display: flex; gap: 4px; }}
-  .meta-label {{ min-width: 10ch; text-align: right; }}
+  .diff-meta {{ color: #888; font-size: 0.85em; font-family: monospace; display: flex; align-items: center; gap: 8px; }}
+  .meta-a {{ min-width: 42ch; text-align: left; }}
+  .meta-sep {{ color: #444; }}
   .diff-body {{ padding: 16px; }}
   h3 {{ margin: 16px 0 8px; color: #aaa; font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.05em; }}
   h3:first-child {{ margin-top: 0; }}
