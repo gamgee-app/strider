@@ -405,8 +405,9 @@ def generate_report(
   .b-cell-meta {{ text-align: center; }}
   .b-frame {{ font-family: monospace; font-size: 0.85em; color: #666; margin-top: 2px; }}
   .b-frame:empty {{ display: none; }}
-  .b-hd {{ display: inline-flex; align-items: center; gap: 4px; font-family: monospace; font-size: 2em; color: #888; }}
+  .b-hd {{ display: inline-flex; align-items: center; gap: 4px; font-family: monospace; font-size: 1.5em; color: #888; }}
   .b-hd:empty {{ display: none; }}
+  .b-hd span {{ position: relative; top: -0.1em; }}
   .b-hd strong {{ color: #e0e0e0; }}
   .b-adj {{ display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; width: 100%; font-family: monospace; font-size: 1.5em; color: #888; }}
   .b-adj:empty {{ display: none; }}
