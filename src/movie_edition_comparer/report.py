@@ -164,11 +164,11 @@ def _collect_frames(
             b_frames.append(diff.last_inner_b.index)
 
         # Contact sheet frames
-        if diff.a_range.frame_count > 0:
-            n = min(contact_frames, max(1, diff.a_range.frame_count))
+        if diff.a_range.inner_count > 0:
+            n = min(contact_frames, max(1, diff.a_range.inner_count))
             a_frames.extend(_sample_frames(diff.a_range, n))
-        if diff.b_range.frame_count > 0:
-            n = min(contact_frames, max(1, diff.b_range.frame_count))
+        if diff.b_range.inner_count > 0:
+            n = min(contact_frames, max(1, diff.b_range.inner_count))
             b_frames.extend(_sample_frames(diff.b_range, n))
 
     return a_frames, b_frames
@@ -206,8 +206,8 @@ def generate_report(
     sections = []
     for i, diff in enumerate(differences):
         # Inner frames exist when there's more than 1 frame between boundary matches
-        a_has_content = diff.a_range.frame_count > 1
-        b_has_content = diff.b_range.frame_count > 1
+        a_has_content = diff.a_range.inner_count > 0
+        b_has_content = diff.b_range.inner_count > 0
 
         # Before = boundary match frame (start of range)
         before_a = _img_tag(a_frames_dir, diff.a_range.start)
@@ -271,7 +271,7 @@ def generate_report(
         # Contact sheets
         cs_a = ""
         if a_has_content:
-            n = min(contact_frames, max(1, diff.a_range.frame_count))
+            n = min(contact_frames, max(1, diff.a_range.inner_count))
             for idx in _sample_frames(diff.a_range, n):
                 cs_a += (
                     f'<div class="cs-frame">{_img_tag(a_frames_dir, idx)}'
@@ -280,7 +280,7 @@ def generate_report(
 
         cs_b = ""
         if b_has_content:
-            n = min(contact_frames, max(1, diff.b_range.frame_count))
+            n = min(contact_frames, max(1, diff.b_range.inner_count))
             for idx in _sample_frames(diff.b_range, n):
                 cs_b += (
                     f'<div class="cs-frame">{_img_tag(b_frames_dir, idx)}'
@@ -292,7 +292,7 @@ def generate_report(
 
         a_start_t = diff.to_time(diff.a_range.start).total_seconds()
         b_start_t = diff.to_time(diff.b_range.start).total_seconds()
-        dur_frames = max(diff.a_range.frame_count, diff.b_range.frame_count)
+        dur_frames = max(diff.a_range.inner_count, diff.b_range.inner_count)
 
         sections.append(f"""
     <details class="diff" data-type="{diff.difference_type}"
@@ -301,9 +301,9 @@ def generate_report(
         <span class="diff-num">#{i + 1}</span>
         <span class="diff-type {type_cls}">{type_lbl}</span>
         <span class="diff-meta">
-          {label_a}: {_ts(diff.to_time(diff.a_range.start))}&ndash;{_ts(diff.to_time(diff.a_range.end))} ({_dur(diff.a_range.frame_count, diff.fps)})
+          {label_a}: {_ts(diff.to_time(diff.a_range.start))}&ndash;{_ts(diff.to_time(diff.a_range.end))} ({_dur(diff.a_range.inner_count, diff.fps)})
           &nbsp;|&nbsp;
-          {label_b}: {_ts(diff.to_time(diff.b_range.start))}&ndash;{_ts(diff.to_time(diff.b_range.end))} ({_dur(diff.b_range.frame_count, diff.fps)})
+          {label_b}: {_ts(diff.to_time(diff.b_range.start))}&ndash;{_ts(diff.to_time(diff.b_range.end))} ({_dur(diff.b_range.inner_count, diff.fps)})
         </span>
       </summary>
       <div class="diff-body">

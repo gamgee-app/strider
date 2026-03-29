@@ -43,7 +43,7 @@ def run(args):
     differences = find_all_differences(all_matches, a_fetcher, b_fetcher, config)
 
     def sort_key(d: SceneDifference) -> int:
-        return max(d.a_range.frame_count, d.b_range.frame_count)
+        return max(d.a_range.inner_count, d.b_range.inner_count)
 
     sorted_diffs = sorted(differences, key=sort_key)
 
@@ -51,8 +51,8 @@ def run(args):
         [(
             d.to_time(d.a_range.start), d.to_time(d.a_range.end), d.difference_type,
             d.to_time(d.b_range.start), d.to_time(d.b_range.end), d.difference_type,
-            timedelta(seconds=d.a_range.frame_count / d.fps),
-            timedelta(seconds=d.b_range.frame_count / d.fps),
+            timedelta(seconds=d.a_range.inner_count / d.fps),
+            timedelta(seconds=d.b_range.inner_count / d.fps),
             d.duration_difference,
         ) for d in sorted_diffs],
         headers=[
@@ -78,7 +78,7 @@ def run(args):
                     "type": d.difference_type,
                 }
                 for d in differences
-                if getattr(d, attr).frame_count > 0
+                if getattr(d, attr).inner_count > 0
             ]
             print(json.dumps(ranges))
 

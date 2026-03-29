@@ -464,13 +464,22 @@ class TestFrameRange:
         r = FrameRange(10, 15)
         assert r.frame_count == 5
 
+    def test_inner_count(self):
+        r = FrameRange(10, 15)
+        assert r.inner_count == 4
+
     def test_zero_frame_count(self):
         r = FrameRange(5, 5)
         assert r.frame_count == 0
 
+    def test_zero_inner_count(self):
+        r = FrameRange(5, 6)
+        assert r.inner_count == 0
+
     def test_negative_clamped_to_zero(self):
         r = FrameRange(10, 5)
         assert r.frame_count == 0
+        assert r.inner_count == 0
 
 
 # ---------------------------------------------------------------------------
@@ -479,6 +488,8 @@ class TestFrameRange:
 
 class TestSceneDifference:
     def test_duration_difference(self):
+        # inner_count: 240 - 0 - 1 = 239 and 360 - 0 - 1 = 359
+        # difference: (359 - 239) / 24 = 5.0 seconds
         d = SceneDifference(
             a_range=FrameRange(0, 240),
             b_range=FrameRange(0, 360),

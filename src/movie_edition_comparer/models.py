@@ -47,7 +47,13 @@ class FrameRange:
 
     @property
     def frame_count(self) -> int:
+        """Total frames spanned including boundary matches."""
         return max(0, self.end - self.start)
+
+    @property
+    def inner_count(self) -> int:
+        """Number of differing frames between the boundary matches."""
+        return max(0, self.end - self.start - 1)
 
 
 def frame_to_time(frame: int, fps: float) -> timedelta:
@@ -75,8 +81,8 @@ class SceneDifference:
 
     @property
     def duration_difference(self) -> timedelta:
-        a_dur = self.a_range.frame_count / self.fps
-        b_dur = self.b_range.frame_count / self.fps
+        a_dur = self.a_range.inner_count / self.fps
+        b_dur = self.b_range.inner_count / self.fps
         return timedelta(seconds=abs(b_dur - a_dur))
 
 
