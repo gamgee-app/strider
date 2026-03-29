@@ -274,6 +274,15 @@ def generate_report(
             last_hd = hamming_distance(diff.last_inner_a.hash, diff.last_inner_b.hash)
             last_diff_label = f'<span class="hash-label">hamming: <strong>{last_hd:.0f}</strong></span>'
 
+        # Min hamming distance across first/last for filtering.
+        # -1 means not applicable (one side has no inner frames).
+        inner_hds = []
+        if diff.first_inner_a and diff.first_inner_b:
+            inner_hds.append(hamming_distance(diff.first_inner_a.hash, diff.first_inner_b.hash))
+        if diff.last_inner_a and diff.last_inner_b:
+            inner_hds.append(hamming_distance(diff.last_inner_a.hash, diff.last_inner_b.hash))
+        min_inner_hd = min(inner_hds) if inner_hds else -1
+
         # Contact sheets
         cs_a = ""
         if a_has_content:
@@ -302,7 +311,8 @@ def generate_report(
 
         sections.append(f"""
     <details class="diff" data-type="{diff.difference_type}"
-             data-a-start="{a_start_t}" data-b-start="{b_start_t}" data-duration="{dur_frames}">
+             data-a-start="{a_start_t}" data-b-start="{b_start_t}" data-duration="{dur_frames}"
+             data-min-hd="{min_inner_hd:.0f}">
       <summary class="{type_cls}">
         <span class="diff-num">#{i + 1}</span>
         <span class="diff-type {type_cls}">{type_lbl}</span>
@@ -376,6 +386,9 @@ def generate_report(
   .controls .filter-btn.type-modified.active {{ border-color: #facc15; }}
   .controls .filter-btn.type-reordered.active {{ border-color: #60a5fa; }}
   .diff.hidden {{ display: none; }}
+  .hamming-group {{ display: flex; align-items: center; gap: 8px; }}
+  .hamming-group input[type=range] {{ width: 120px; accent-color: #60a5fa; }}
+  #hamming-value {{ color: #e0e0e0; font-family: monospace; min-width: 2ch; }}
   .hash-label {{ font-size: 0.8em; color: #666; display: block; margin-top: 4px; font-family: monospace; }}
   .hash-label strong {{ color: #e0e0e0; font-size: 1.2em; }}
   .video-row {{ display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }}
@@ -404,6 +417,12 @@ def generate_report(
       <button class="filter-btn type-removed active" data-type="unique_to_a">Only in A</button>
       <button class="filter-btn type-reordered active" data-type="reordered">Reordered</button>
     </div>
+    <label>Max hamming:</label>
+    <div class="hamming-group">
+      <input type="range" id="hamming-slider" min="0" max="50" value="50">
+      <span id="hamming-value">50</span>
+      <button id="hamming-unlimited" class="filter-btn active">&#x221e;</button>
+    </div>
   </div>
   <div id="diff-container">
   {"".join(sections)}
@@ -412,7 +431,12 @@ def generate_report(
 (function() {{
   const container = document.getElementById('diff-container');
   const sortSelect = document.getElementById('sort-select');
-  const filterBtns = document.querySelectorAll('.filter-btn');
+  const filterBtns = document.querySelectorAll('.filter-btn[data-type]');
+  const hammingSlider = document.getElementById('hamming-slider');
+  const hammingValue = document.getElementById('hamming-value');
+  const hammingUnlimited = document.getElementById('hamming-unlimited');
+
+  let hammingLimit = Infinity;
 
   function getActiveTypes() {{
     return new Set(
@@ -434,7 +458,10 @@ def generate_report(
   function applyFilter() {{
     const active = getActiveTypes();
     container.querySelectorAll('.diff').forEach(el => {{
-      el.classList.toggle('hidden', !active.has(el.dataset.type));
+      const typeMatch = active.has(el.dataset.type);
+      const hd = parseFloat(el.dataset.minHd);
+      const hdMatch = hd < 0 || hd <= hammingLimit;
+      el.classList.toggle('hidden', !typeMatch || !hdMatch);
     }});
   }}
 
@@ -444,6 +471,25 @@ def generate_report(
       btn.classList.toggle('active');
       applyFilter();
     }});
+  }});
+
+  hammingSlider.addEventListener('input', () => {{
+    hammingLimit = parseInt(hammingSlider.value);
+    hammingValue.textContent = hammingLimit;
+    hammingUnlimited.classList.remove('active');
+    applyFilter();
+  }});
+
+  hammingUnlimited.addEventListener('click', () => {{
+    const isActive = hammingUnlimited.classList.toggle('active');
+    if (isActive) {{
+      hammingLimit = Infinity;
+      hammingValue.textContent = '\u221e';
+    }} else {{
+      hammingLimit = parseInt(hammingSlider.value);
+      hammingValue.textContent = hammingLimit;
+    }}
+    applyFilter();
   }});
 
   applySort();

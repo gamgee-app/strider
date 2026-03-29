@@ -109,9 +109,9 @@ def extract_clip(
 ):
     """Extract a frame-exact clip as 720p H.264 MP4.
 
-    Uses ffmpeg with output-side -ss for frame-exact seeking, then
-    re-encodes to H.264+AAC at 720p for browser playback.
-    Skips if the output file already exists.
+    Uses -ss before -i for fast keyframe seeking, then the trim video
+    filter for frame-exact start/end selection. Re-encodes to H.264+AAC
+    at 720p for browser playback. Skips if the output file already exists.
     """
     import subprocess
 
@@ -121,15 +121,34 @@ def extract_clip(
         return out_path
 
     start_time = start_frame / fps
-    duration = (end_frame - start_frame) / fps
+    inner_frames = end_frame - start_frame - 1
+    if inner_frames <= 0:
+        return out_path
+
+    # Seek to 10s before start for keyframe context, minimum 0
+    seek_time = max(0, start_time - 10)
+
+    # trim filter uses frame numbers relative to the input stream,
+    # but with -ss the stream starts from the seek point.
+    # We need to calculate frame offsets relative to the seek point.
+    seek_frame = int(seek_time * fps)
+    trim_start = start_frame - seek_frame + 1  # +1 for first inner frame
+    trim_end = trim_start + inner_frames
+
+    vf = f"trim=start_frame={trim_start}:end_frame={trim_end},setpts=PTS-STARTPTS,scale=1280:-2"
+
+    # Calculate audio trim relative to seek point
+    audio_start = (start_frame + 1) / fps - seek_time
+    audio_duration = inner_frames / fps
+    af = f"atrim=start={audio_start:.6f}:duration={audio_duration:.6f},asetpts=PTS-STARTPTS"
 
     subprocess.run(
         [
             "ffmpeg", "-y",
+            "-ss", f"{seek_time:.6f}",
             "-i", input_file,
-            "-ss", f"{start_time:.6f}",
-            "-t", f"{duration:.6f}",
-            "-vf", "scale=1280:-2",
+            "-vf", vf,
+            "-af", af,
             "-c:v", "libx264", "-preset", "medium", "-crf", "18",
             "-c:a", "aac", "-b:a", "192k",
             "-movflags", "+faststart",
