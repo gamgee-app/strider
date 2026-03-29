@@ -26,6 +26,7 @@ def configure_parser(parser: argparse.ArgumentParser):
     parser.add_argument("--report", default=None, metavar="FILE", help="Generate an HTML visual verification report")
     parser.add_argument("--contact-frames", type=int, default=8, help="Frames per contact sheet in the report (default: 8)")
     parser.add_argument("--frames-dir", default="frames", help="Directory for extracted report frames (default: frames)")
+    parser.add_argument("--clips", action="store_true", help="Extract video clips for the report")
 
 
 def run(args):
@@ -89,6 +90,7 @@ def run(args):
             args.label_a, args.label_b, args.report,
             frames_dir=args.frames_dir,
             contact_frames=args.contact_frames,
+            clips=args.clips,
         )
 
     do_trim = not args.no_trim and args.movie_a and args.movie_b

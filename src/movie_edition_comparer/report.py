@@ -181,6 +181,7 @@ def generate_report(
     output_path: str,
     frames_dir: str = "frames",
     contact_frames: int = 8,
+    clips: bool = True,
 ):
     """Generate an HTML report referencing extracted frame images.
 
@@ -200,9 +201,10 @@ def generate_report(
     print(f"Extracting {label_b} frames...")
     extract_frames(movie_b, b_frame_indices, b_frames_dir)
 
-    print("Extracting clips...")
-    extract_clips(differences, movie_a, movie_b, label_a, label_b,
-                  os.path.join(frames_dir, "clips"))
+    if clips:
+        print("Extracting clips...")
+        extract_clips(differences, movie_a, movie_b, label_a, label_b,
+                      os.path.join(frames_dir, "clips"))
 
     diff_images_dir = os.path.join(frames_dir, "diff")
     print("Generating boundary diffs...")
