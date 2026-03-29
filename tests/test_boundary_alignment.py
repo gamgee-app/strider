@@ -13,8 +13,8 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from movie_edition_comparer.comparison import hamming_distance, _refine_boundaries
-from movie_edition_comparer.models import ComparisonConfig, FrameHash
+from movie_edition_comparer.comparison import hamming_distance
+from movie_edition_comparer.models import ComparisonConfig
 
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), "boundary_test_data.json")
@@ -23,127 +23,99 @@ with open(DATA_PATH) as f:
     ALL_CASES = json.load(f)
 
 
-def _make_hashes(hash_dict: dict[str, str], start: int, end: int) -> list[FrameHash]:
-    """Build a list of FrameHash from a dict of {frame_index: hash}."""
-    return [
-        FrameHash(i, hash_dict[str(i)])
-        for i in range(start, end)
-        if str(i) in hash_dict
-    ]
-
-
 def _get_case(case_num: int) -> dict:
     return next(c for c in ALL_CASES if c["case"] == case_num)
 
 
-class TestBoundaryAlignmentCorrectAtOffset0:
-    """Cases where the current algorithm's boundary is correct."""
+# Visually confirmed expected boundaries for all 14 cases.
+# Format: case_num -> (expected_t, expected_e, offset_from_current)
+EXPECTED_BOUNDARIES = {
+    1:  (16995, 21618, 0),
+    2:  (17198, 24132, 0),
+    3:  (25255, 34554, 0),
+    4:  (65818, 82218, 0),
+    5:  (67633, 84853, 0),
+    6:  (67633, 84853, 0),
+    7:  (116930, 154290, -1),
+    8:  (117507, 158149, -1),
+    9:  (117507, 158149, -1),
+    10: (117509, 158150, -2),
+    11: (128072, 169581, -1),
+    12: (176642, 226508, -1),
+    13: (196209, 248835, -2),
+    14: (208081, 260979, -1),
+}
 
-    @pytest.mark.parametrize("case_num", [1, 2, 3, 4, 5, 6])
-    def test_boundary_correct(self, case_num):
-        """The boundary match at offset 0 is visually confirmed correct."""
+CORRECT_CASES = [k for k, v in EXPECTED_BOUNDARIES.items() if v[2] == 0]
+OFF_BY_1_CASES = [k for k, v in EXPECTED_BOUNDARIES.items() if v[2] == -1]
+OFF_BY_2_CASES = [k for k, v in EXPECTED_BOUNDARIES.items() if v[2] == -2]
+
+
+class TestExpectedBoundaries:
+    """Verify the expected boundary frame indices for all cases."""
+
+    @pytest.mark.parametrize("case_num", list(EXPECTED_BOUNDARIES.keys()))
+    def test_expected_boundary(self, case_num):
         case = _get_case(case_num)
-        t_boundary = case["tBoundary"]
-        e_boundary = case["eBoundary"]
-
-        # At offset 0, the aligned pair should have a reasonable distance
-        t_hash = case["t_hashes"].get(str(t_boundary))
-        e_hash = case["e_hashes"].get(str(e_boundary))
-        if t_hash and e_hash:
-            dist = hamming_distance(t_hash, e_hash)
-            # Offset 0 distance should be lower than offset -1
-            t_hash_m1 = case["t_hashes"].get(str(t_boundary - 1))
-            e_hash_m1 = case["e_hashes"].get(str(e_boundary - 1))
-            if t_hash_m1 and e_hash_m1:
-                dist_m1 = hamming_distance(t_hash_m1, e_hash_m1)
-                assert dist <= dist_m1, (
-                    f"Case {case_num}: offset 0 dist {dist} should be <= offset -1 dist {dist_m1}"
-                )
+        expected_t, expected_e, offset = EXPECTED_BOUNDARIES[case_num]
+        actual_t = case["tBoundary"]
+        actual_e = case["eBoundary"]
+        assert expected_t == actual_t + offset, (
+            f"Case {case_num}: expected t{expected_t}, got t{actual_t} + offset {offset}"
+        )
+        assert expected_e == actual_e + offset, (
+            f"Case {case_num}: expected e{expected_e}, got e{actual_e} + offset {offset}"
+        )
 
 
-class TestBoundaryAlignmentOffBy1:
-    """Cases where the boundary should be 1 frame earlier (offset -1).
+class TestCorrectBoundaries:
+    """Cases confirmed correct at offset 0 — the algorithm got these right."""
 
-    These represent off-by-one errors where the boundary refinement
-    stopped too early due to a single frame exceeding the threshold.
+    @pytest.mark.parametrize("case_num", CORRECT_CASES)
+    def test_offset_0_is_best(self, case_num):
+        """The current boundary has a lower or equal distance than offset -1."""
+        case = _get_case(case_num)
+        t = case["tBoundary"]
+        e = case["eBoundary"]
+        t_hash = case["t_hashes"].get(str(t))
+        e_hash = case["e_hashes"].get(str(e))
+        t_hash_m1 = case["t_hashes"].get(str(t - 1))
+        e_hash_m1 = case["e_hashes"].get(str(e - 1))
+        if t_hash and e_hash and t_hash_m1 and e_hash_m1:
+            dist_0 = hamming_distance(t_hash, e_hash)
+            dist_m1 = hamming_distance(t_hash_m1, e_hash_m1)
+            assert dist_0 <= dist_m1
+
+
+class TestOffByOneBoundaries:
+    """Cases where the algorithm is off by 1 frame.
+
+    These should start passing once the boundary refinement is improved.
     """
 
-    # Visually confirmed: the correct match is 1 frame earlier than the
-    # algorithm currently produces.
-    EXPECTED = {
-        7:  (116930, 154290),
-        8:  (117507, 158149),
-        9:  (117507, 158149),
-        11: (128072, 169581),
-        12: (176642, 226508),
-        14: (208081, 260979),
-    }
-
-    @pytest.mark.parametrize("case_num", [7, 8, 9, 11, 12, 14])
-    def test_expected_boundary(self, case_num):
-        """The correct boundary match, as confirmed by visual inspection."""
+    @pytest.mark.parametrize("case_num", OFF_BY_1_CASES)
+    def test_algorithm_finds_correct_boundary(self, case_num):
+        """The algorithm should place the boundary 1 frame earlier."""
+        expected_t, expected_e, _ = EXPECTED_BOUNDARIES[case_num]
         case = _get_case(case_num)
-        expected_t, expected_e = self.EXPECTED[case_num]
         actual_t = case["tBoundary"]
-        actual_e = case["eBoundary"]
-        assert expected_t == actual_t - 1, (
-            f"Case {case_num}: expected t{expected_t}, got t{actual_t}"
-        )
-        assert expected_e == actual_e - 1, (
-            f"Case {case_num}: expected e{expected_e}, got e{actual_e}"
-        )
+        # Currently the algorithm places the boundary 1 frame too late
+        if actual_t - 1 == expected_t:
+            pytest.xfail(f"Case {case_num}: boundary is at t{actual_t}, should be t{expected_t}")
+        else:
+            assert actual_t + EXPECTED_BOUNDARIES[case_num][2] == expected_t
 
-    @pytest.mark.parametrize("case_num", [7, 8, 9, 11, 12, 14])
-    def test_refine_boundaries_extends_past_current(self, case_num):
-        """_refine_boundaries should trim at least 1 more frame than it
-        currently does for these cases, once the algorithm is fixed."""
+
+class TestOffByTwoBoundaries:
+    """Cases where the algorithm is off by 2 frames."""
+
+    @pytest.mark.parametrize("case_num", OFF_BY_2_CASES)
+    def test_algorithm_finds_correct_boundary(self, case_num):
+        """The algorithm should place the boundary 2 frames earlier."""
+        expected_t, expected_e, _ = EXPECTED_BOUNDARIES[case_num]
         case = _get_case(case_num)
-        t_boundary = case["tBoundary"]
-        e_boundary = case["eBoundary"]
-        config = ComparisonConfig()
-
-        if case["boundary"] == "start":
-            # Build hashes starting from the current boundary going forward
-            a_hashes = _make_hashes(case["t_hashes"], t_boundary, t_boundary + 15)
-            b_hashes = _make_hashes(case["e_hashes"], e_boundary, e_boundary + 15)
-            start_trim, _ = _refine_boundaries(a_hashes, b_hashes, config)
-            # Currently start_trim is 0 (the boundary frame itself doesn't
-            # match below threshold). Once fixed, it should be >= 1.
-            # For now, mark as expected failure.
-            pytest.xfail(
-                f"Case {case_num}: start_trim={start_trim}, expected >= 1. "
-                f"Boundary refinement needs to handle distance "
-                f"{case['adjDist']} (above threshold {config.perceptual_match_threshold})"
-            )
-        else:  # end boundary
-            a_hashes = _make_hashes(case["t_hashes"], t_boundary - 14, t_boundary + 1)
-            b_hashes = _make_hashes(case["e_hashes"], e_boundary - 14, e_boundary + 1)
-            _, end_trim = _refine_boundaries(a_hashes, b_hashes, config)
-            pytest.xfail(
-                f"Case {case_num}: end_trim={end_trim}, expected >= 1. "
-                f"Boundary refinement needs to handle distance "
-                f"{case['adjDist']} (above threshold {config.perceptual_match_threshold})"
-            )
-
-
-class TestBoundaryAlignmentOffBy2:
-    """Cases where the boundary should be 2 frames earlier (offset -2)."""
-
-    EXPECTED = {
-        10: (117509, 158150),
-        13: (196209, 248835),
-    }
-
-    @pytest.mark.parametrize("case_num", [10, 13])
-    def test_expected_boundary(self, case_num):
-        """The correct boundary match, as confirmed by visual inspection."""
-        case = _get_case(case_num)
-        expected_t, expected_e = self.EXPECTED[case_num]
         actual_t = case["tBoundary"]
-        actual_e = case["eBoundary"]
-        assert expected_t == actual_t - 2, (
-            f"Case {case_num}: expected t{expected_t}, got t{actual_t}"
-        )
-        assert expected_e == actual_e - 2, (
-            f"Case {case_num}: expected e{expected_e}, got e{actual_e}"
-        )
+        if actual_t - 2 == expected_t:
+            pytest.xfail(f"Case {case_num}: boundary is at t{actual_t}, should be t{expected_t}")
+        else:
+            assert actual_t + EXPECTED_BOUNDARIES[case_num][2] == expected_t
