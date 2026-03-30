@@ -207,7 +207,7 @@ class TestCase11Insertion:
 class TestCase13Region:
     """Case 13: complex region with multiple lag shifts and non-matching frames.
 
-    Visually confirmed alignment (extended frame / theatrical frame):
+    Visually confirmed alignment:
     - e248812/t196185: match at offset -1
     - e248813-e248817 / t196185-t196189: match at offset +2
     - t196190: unique to theatrical
@@ -215,46 +215,77 @@ class TestCase13Region:
     - e248830/t196203: do not match
     - e248831-e248841 / t196204-t196214: match at offset +1
     - e248842/t196215: do not match
-    - e248843/t196216: match at offset +1
+    - e248843-e248863 / t196216-t196236: match at offset +1
+    - e248865+ / t196238+: match at offset +1
 
     The algorithm boundary is at t196211/e248837 (offset 0).
     The correct boundary should be at t196210/e248836 (offset -1),
     placing it within the offset +1 matching region.
     """
 
-    def test_offset_plus_1_region_before_boundary(self):
-        """Frames before the boundary match at offset +1."""
+    def test_offset_minus_1_match(self):
+        """e248812/t196185 match at offset -1."""
         case = _get_case(13)
-        # e248831-e248836 / t196204-t196209 should match at offset +1
-        # meaning t196204 matches e248831, etc.
-        for t_idx, e_idx in [(196204, 248831), (196209, 248836)]:
+        t_hash = case["t_hashes"].get("196185")
+        e_hash = case["e_hashes"].get("248812")
+        if t_hash and e_hash:
+            dist = hamming_distance(t_hash, e_hash)
+            assert dist <= 10, f"t196185 ↔ e248812 should match (offset -1), got {dist}"
+
+    def test_offset_plus_2_region(self):
+        """e248813-e248817 / t196185-t196189 match at offset +2."""
+        case = _get_case(13)
+        for t_idx, e_idx in [(196186, 248814), (196189, 248817)]:
             t_hash = case["t_hashes"].get(str(t_idx))
             e_hash = case["e_hashes"].get(str(e_idx))
             if t_hash and e_hash:
                 dist = hamming_distance(t_hash, e_hash)
                 assert dist <= 10, (
-                    f"t{t_idx} ↔ e{e_idx} should match (offset +1), got distance {dist}"
+                    f"t{t_idx} ↔ e{e_idx} should match (offset +2), got {dist}"
+                )
+
+    def test_offset_plus_1_region_before_boundary(self):
+        """e248818-e248829 / t196191-t196202 match at offset +1."""
+        case = _get_case(13)
+        for t_idx, e_idx in [(196191, 248818), (196202, 248829)]:
+            t_hash = case["t_hashes"].get(str(t_idx))
+            e_hash = case["e_hashes"].get(str(e_idx))
+            if t_hash and e_hash:
+                dist = hamming_distance(t_hash, e_hash)
+                assert dist <= 10, (
+                    f"t{t_idx} ↔ e{e_idx} should match (offset +1), got {dist}"
+                )
+
+    def test_offset_plus_1_region_through_boundary(self):
+        """e248831-e248841 / t196204-t196214 match at offset +1.
+
+        The algorithm boundary sits inside this region.
+        """
+        case = _get_case(13)
+        for t_idx, e_idx in [(196204, 248831), (196209, 248836),
+                              (196211, 248838), (196214, 248841)]:
+            t_hash = case["t_hashes"].get(str(t_idx))
+            e_hash = case["e_hashes"].get(str(e_idx))
+            if t_hash and e_hash:
+                dist = hamming_distance(t_hash, e_hash)
+                assert dist <= 10, (
+                    f"t{t_idx} ↔ e{e_idx} should match (offset +1), got {dist}"
                 )
 
     def test_offset_plus_1_region_after_boundary(self):
-        """Frames after the boundary also match at offset +1."""
+        """e248843-e248863 / t196216-t196236 match at offset +1."""
         case = _get_case(13)
-        for t_idx, e_idx in [(196211, 248838), (196214, 248841)]:
+        for t_idx, e_idx in [(196216, 248843), (196236, 248863)]:
             t_hash = case["t_hashes"].get(str(t_idx))
             e_hash = case["e_hashes"].get(str(e_idx))
             if t_hash and e_hash:
                 dist = hamming_distance(t_hash, e_hash)
                 assert dist <= 10, (
-                    f"t{t_idx} ↔ e{e_idx} should match (offset +1), got distance {dist}"
+                    f"t{t_idx} ↔ e{e_idx} should match (offset +1), got {dist}"
                 )
 
     def test_non_matching_frames(self):
-        """e248830/t196203 and e248842/t196215 are visually different.
-
-        Despite being visually different, their hash distances are at or
-        near the perceptual threshold — another case where the hash
-        can't reliably distinguish matching from non-matching frames.
-        """
+        """Several frame pairs are visually different despite low hash distance."""
         case = _get_case(13)
         for t_idx, e_idx in [(196203, 248830), (196215, 248842)]:
             t_hash = case["t_hashes"].get(str(t_idx))
@@ -262,7 +293,7 @@ class TestCase13Region:
             if t_hash and e_hash:
                 dist = hamming_distance(t_hash, e_hash)
                 assert dist >= 5, (
-                    f"t{t_idx} ↔ e{e_idx} should not match, got distance {dist}"
+                    f"t{t_idx} ↔ e{e_idx} should not match, got {dist}"
                 )
 
 
