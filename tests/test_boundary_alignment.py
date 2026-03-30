@@ -86,6 +86,71 @@ class TestCorrectBoundaries:
         assert case["eBoundary"] == expected_e
 
 
+class TestCase10Insertion:
+    """Case 10: 1-frame insertion in extended edition (e158151).
+
+    Visually confirmed:
+    - t117510 matches e158150 (last frame before insertion)
+    - e158151 is unique to extended (1 frame)
+    - t117511 matches e158152 (exact match, distance 0)
+
+    The algorithm matches t117511 ↔ e158152 (correct) but places the
+    boundary 1 frame too late because it can't detect the single
+    inserted frame — the distances on either side of the insertion
+    are in the same noisy range (3-9).
+    """
+
+    def test_before_insertion_pair(self):
+        """t117510 and e158150 are visually matching but have high hash distance."""
+        case = _get_case(10)
+        t_hash = case["t_hashes"]["117510"]
+        e_hash = case["e_hashes"]["158150"]
+        dist = hamming_distance(t_hash, e_hash)
+        assert dist == 13, f"Expected distance 13, got {dist}"
+
+    def test_after_insertion_match(self):
+        """t117511 and e158152 are an exact match (distance 0)."""
+        case = _get_case(10)
+        t_hash = case["t_hashes"]["117511"]
+        e_hash = case["e_hashes"]["158152"]
+        dist = hamming_distance(t_hash, e_hash)
+        assert dist == 0
+
+    def test_insertion_is_1_frame(self):
+        """e158151 is the single inserted frame.
+
+        Between the matching pairs:
+        - t117510 ↔ e158150 (before insertion)
+        - t117511 ↔ e158152 (after insertion)
+        """
+        before_e = 158150
+        after_e = 158152
+        insertion_length = after_e - before_e - 1
+        assert insertion_length == 1
+
+        # The theatrical side has no gap — consecutive frames
+        before_t = 117510
+        after_t = 117511
+        assert after_t - before_t == 1
+
+    def test_inserted_frame_similar_distance(self):
+        """The inserted frame e158151 has similar distance to its neighbours.
+
+        This is why the algorithm can't detect it — there's no sharp
+        transition in hamming distance.
+        """
+        case = _get_case(10)
+        t_hash = case["t_hashes"]["117510"]
+        e_inserted = case["e_hashes"]["158151"]
+        e_before = case["e_hashes"]["158150"]
+
+        dist_inserted = hamming_distance(t_hash, e_inserted)
+        dist_before = hamming_distance(t_hash, e_before)
+        # Both are in the noisy range (9 vs 13) — no clear signal
+        assert dist_inserted < 15
+        assert dist_before < 15
+
+
 class TestCase11Insertion:
     """Case 11: 6-frame insertion in extended edition (e169576-e169581).
 
