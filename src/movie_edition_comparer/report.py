@@ -64,23 +64,15 @@ def _diff_filename(idx_a: int, idx_b: int) -> str:
     return f"diff_{max(idx_a, 0):012d}_{max(idx_b, 0):012d}.png"
 
 
-def _read_frame_at(cap, frame_index: int):
-    """Seek and read a single frame from an open VideoCapture."""
-    import cv2
-    cap.set(cv2.CAP_PROP_POS_FRAMES, max(frame_index, 0))
-    ret, frame = cap.read()
-    return frame if ret else None
-
-
 def _generate_diff_images(
     differences: list[SceneDifference],
-    movie_a: str, movie_b: str,
+    a_frames_dir: str, b_frames_dir: str,
     diff_dir: str,
 ):
-    """Generate difference images from full-resolution frames.
+    """Generate difference images from already-extracted frames.
 
-    Reads frames at native resolution from the video files and computes the
-    per-pixel absolute difference.
+    Reads the hash-verified frames from disk and computes the per-pixel
+    absolute difference.
     """
     import cv2
     from progress.bar import Bar
@@ -109,31 +101,25 @@ def _generate_diff_images(
     if not to_generate:
         return
 
-    # Sort by movie A frame for efficient forward seeking
-    to_generate.sort(key=lambda p: max(p[0], 0))
+    with Bar("  Generating", max=len(to_generate)) as bar:
+        for idx_a, idx_b in to_generate:
+            path_a = os.path.join(a_frames_dir, _frame_filename(max(idx_a, 0)))
+            path_b = os.path.join(b_frames_dir, _frame_filename(max(idx_b, 0)))
 
-    cap_a = cv2.VideoCapture(movie_a)
-    cap_b = cv2.VideoCapture(movie_b)
-    try:
-        with Bar("  Generating", max=len(to_generate)) as bar:
-            for idx_a, idx_b in to_generate:
-                frame_a = _read_frame_at(cap_a, idx_a)
-                frame_b = _read_frame_at(cap_b, idx_b)
+            frame_a = cv2.imread(path_a)
+            frame_b = cv2.imread(path_b)
 
-                if frame_a is not None and frame_b is not None:
-                    if frame_a.shape != frame_b.shape:
-                        frame_b = cv2.resize(frame_b, (frame_a.shape[1], frame_a.shape[0]))
+            if frame_a is not None and frame_b is not None:
+                if frame_a.shape != frame_b.shape:
+                    frame_b = cv2.resize(frame_b, (frame_a.shape[1], frame_a.shape[0]))
 
-                    diff_img = cv2.absdiff(frame_a, frame_b)
-                    diff_img = cv2.normalize(diff_img, None, 0, 255, cv2.NORM_MINMAX)
+                diff_img = cv2.absdiff(frame_a, frame_b)
+                diff_img = cv2.normalize(diff_img, None, 0, 255, cv2.NORM_MINMAX)
 
-                    out_path = os.path.join(diff_dir, _diff_filename(idx_a, idx_b))
-                    cv2.imwrite(out_path, diff_img)
+                out_path = os.path.join(diff_dir, _diff_filename(idx_a, idx_b))
+                cv2.imwrite(out_path, diff_img)
 
-                bar.next()
-    finally:
-        cap_a.release()
-        cap_b.release()
+            bar.next()
 
 
 def _diff_img_tag(diff_dir: str, idx_a: int, idx_b: int) -> str:
@@ -225,7 +211,7 @@ def generate_report(
 
     diff_images_dir = os.path.join(frames_dir, "diff")
     print("Generating boundary diffs...")
-    _generate_diff_images(differences, movie_a, movie_b, diff_images_dir)
+    _generate_diff_images(differences, a_frames_dir, b_frames_dir, diff_images_dir)
 
     # Generate HTML
     sections = []
