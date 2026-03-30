@@ -216,6 +216,7 @@ class TestCase13Region:
     - e248831-e248841 / t196204-t196214: match at offset +1
     - e248842/t196215: do not match
     - e248843-e248863 / t196216-t196236: match at offset +1
+    - e248864/t196237: hash collision (distance 0 but visually different)
     - e248865+ / t196238+: match at offset +1
 
     The algorithm boundary is at t196211/e248837 (offset 0).
@@ -285,7 +286,8 @@ class TestCase13Region:
                 )
 
     def test_non_matching_frames(self):
-        """Several frame pairs are visually different despite low hash distance."""
+        """e248830/t196203 and e248842/t196215 are visually different
+        but have hash distances at or near the perceptual threshold."""
         case = _get_case(13)
         for t_idx, e_idx in [(196203, 248830), (196215, 248842)]:
             t_hash = case["t_hashes"].get(str(t_idx))
@@ -295,6 +297,17 @@ class TestCase13Region:
                 assert dist >= 5, (
                     f"t{t_idx} ↔ e{e_idx} should not match, got {dist}"
                 )
+
+    def test_hash_collision(self):
+        """t196237 and e248864 have identical hashes but are visually different.
+
+        A genuine hash collision in block_mean_0 — the algorithm would
+        incorrectly treat these as matching frames.
+        """
+        case = _get_case(13)
+        t_hash = case["t_hashes"]["196237"]
+        e_hash = case["e_hashes"]["248864"]
+        assert t_hash == e_hash, "Expected identical hashes (collision)"
 
 
 class TestWrongBoundaries:
