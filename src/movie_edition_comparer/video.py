@@ -2,6 +2,7 @@
 
 import os
 import os.path
+import sys
 from datetime import timedelta
 
 from movie_edition_comparer.models import SceneDifference
@@ -45,6 +46,7 @@ def grab_frame(
     """Extract a single frame by index using OpenCV."""
     import cv2
 
+    os.environ["OPENCV_LOG_LEVEL"] = "SILENT"
     timestamp = timedelta(seconds=frame_index / fps)
     filename = f"{output_dir}/{index}-{_time_to_filename(timestamp)}-{identifier}.png"
     if not os.path.isfile(filename):
@@ -58,61 +60,79 @@ def grab_frame(
             cap.release()
 
 
-def _seek_and_verify(cap, target_idx: int, expected_hash: str | None,
-                     max_correction: int = 5):
-    """Seek to a frame index and verify by hash if available.
+def _anchored_extract(cap, target_idx: int, landmarks: list[tuple[int, str]],
+                      max_seek_error: int = 5):
+    """Extract a frame using MD5-anchored positioning.
 
-    If expected_hash is provided, the extracted frame's hash is compared.
-    If it doesn't match, reads forward up to max_correction frames to
-    find the correct one.
+    Seeks to before the landmark region, reads a window of frames, then
+    slides the expected MD5 landmarks across the read buffer to find the
+    exact seek offset.  Once anchored, returns the frame at target_idx.
 
-    Returns (frame, correction_applied) or (None, 0) on failure.
+    Args:
+        cap: OpenCV VideoCapture.
+        target_idx: The frame index to extract.
+        landmarks: List of (frame_index, expected_md5) with distinct MD5s.
+        max_seek_error: Maximum seek drift to test in either direction.
+
+    Returns (frame, seek_error) or (None, 0) on failure.
     """
-    from movie_edition_comparer.algorithms import hash_frame
+    from movie_edition_comparer.algorithms import hash_frame_md5
 
-    cap.set(1, target_idx)  # cv2.CAP_PROP_POS_FRAMES = 1
-    ret, frame = cap.read()
-    if not ret:
-        return None, 0
+    earliest = min(idx for idx, _ in landmarks)
+    latest = max(idx for idx, _ in landmarks)
 
-    if not expected_hash:
-        return frame, 0
+    # Buffer must cover landmarks and target across all possible seek errors
+    buffer_start = min(earliest, target_idx) - max_seek_error
+    buffer_end = max(latest, target_idx) + max_seek_error
+    buffer_start = max(0, buffer_start)
+    read_count = buffer_end - buffer_start + 1
 
-    if hash_frame(frame) == expected_hash:
-        return frame, 0
-
-    # Seek landed on wrong frame — read forward to find the right one
-    for correction in range(1, max_correction + 1):
+    cap.set(1, buffer_start)  # cv2.CAP_PROP_POS_FRAMES = 1
+    frames = []
+    for _ in range(read_count):
         ret, frame = cap.read()
-        if not ret:
-            break
-        if hash_frame(frame) == expected_hash:
-            return frame, correction
+        frames.append(frame if ret else None)
 
-    # Couldn't find it — return the original seek result
-    cap.set(1, target_idx)
-    ret, frame = cap.read()
-    return (frame if ret else None), 0
+    # Try each possible seek error: actual position = buffer_start + error
+    # Frame at read position P is actually frame (buffer_start + error + P)
+    # So landmark L is at read position (L - buffer_start - error)
+    for error in range(-max_seek_error, max_seek_error + 1):
+        all_match = True
+        for landmark_idx, expected_md5 in landmarks:
+            read_pos = landmark_idx - buffer_start - error
+            if read_pos < 0 or read_pos >= len(frames) or frames[read_pos] is None:
+                all_match = False
+                break
+            if hash_frame_md5(frames[read_pos]) != expected_md5:
+                all_match = False
+                break
+        if all_match:
+            target_pos = target_idx - buffer_start - error
+            if 0 <= target_pos < len(frames) and frames[target_pos] is not None:
+                return frames[target_pos], error
+            break
+
+    # Fallback: no anchor found, return unverified frame at expected position
+    fallback_pos = target_idx - buffer_start
+    if 0 <= fallback_pos < len(frames) and frames[fallback_pos] is not None:
+        return frames[fallback_pos], 0
+    return None, 0
 
 
 def extract_frames(
     input_file: str, frame_indices: list[int],
     output_dir: str,
-    expected_hashes: dict[int, str] | None = None,
+    db_path: str | None = None,
+    edition: str | None = None,
 ):
     """Extract frames at the given indices, skipping any that already exist.
 
-    Opens the video once with OpenCV and seeks by frame index. When
-    expected_hashes is provided (mapping frame_index to hash string),
-    verifies each frame and corrects seek errors by reading forward.
+    When db_path and edition are provided, uses MD5-anchored seeking to
+    guarantee correct frame positioning despite HEVC seek inaccuracy.
     """
     import cv2
-    from progress.bar import Bar
 
     os.makedirs(output_dir, exist_ok=True)
-
-    if expected_hashes is None:
-        expected_hashes = {}
 
     # Deduplicate, clamp to zero, and sort for sequential seeking
     unique_frames = sorted(set(max(idx, 0) for idx in frame_indices))
@@ -126,17 +146,43 @@ def extract_frames(
     if not to_extract:
         return
 
+    use_anchoring = db_path is not None and edition is not None
+    if use_anchoring:
+        from movie_edition_comparer.db import fetch_md5_landmarks
+
+    # Suppress HEVC decoder warnings from OpenCV (noisy on every seek)
+    os.environ["OPENCV_LOG_LEVEL"] = "SILENT"
+
+    is_tty = sys.stderr.isatty()
+    total = len(to_extract)
+
     cap = cv2.VideoCapture(input_file)
     try:
-        with Bar("  Extracting", max=len(to_extract)) as bar:
-            for idx in to_extract:
-                frame, _ = _seek_and_verify(
-                    cap, idx, expected_hashes.get(idx),
-                )
-                if frame is not None:
-                    out_path = os.path.join(output_dir, _frame_filename(idx))
-                    cv2.imwrite(out_path, frame)
+        bar = None
+        if is_tty:
+            from progress.bar import Bar
+            bar = Bar("  Extracting", max=total)
+
+        for i, idx in enumerate(to_extract):
+            if use_anchoring:
+                landmarks = fetch_md5_landmarks(db_path, edition, idx)
+                frame, seek_error = _anchored_extract(cap, idx, landmarks)
+            else:
+                cap.set(1, idx)
+                ret, frame = cap.read()
+                frame = frame if ret else None
+                seek_error = 0
+            if frame is not None:
+                out_path = os.path.join(output_dir, _frame_filename(idx))
+                cv2.imwrite(out_path, frame)
+
+            if bar:
                 bar.next()
+            elif (i + 1) % 50 == 0 or i + 1 == total:
+                print(f"  Extracted {i + 1}/{total} (frame {idx}, seek_error={seek_error})")
+
+        if bar:
+            bar.finish()
     finally:
         cap.release()
 

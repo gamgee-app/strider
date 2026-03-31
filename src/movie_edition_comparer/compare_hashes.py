@@ -91,6 +91,9 @@ def run(args):
             frames_dir=args.frames_dir,
             contact_frames=args.contact_frames,
             clips=args.clips,
+            db_path=args.db,
+            edition_a=args.edition_a,
+            edition_b=args.edition_b,
         )
 
     do_trim = not args.no_trim and args.movie_a and args.movie_b

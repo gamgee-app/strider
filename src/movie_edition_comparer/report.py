@@ -129,44 +129,30 @@ def _diff_img_tag(diff_dir: str, idx_a: int, idx_b: int) -> str:
 
 def _collect_frames(
     differences: list[SceneDifference], contact_frames: int,
-) -> tuple[list[int], list[int], dict[int, str], dict[int, str]]:
-    """Collect all frame indices and known hashes for both movies.
+) -> tuple[list[int], list[int]]:
+    """Collect all frame indices needed for both movies.
 
-    Returns (a_frames, b_frames, a_hashes, b_hashes) where the hash
-    dicts map frame_index to expected hash for seek verification.
+    Returns (a_frames, b_frames).
     """
     a_frames: list[int] = []
     b_frames: list[int] = []
-    a_hashes: dict[int, str] = {}
-    b_hashes: dict[int, str] = {}
 
     for diff in differences:
         # Before (boundary match) and After (boundary match)
         a_frames.extend([diff.a_range.start, diff.a_range.end])
         b_frames.extend([diff.b_range.start, diff.b_range.end])
 
-        if diff.start_match:
-            a_hashes[diff.start_match.a.index] = diff.start_match.a.hash
-            b_hashes[diff.start_match.b.index] = diff.start_match.b.hash
-        if diff.end_match:
-            a_hashes[diff.end_match.a.index] = diff.end_match.a.hash
-            b_hashes[diff.end_match.b.index] = diff.end_match.b.hash
-
         # First/Last inner frames
         if diff.first_inner_a:
             a_frames.append(diff.first_inner_a.index)
-            a_hashes[diff.first_inner_a.index] = diff.first_inner_a.hash
         if diff.first_inner_b:
             b_frames.append(diff.first_inner_b.index)
-            b_hashes[diff.first_inner_b.index] = diff.first_inner_b.hash
         if diff.last_inner_a:
             a_frames.append(diff.last_inner_a.index)
-            a_hashes[diff.last_inner_a.index] = diff.last_inner_a.hash
         if diff.last_inner_b:
             b_frames.append(diff.last_inner_b.index)
-            b_hashes[diff.last_inner_b.index] = diff.last_inner_b.hash
 
-        # Contact sheet frames (no hashes available)
+        # Contact sheet frames
         if diff.a_range.inner_count > 0:
             n = min(contact_frames, max(1, diff.a_range.inner_count))
             a_frames.extend(_sample_frames(diff.a_range, n))
@@ -174,7 +160,7 @@ def _collect_frames(
             n = min(contact_frames, max(1, diff.b_range.inner_count))
             b_frames.extend(_sample_frames(diff.b_range, n))
 
-    return a_frames, b_frames, a_hashes, b_hashes
+    return a_frames, b_frames
 
 
 def generate_report(
@@ -185,11 +171,17 @@ def generate_report(
     frames_dir: str = "frames",
     contact_frames: int = 8,
     clips: bool = True,
+    db_path: str | None = None,
+    edition_a: str | None = None,
+    edition_b: str | None = None,
 ):
     """Generate an HTML report referencing extracted frame images.
 
     Frames are extracted to subdirectories under frames_dir, then the HTML
     references them with relative paths. Re-running skips already-extracted frames.
+
+    When db_path and edition names are provided, frame extraction uses
+    MD5-anchored seeking for accurate positioning.
     """
     a_frames_dir = os.path.join(frames_dir, label_a)
     b_frames_dir = os.path.join(frames_dir, label_b)
@@ -197,12 +189,14 @@ def generate_report(
     b_clips_dir = os.path.join(frames_dir, "clips", label_b)
 
     # Collect and extract all needed frames
-    a_frame_indices, b_frame_indices, a_hashes, b_hashes = _collect_frames(differences, contact_frames)
+    a_frame_indices, b_frame_indices = _collect_frames(differences, contact_frames)
 
     print(f"Extracting {label_a} frames...")
-    extract_frames(movie_a, a_frame_indices, a_frames_dir, expected_hashes=a_hashes)
+    extract_frames(movie_a, a_frame_indices, a_frames_dir,
+                   db_path=db_path, edition=edition_a)
     print(f"Extracting {label_b} frames...")
-    extract_frames(movie_b, b_frame_indices, b_frames_dir, expected_hashes=b_hashes)
+    extract_frames(movie_b, b_frame_indices, b_frames_dir,
+                   db_path=db_path, edition=edition_b)
 
     if clips:
         print("Extracting clips...")
@@ -443,7 +437,7 @@ def generate_report(
 </head>
 <body>
   <h1>Edition Comparison Report</h1>
-  <p class="subtitle">{label_a} vs {label_b} &mdash; {len(differences)} differences</p>
+  <p class="subtitle">{label_a} vs {label_b} &mdash; <span id="shown-count">{len(differences)}</span> / {len(differences)} differences</p>
   <div class="controls">
     <label>Sort by:</label>
     <select id="sort-select">
@@ -498,12 +492,16 @@ def generate_report(
 
   function applyFilter() {{
     const active = getActiveTypes();
+    let shown = 0;
     container.querySelectorAll('.diff').forEach(el => {{
       const typeMatch = active.has(el.dataset.type);
       const hd = parseFloat(el.dataset.minHd);
       const hdMatch = hd < 0 || hd <= hammingLimit;
-      el.classList.toggle('hidden', !typeMatch || !hdMatch);
+      const visible = typeMatch && hdMatch;
+      el.classList.toggle('hidden', !visible);
+      if (visible) shown++;
     }});
+    document.getElementById('shown-count').textContent = shown;
   }}
 
   sortSelect.addEventListener('change', applySort);

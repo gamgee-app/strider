@@ -32,6 +32,45 @@ def make_db_fetcher(db_path: str, edition: str) -> HashFetcher:
     return fetcher
 
 
+def fetch_md5_landmarks(
+    db_path: str, edition: str, center: int,
+    min_distinct: int = 5,
+) -> list[tuple[int, str]]:
+    """Find frames near center with at least min_distinct different MD5 hashes.
+
+    Returns list of (frame_index, md5_hash) with one representative per
+    distinct MD5 value, sorted by frame_index.
+    """
+    window = 20
+    with closing(sqlite3.connect(db_path)) as connection:
+        cursor = connection.cursor()
+        while window < 100_000:
+            start = max(0, center - window // 2)
+            end = center + window // 2
+            cursor.execute(
+                f"SELECT frame_index, hash_md5 "
+                f"FROM {FRAME_HASHES_TABLE} "
+                f"WHERE edition = ? AND frame_index >= ? AND frame_index < ? "
+                f"ORDER BY ABS(frame_index - ?)",
+                (edition, start, end, center),
+            )
+            seen: set[str] = set()
+            landmarks: list[tuple[int, str]] = []
+            for idx, md5 in cursor:
+                if md5 not in seen:
+                    seen.add(md5)
+                    landmarks.append((idx, md5))
+                    if len(landmarks) >= min_distinct:
+                        landmarks.sort()
+                        return landmarks
+            window *= 2
+
+    raise ValueError(
+        f"Could not find {min_distinct} distinct MD5 hashes "
+        f"near frame {center} for {edition}"
+    )
+
+
 def read_unique_matches(
     db_path: str, edition_a: str, edition_b: str,
 ) -> list[FrameMatch]:
