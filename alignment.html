@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Boundary Alignment Verification</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  h1 { margin-bottom: 16px; }
+  .controls { display: flex; gap: 6px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; justify-content: center; }
+  .controls button { background: #333; color: #e0e0e0; border: 1px solid #555; border-radius: 4px; padding: 6px 10px; font-size: 0.85em; cursor: pointer; }
+  .controls button.active { border-color: #facc15; color: #facc15; }
+  .controls button:hover { background: #444; }
+  .controls .nav-btn { background: #2a2a2a; }
+  .info { font-family: monospace; font-size: 0.95em; color: #888; margin-bottom: 8px; text-align: center; line-height: 1.6; }
+  .info .edition { color: #facc15; font-weight: bold; }
+  .info .dist { color: #4ade80; font-weight: bold; }
+  .info .case-info { color: #60a5fa; }
+  .viewer { position: relative; width: 100%; max-width: 1200px; cursor: pointer; }
+  .viewer img { width: 100%; aspect-ratio: 2.39 / 1; object-fit: cover; border-radius: 6px; display: block; }
+  .hint { color: #555; font-size: 0.8em; margin-top: 8px; text-align: center; }
+  .confirm-bar { display: flex; gap: 8px; align-items: center; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
+  .confirm-bar button { background: #1a3a1a; color: #4ade80; border: 1px solid #4ade80; border-radius: 4px; padding: 8px 16px; font-size: 0.9em; cursor: pointer; font-weight: bold; }
+  .confirm-bar button:hover { background: #2a4a2a; }
+  .confirm-bar .skip-btn { background: #3a1a1a; color: #f87171; border-color: #f87171; }
+  .confirm-bar .skip-btn:hover { background: #4a2a2a; }
+  .confirmed-list { margin-top: 16px; font-family: monospace; font-size: 0.85em; color: #888; max-width: 800px; width: 100%; }
+  .confirmed-list h3 { color: #aaa; font-size: 0.9em; margin-bottom: 8px; }
+  .confirmed-list .entry { padding: 4px 0; border-bottom: 1px solid #333; cursor: pointer; }
+  .confirmed-list .entry:hover { color: #e0e0e0; }
+  .confirmed-list .entry.confirmed { color: #4ade80; }
+  .confirmed-list .entry.skipped { color: #f87171; }
+  .export-bar { margin-top: 12px; }
+  .export-bar button { background: #1a2a3a; color: #60a5fa; border: 1px solid #60a5fa; border-radius: 4px; padding: 8px 16px; font-size: 0.9em; cursor: pointer; }
+  .export-bar button:hover { background: #2a3a4a; }
+  .export-bar textarea { width: 100%; max-width: 800px; height: 150px; background: #222; color: #e0e0e0; border: 1px solid #555; border-radius: 4px; padding: 8px; font-family: monospace; font-size: 0.85em; margin-top: 8px; }
+</style>
+</head>
+<body>
+  <h1>Boundary Alignment Verification (MD5-anchored)</h1>
+  <div class="controls">
+    <button class="nav-btn" id="btn-prev-case">&laquo; Prev</button>
+    <button class="nav-btn" id="btn-prev">&larr;</button>
+    <button data-offset="-5">-5</button>
+    <button data-offset="-4">-4</button>
+    <button data-offset="-3">-3</button>
+    <button data-offset="-2">-2</button>
+    <button data-offset="-1">-1</button>
+    <button data-offset="0" class="active">0</button>
+    <button data-offset="1">+1</button>
+    <button data-offset="2">+2</button>
+    <button data-offset="3">+3</button>
+    <button data-offset="4">+4</button>
+    <button data-offset="5">+5</button>
+    <button class="nav-btn" id="btn-next">&rarr;</button>
+    <button class="nav-btn" id="btn-next-case">Next &raquo;</button>
+  </div>
+  <div class="hint">Space/Click: toggle edition | ←→: pairs | +/-: offset | [/]: cases | Enter: confirm | Esc: skip</div>
+  <div class="info" id="info"></div>
+  <div class="viewer" id="viewer">
+    <img id="frame" src="">
+  </div>
+  <div class="confirm-bar">
+    <button id="btn-confirm">Confirm offset <span id="confirm-offset">0</span></button>
+    <button id="btn-skip" class="skip-btn">Skip / Unclear</button>
+  </div>
+  <div class="confirmed-list" id="confirmed-list"></div>
+  <div class="export-bar">
+    <button id="btn-export">Export confirmations as JSON</button>
+    <textarea id="export-area" style="display:none"></textarea>
+  </div>
+
+<script>
+var cases = [];
+var NUM_PAIRS = 11;
+var CENTER_PAIR = 5;
+var currentCase = 0;
+var currentOffset = "0";
+var currentPairIdx = CENTER_PAIR;
+var showingTheatrical = true;
+var confirmations = {};
+
+try {
+  var saved = localStorage.getItem('alignment_confirmations');
+  if (saved) confirmations = JSON.parse(saved);
+} catch(e) {}
+
+function saveConfirmations() {
+  localStorage.setItem('alignment_confirmations', JSON.stringify(confirmations));
+}
+
+function framePath(edition, frameIdx) {
+  return "frames/" + edition + "/frame_" + String(frameIdx).padStart(12, "0") + ".png";
+}
+
+function render() {
+  if (!cases.length) return;
+  var c = cases[currentCase];
+  var od = c.offsets[currentOffset];
+  var i = currentPairIdx - CENTER_PAIR;
+  var ti = od.tAnchor + i;
+  var ei = c.eBoundary + i;
+  var dist = od.dists[currentPairIdx];
+
+  var edition = showingTheatrical ? "theatrical" : "extended";
+  var frameIdx = showingTheatrical ? ti : ei;
+  var frameLabel = showingTheatrical ? "t" + ti : "e" + ei;
+
+  document.getElementById("frame").src = framePath(edition, frameIdx);
+
+  var anchor = currentPairIdx === CENTER_PAIR ? " ★" : "";
+  var conf = confirmations[currentCase];
+  var confLabel = conf !== undefined
+    ? (conf === null ? " <span style='color:#f87171'>[skipped]</span>" : " <span style='color:#4ade80'>[confirmed: " + conf + "]</span>")
+    : "";
+
+  document.getElementById("info").innerHTML =
+    "<span class='case-info'>Case " + (currentCase + 1) + "/" + cases.length +
+    " | diff #" + c.diffNum + " " + c.boundary + " | " + c.type +
+    " | t" + c.tBoundary + " e" + c.eBoundary +
+    confLabel + "</span><br>" +
+    "Pair " + (currentPairIdx + 1) + "/" + NUM_PAIRS + anchor + " | " +
+    "<span class='edition'>" + frameLabel + " (" + edition + ")</span> | " +
+    "t" + ti + " ↔ e" + ei + ": <span class='dist'>" + (dist >= 0 ? dist : "?") + "</span> | " +
+    "Offset " + currentOffset;
+
+  document.getElementById("confirm-offset").textContent = currentOffset;
+  document.querySelectorAll("[data-offset]").forEach(function(btn) {
+    btn.classList.toggle("active", btn.dataset.offset === currentOffset);
+  });
+  renderConfirmations();
+}
+
+function renderConfirmations() {
+  var el = document.getElementById("confirmed-list");
+  var confirmed = Object.keys(confirmations).length;
+  var html = "<h3>Confirmations (" + confirmed + "/" + cases.length + ")</h3>";
+  for (var i = 0; i < cases.length; i++) {
+    var c = cases[i];
+    var conf = confirmations[i];
+    var cls = "";
+    var label = "pending";
+    if (conf !== undefined) {
+      if (conf === null) { cls = "skipped"; label = "skipped"; }
+      else { cls = "confirmed"; label = "offset " + conf; }
+    }
+    var highlight = i === currentCase ? " ◀" : "";
+    html += "<div class='entry " + cls + "' data-case='" + i + "'>#" + c.diffNum + " " + c.boundary +
+      " t" + c.tBoundary + " e" + c.eBoundary +
+      " (" + c.type + "): " + label + highlight + "</div>";
+  }
+  el.innerHTML = html;
+  el.querySelectorAll('.entry[data-case]').forEach(function(entry) {
+    entry.addEventListener('click', function() {
+      currentCase = parseInt(entry.dataset.case);
+      currentPairIdx = CENTER_PAIR;
+      currentOffset = "0";
+      render();
+    });
+  });
+}
+
+function confirmOffset() {
+  confirmations[currentCase] = parseInt(currentOffset);
+  saveConfirmations();
+  if (currentCase < cases.length - 1) { currentCase++; currentPairIdx = CENTER_PAIR; currentOffset = "0"; }
+  render();
+}
+
+function skipCase() {
+  confirmations[currentCase] = null;
+  saveConfirmations();
+  if (currentCase < cases.length - 1) { currentCase++; currentPairIdx = CENTER_PAIR; currentOffset = "0"; }
+  render();
+}
+
+function exportConfirmations() {
+  var result = [];
+  for (var i = 0; i < cases.length; i++) {
+    var c = cases[i];
+    var conf = confirmations[i];
+    result.push({ diffNum: c.diffNum, boundary: c.boundary, tBoundary: c.tBoundary, eBoundary: c.eBoundary, type: c.type, confirmedOffset: conf !== undefined ? conf : "pending" });
+  }
+  var area = document.getElementById("export-area");
+  area.style.display = "block";
+  area.value = JSON.stringify(result, null, 2);
+  area.select();
+}
+
+function setOffset(o) { if (cases.length && cases[currentCase].offsets[String(o)] !== undefined) { currentOffset = String(o); render(); } }
+function nextPair() { if (currentPairIdx < NUM_PAIRS - 1) { currentPairIdx++; render(); } }
+function prevPair() { if (currentPairIdx > 0) { currentPairIdx--; render(); } }
+function toggleEdition() { showingTheatrical = !showingTheatrical; render(); }
+function nextCase() { if (currentCase < cases.length - 1) { currentCase++; currentPairIdx = CENTER_PAIR; currentOffset = "0"; render(); } }
+function prevCase() { if (currentCase > 0) { currentCase--; currentPairIdx = CENTER_PAIR; currentOffset = "0"; render(); } }
+
+document.getElementById("btn-prev").addEventListener("click", prevPair);
+document.getElementById("btn-next").addEventListener("click", nextPair);
+document.getElementById("btn-prev-case").addEventListener("click", prevCase);
+document.getElementById("btn-next-case").addEventListener("click", nextCase);
+document.getElementById("viewer").addEventListener("click", toggleEdition);
+document.getElementById("btn-confirm").addEventListener("click", confirmOffset);
+document.getElementById("btn-skip").addEventListener("click", skipCase);
+document.getElementById("btn-export").addEventListener("click", exportConfirmations);
+document.querySelectorAll("[data-offset]").forEach(function(btn) {
+  btn.addEventListener("click", function() { setOffset(parseInt(btn.dataset.offset)); });
+});
+
+document.addEventListener("keydown", function(e) {
+  if (e.key === "ArrowLeft") prevPair();
+  else if (e.key === "ArrowRight") nextPair();
+  else if (e.key === " ") { e.preventDefault(); toggleEdition(); }
+  else if (e.key === "=" || e.key === "+") setOffset(parseInt(currentOffset) + 1);
+  else if (e.key === "-") setOffset(parseInt(currentOffset) - 1);
+  else if (e.key === "[") prevCase();
+  else if (e.key === "]") nextCase();
+  else if (e.key === "Enter") confirmOffset();
+  else if (e.key === "Escape") skipCase();
+});
+
+fetch("alignment_data.json").then(function(r) { return r.json(); }).then(function(data) { cases = data; render(); });
+</script>
+</body>
+</html>
