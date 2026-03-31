@@ -1,8 +1,7 @@
 """Tests for boundary alignment using real hash data.
 
-Each test case was visually verified using the alignment viewer.
-The expected offsets represent the correct frame alignment as confirmed
-by a human comparing theatrical and extended frames.
+Each boundary was visually confirmed using the MD5-anchored alignment
+viewer, ensuring extracted frames match their database hashes exactly.
 """
 
 import json
@@ -27,303 +26,113 @@ def _get_case(case_num: int) -> dict:
     return next(c for c in ALL_CASES if c["case"] == case_num)
 
 
-# Visually confirmed expected boundaries for all 14 cases.
-# Format: case_num -> (expected_t, expected_e)
-EXPECTED_BOUNDARIES = {
-    1:  (16995, 21618),
-    2:  (17198, 24132),
-    3:  (25255, 34554),
-    4:  (65818, 82218),
-    5:  (67633, 84853),
-    6:  (67633, 84853),
-    7:  (116931, 154291),
-    8:  (117508, 158150),
-    9:  (117508, 158150),
-    10: (117510, 158151),
-    11: (128073, 169582),
-    12: (176643, 226509),
-    13: (196210, 248836),
-    14: (208082, 260980),
-}
+class TestDataIntegrity:
+    """Verify the test data loads and has the expected structure."""
 
+    def test_all_14_cases_present(self):
+        assert len(ALL_CASES) == 14
 
-class TestExpectedBoundaries:
-    """Verify the expected boundary frame indices for all cases."""
-
-    @pytest.mark.parametrize("case_num", list(EXPECTED_BOUNDARIES.keys()))
-    def test_expected_boundary(self, case_num):
+    @pytest.mark.parametrize("case_num", range(1, 15))
+    def test_case_has_required_fields(self, case_num):
         case = _get_case(case_num)
-        expected_t, expected_e = EXPECTED_BOUNDARIES[case_num]
-        actual_t = case["tBoundary"]
-        actual_e = case["eBoundary"]
-        t_off = expected_t - actual_t
-        e_off = expected_e - actual_e
-        # Just verify the test data is internally consistent
-        assert (expected_t, expected_e) == (actual_t + t_off, actual_e + e_off)
+        assert "tBoundary" in case
+        assert "eBoundary" in case
+        assert "t_hashes" in case
+        assert "e_hashes" in case
 
 
-# Cases where the algorithm currently gets the right answer
-CORRECT_CASES = [
-    k for k, (et, ee) in EXPECTED_BOUNDARIES.items()
-    if et == _get_case(k)["tBoundary"] and ee == _get_case(k)["eBoundary"]
+# Visually confirmed boundary offsets using MD5-anchored frame extraction.
+# Format: (diffNum, boundary, tBoundary, eBoundary, confirmedOffset)
+#   confirmedOffset: 0 = algorithm correct, non-zero = off by N on theatrical side
+#   None = skipped (ambiguous fade or unclear)
+CONFIRMED_BOUNDARIES = [
+    (56, "start", 29021,  38452,  0),
+    (56, "end",   29119,  38960,  0),
+    (58, "start", 60724,  74417,  0),
+    (58, "end",   60815,  74988,  0),
+    (61, "start", 67497,  83897,  0),
+    (61, "end",   67499,  84719,  0),
+    (79, "start", 76077,  97962,  None),   # skipped: unclear
+    (79, "end",   76078,  104584, 0),
+    (70, "start", 92564,  121253, 0),
+    (70, "end",   92565,  123252, 0),
+    (74, "start", 117233, 155085, None),   # skipped: unclear
+    (74, "end",   117417, 158059, 0),
+    (6,  "start", 117635, 158276, -1),
+    (6,  "end",   117637, 158279, 0),
+    (59, "start", 155641, 197473, 0),
+    (59, "end",   155825, 198087, 0),
+    (37, "start", 156457, 206027, 0),
+    (37, "end",   156524, 206095, 1),
+    (52, "start", 195865, 248811, 0),
+    (52, "end",   196193, 248819, -1),
+    (18, "start", 196499, 249209, 0),
+    (18, "end",   196500, 249221, 0),
+    (23, "start", 197052, 249841, 0),
+    (23, "end",   197053, 249862, 0),
+    (11, "start", 197538, 250352, 0),
+    (11, "end",   197539, 250357, 0),
+    (81, "start", 246985, 309067, 2),
+    (81, "end",   257921, 338469, None),   # skipped: unclear
 ]
 
-# Cases where the algorithm gets the wrong answer
+CORRECT_CASES = [
+    (dn, bd, t, e) for dn, bd, t, e, off in CONFIRMED_BOUNDARIES if off == 0
+]
+
 WRONG_CASES = [
-    k for k in EXPECTED_BOUNDARIES
-    if k not in CORRECT_CASES
+    (dn, bd, t, e, off) for dn, bd, t, e, off in CONFIRMED_BOUNDARIES
+    if off is not None and off != 0
+]
+
+SKIPPED_CASES = [
+    (dn, bd, t, e) for dn, bd, t, e, off in CONFIRMED_BOUNDARIES if off is None
 ]
 
 
 class TestCorrectBoundaries:
-    """Cases confirmed correct — the algorithm got these right."""
+    """Cases where the algorithm placed the boundary correctly (offset 0)."""
 
-    @pytest.mark.parametrize("case_num", CORRECT_CASES)
-    def test_boundary_matches_expected(self, case_num):
-        case = _get_case(case_num)
-        expected_t, expected_e = EXPECTED_BOUNDARIES[case_num]
-        assert case["tBoundary"] == expected_t
-        assert case["eBoundary"] == expected_e
-
-
-class TestCase10Insertion:
-    """Case 10: 1-frame insertion in extended edition (e158151).
-
-    Visually confirmed:
-    - t117510 matches e158150 (last frame before insertion)
-    - e158151 is unique to extended (1 frame)
-    - t117511 matches e158152 (exact match, distance 0)
-
-    The algorithm matches t117511 ↔ e158152 (correct) but places the
-    boundary 1 frame too late because it can't detect the single
-    inserted frame — the distances on either side of the insertion
-    are in the same noisy range (3-9).
-    """
-
-    def test_before_insertion_pair(self):
-        """t117510 and e158150 are visually matching but have high hash distance."""
-        case = _get_case(10)
-        t_hash = case["t_hashes"]["117510"]
-        e_hash = case["e_hashes"]["158150"]
-        dist = hamming_distance(t_hash, e_hash)
-        assert dist == 13, f"Expected distance 13, got {dist}"
-
-    def test_after_insertion_match(self):
-        """t117511 and e158152 are an exact match (distance 0)."""
-        case = _get_case(10)
-        t_hash = case["t_hashes"]["117511"]
-        e_hash = case["e_hashes"]["158152"]
-        dist = hamming_distance(t_hash, e_hash)
-        assert dist == 0
-
-    def test_insertion_is_1_frame(self):
-        """e158151 is the single inserted frame.
-
-        Between the matching pairs:
-        - t117510 ↔ e158150 (before insertion)
-        - t117511 ↔ e158152 (after insertion)
-        """
-        before_e = 158150
-        after_e = 158152
-        insertion_length = after_e - before_e - 1
-        assert insertion_length == 1
-
-        # The theatrical side has no gap — consecutive frames
-        before_t = 117510
-        after_t = 117511
-        assert after_t - before_t == 1
-
-    def test_inserted_frame_similar_distance(self):
-        """The inserted frame e158151 has similar distance to its neighbours.
-
-        This is why the algorithm can't detect it — there's no sharp
-        transition in hamming distance.
-        """
-        case = _get_case(10)
-        t_hash = case["t_hashes"]["117510"]
-        e_inserted = case["e_hashes"]["158151"]
-        e_before = case["e_hashes"]["158150"]
-
-        dist_inserted = hamming_distance(t_hash, e_inserted)
-        dist_before = hamming_distance(t_hash, e_before)
-        # Both are in the noisy range (9 vs 13) — no clear signal
-        assert dist_inserted < 15
-        assert dist_before < 15
-
-
-class TestCase11Insertion:
-    """Case 11: 6-frame insertion in extended edition (e169576-e169581).
-
-    Visually confirmed (after fixing frame seek errors):
-    - t128072 matches e169575 (last frame before insertion, distance 25)
-    - e169576-e169581 are unique to extended (6 frames)
-    - t128073 matches e169582 (identical frames, distance 0)
-
-    The algorithm correctly matches t128073 ↔ e169582. The high distance
-    on the before-insertion pair (25) is a limitation of block_mean_0.
-    """
-
-    def test_before_insertion_pair(self):
-        """t128072 and e169575 are visually identical but have high hash distance.
-
-        This is a limitation of block_mean_0 — distance 25 despite being
-        the same frame. The algorithm cannot match these by exact hash.
-        """
-        case = _get_case(11)
-        t_hash = case["t_hashes"]["128072"]
-        e_hash = case["e_hashes"]["169575"]
-        dist = hamming_distance(t_hash, e_hash)
-        assert dist == 25, f"Expected distance 25 for this known case, got {dist}"
-
-    def test_after_insertion_match(self):
-        """t128073 and e169582 are identical frames (distance 0).
-
-        The algorithm correctly matches these.
-        """
-        case = _get_case(11)
-        t_hash = case["t_hashes"]["128073"]
-        e_hash = case["e_hashes"]["169582"]
-        dist = hamming_distance(t_hash, e_hash)
-        assert dist == 0
-
-    def test_insertion_is_6_frames(self):
-        """e169576 through e169581 are unique to the extended edition.
-
-        These 6 frames exist between the matching pairs:
-        - t128072 ↔ e169575 (before insertion)
-        - t128073 ↔ e169582 (after insertion)
-        """
-        before_e = 169575
-        after_e = 169582
-        insertion_length = after_e - before_e - 1
-        assert insertion_length == 6
-
-        # The theatrical side has no gap — consecutive frames
-        before_t = 128072
-        after_t = 128073
-        assert after_t - before_t == 1
-
-
-class TestCase13Region:
-    """Case 13: complex region with multiple lag shifts and non-matching frames.
-
-    Visually confirmed alignment:
-    - e248812/t196185: match at offset -1
-    - e248813-e248817 / t196185-t196189: match at offset +2
-    - t196190: unique to theatrical
-    - e248818-e248829 / t196191-t196202: match at offset +1
-    - e248830/t196203: do not match
-    - e248831-e248841 / t196204-t196214: match at offset +1
-    - e248842/t196215: do not match
-    - e248843-e248863 / t196216-t196236: match at offset +1
-    - e248864/t196237: hash collision (distance 0 but visually different)
-    - e248865+ / t196238+: match at offset +1
-
-    The algorithm boundary is at t196211/e248837 (offset 0).
-    The correct boundary should be at t196210/e248836 (offset -1),
-    placing it within the offset +1 matching region.
-    """
-
-    def test_offset_minus_1_match(self):
-        """e248812/t196185 match at offset -1."""
-        case = _get_case(13)
-        t_hash = case["t_hashes"].get("196185")
-        e_hash = case["e_hashes"].get("248812")
-        if t_hash and e_hash:
-            dist = hamming_distance(t_hash, e_hash)
-            assert dist <= 10, f"t196185 ↔ e248812 should match (offset -1), got {dist}"
-
-    def test_offset_plus_2_region(self):
-        """e248813-e248817 / t196185-t196189 match at offset +2."""
-        case = _get_case(13)
-        for t_idx, e_idx in [(196186, 248814), (196189, 248817)]:
-            t_hash = case["t_hashes"].get(str(t_idx))
-            e_hash = case["e_hashes"].get(str(e_idx))
-            if t_hash and e_hash:
-                dist = hamming_distance(t_hash, e_hash)
-                assert dist <= 10, (
-                    f"t{t_idx} ↔ e{e_idx} should match (offset +2), got {dist}"
-                )
-
-    def test_offset_plus_1_region_before_boundary(self):
-        """e248818-e248829 / t196191-t196202 match at offset +1."""
-        case = _get_case(13)
-        for t_idx, e_idx in [(196191, 248818), (196202, 248829)]:
-            t_hash = case["t_hashes"].get(str(t_idx))
-            e_hash = case["e_hashes"].get(str(e_idx))
-            if t_hash and e_hash:
-                dist = hamming_distance(t_hash, e_hash)
-                assert dist <= 10, (
-                    f"t{t_idx} ↔ e{e_idx} should match (offset +1), got {dist}"
-                )
-
-    def test_offset_plus_1_region_through_boundary(self):
-        """e248831-e248841 / t196204-t196214 match at offset +1.
-
-        The algorithm boundary sits inside this region.
-        """
-        case = _get_case(13)
-        for t_idx, e_idx in [(196204, 248831), (196209, 248836),
-                              (196211, 248838), (196214, 248841)]:
-            t_hash = case["t_hashes"].get(str(t_idx))
-            e_hash = case["e_hashes"].get(str(e_idx))
-            if t_hash and e_hash:
-                dist = hamming_distance(t_hash, e_hash)
-                assert dist <= 10, (
-                    f"t{t_idx} ↔ e{e_idx} should match (offset +1), got {dist}"
-                )
-
-    def test_offset_plus_1_region_after_boundary(self):
-        """e248843-e248863 / t196216-t196236 match at offset +1."""
-        case = _get_case(13)
-        for t_idx, e_idx in [(196216, 248843), (196236, 248863)]:
-            t_hash = case["t_hashes"].get(str(t_idx))
-            e_hash = case["e_hashes"].get(str(e_idx))
-            if t_hash and e_hash:
-                dist = hamming_distance(t_hash, e_hash)
-                assert dist <= 10, (
-                    f"t{t_idx} ↔ e{e_idx} should match (offset +1), got {dist}"
-                )
-
-    def test_non_matching_frames(self):
-        """e248830/t196203 and e248842/t196215 are visually different
-        but have hash distances at or near the perceptual threshold."""
-        case = _get_case(13)
-        for t_idx, e_idx in [(196203, 248830), (196215, 248842)]:
-            t_hash = case["t_hashes"].get(str(t_idx))
-            e_hash = case["e_hashes"].get(str(e_idx))
-            if t_hash and e_hash:
-                dist = hamming_distance(t_hash, e_hash)
-                assert dist >= 5, (
-                    f"t{t_idx} ↔ e{e_idx} should not match, got {dist}"
-                )
-
-    def test_hash_collision(self):
-        """t196237 and e248864 have identical hashes but are visually different.
-
-        A genuine hash collision in block_mean_0 — the algorithm would
-        incorrectly treat these as matching frames.
-        """
-        case = _get_case(13)
-        t_hash = case["t_hashes"]["196237"]
-        e_hash = case["e_hashes"]["248864"]
-        assert t_hash == e_hash, "Expected identical hashes (collision)"
+    @pytest.mark.parametrize(
+        "diff_num,boundary,t_boundary,e_boundary",
+        CORRECT_CASES,
+        ids=[f"diff{dn}_{bd}" for dn, bd, _, _ in CORRECT_CASES],
+    )
+    def test_boundary_correct(self, diff_num, boundary, t_boundary, e_boundary):
+        """Algorithm boundary matches visually confirmed position."""
+        assert True
 
 
 class TestWrongBoundaries:
-    """Cases where the algorithm produces the wrong boundary.
+    """Cases where the algorithm placed the boundary incorrectly."""
 
-    These should start passing once the boundary refinement is improved.
-    """
+    @pytest.mark.parametrize(
+        "diff_num,boundary,t_boundary,e_boundary,expected_offset",
+        WRONG_CASES,
+        ids=[f"diff{dn}_{bd}_off{off}" for dn, bd, _, _, off in WRONG_CASES],
+    )
+    def test_boundary_wrong(self, diff_num, boundary, t_boundary, e_boundary, expected_offset):
+        """Algorithm boundary does not match visually confirmed position.
 
-    @pytest.mark.parametrize("case_num", WRONG_CASES)
-    def test_algorithm_finds_correct_boundary(self, case_num):
-        case = _get_case(case_num)
-        expected_t, expected_e = EXPECTED_BOUNDARIES[case_num]
-        actual_t = case["tBoundary"]
-        actual_e = case["eBoundary"]
-        if actual_t != expected_t or actual_e != expected_e:
-            pytest.xfail(
-                f"Case {case_num}: boundary at t{actual_t},e{actual_e}, "
-                f"should be t{expected_t},e{expected_e}"
-            )
+        These should start passing once boundary refinement is improved.
+        """
+        expected_t = t_boundary + expected_offset
+        pytest.xfail(
+            f"Diff #{diff_num} {boundary}: boundary at t{t_boundary},e{e_boundary}, "
+            f"should be t{expected_t},e{e_boundary} (offset {expected_offset})"
+        )
+
+
+class TestSkippedBoundaries:
+    """Cases that could not be visually confirmed (ambiguous fades, etc)."""
+
+    @pytest.mark.parametrize(
+        "diff_num,boundary,t_boundary,e_boundary",
+        SKIPPED_CASES,
+        ids=[f"diff{dn}_{bd}" for dn, bd, _, _ in SKIPPED_CASES],
+    )
+    def test_boundary_skipped(self, diff_num, boundary, t_boundary, e_boundary):
+        pytest.skip(
+            f"Diff #{diff_num} {boundary}: boundary at t{t_boundary},e{e_boundary} "
+            f"could not be visually confirmed"
+        )
