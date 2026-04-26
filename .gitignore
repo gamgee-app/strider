@@ -6,3 +6,5 @@ __pycache__/
 *.pyc
 .coverage
 .idea/
+report.html
+alignment_data.json

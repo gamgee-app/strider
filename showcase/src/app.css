@@ -1,0 +1,275 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background: #0a0a0a;
+  color: #e0e0e0;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Landing page — full-screen three-panel layout */
+.landing-fullscreen {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.film-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  height: 100%;
+}
+
+.film-panel {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  display: block;
+}
+
+.film-panel-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.6s ease, filter 0.4s ease;
+  filter: brightness(0.85);
+}
+
+.film-panel:hover .film-panel-bg {
+  transform: scale(1.03);
+  filter: brightness(1);
+}
+
+.film-panel-arrow {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.film-panel:hover .film-panel-arrow {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Film page */
+.film-page {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.film-page[data-film="fellowship"] {
+  background: linear-gradient(180deg, #2a1e08 0%, #120e04 60%, #0a0a0a 100%);
+}
+
+.film-page[data-film="two_towers"] {
+  background: linear-gradient(180deg, #081020 0%, #040810 60%, #0a0a0a 100%);
+}
+
+.film-page[data-film="return_of_the_king"] {
+  background: linear-gradient(180deg, #2a0c04 0%, #120604 60%, #0a0a0a 100%);
+}
+
+.film-header {
+  grid-column: 1 / -1;
+  padding: 16px 24px;
+  border-bottom: 1px solid #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.film-header a {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.film-header a:hover {
+  color: #c8a96e;
+}
+
+.film-header h1 {
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: #c8a96e;
+}
+
+.film-header .diff-count {
+  color: #555;
+  font-size: 0.85rem;
+  margin-left: auto;
+}
+
+/* Timeline horizontal */
+.timeline-horizontal {
+  position: relative;
+  border-top: 1px solid #1a1a1a;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.chapter-label {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #666;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.chapter-label-top {
+  bottom: 148px;
+}
+
+.chapter-label-bottom {
+  bottom: 12px;
+}
+
+.timeline-horizontal::-webkit-scrollbar {
+  display: none;
+}
+
+.timeline-svg-h {
+  height: 100%;
+  min-height: 170px;
+}
+
+.timeline-mark {
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.timeline-mark:hover {
+  opacity: 1 !important;
+}
+
+/* Detail panel */
+.detail-panel {
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.detail-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #444;
+  font-size: 0.9rem;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.detail-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.detail-col-header {
+  margin-bottom: 16px;
+}
+
+.detail-col-header dt {
+  color: #666;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.detail-col-header dd {
+  color: #ccc;
+  font-size: 0.85rem;
+}
+
+.detail-col-header .chapter {
+  color: #666;
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.detail-hero {
+  width: 100%;
+  border-radius: 6px;
+  aspect-ratio: 2.39 / 1;
+  object-fit: cover;
+  background: #111;
+}
+
+.detail-hero-empty {
+  aspect-ratio: 2.39 / 1;
+}
+
+.samples-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 8px;
+}
+
+.samples-grid img {
+  width: 100%;
+  border-radius: 4px;
+  aspect-ratio: 2.39 / 1;
+  object-fit: cover;
+  background: #111;
+}
+
+.reorder-note {
+  color: #60a5fa;
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  background: #0d1520;
+  border-radius: 6px;
+  border: 1px solid #1a2a3a;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
