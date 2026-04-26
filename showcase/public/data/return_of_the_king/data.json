@@ -1,0 +1,2647 @@
+{
+  "film": {
+    "slug": "return_of_the_king",
+    "title": "The Return of the King",
+    "year": 2003,
+    "fps": 23.976216,
+    "theatrical_frames": 289194,
+    "extended_frames": 378598
+  },
+  "chapters": {
+    "theatrical": [
+      {
+        "start_seconds": 0.0,
+        "title": "The Finding of the Ring"
+      },
+      {
+        "start_seconds": 373.54,
+        "title": "Journey to the Cross-roads"
+      },
+      {
+        "start_seconds": 550.592,
+        "title": "The Road to Isengard"
+      },
+      {
+        "start_seconds": 728.353,
+        "title": "Return to Edoras"
+      },
+      {
+        "start_seconds": 910.493,
+        "title": "Gollum's Villainy"
+      },
+      {
+        "start_seconds": 1149.69,
+        "title": "The Palantir"
+      },
+      {
+        "start_seconds": 1603.56,
+        "title": "Arwen's Vision"
+      },
+      {
+        "start_seconds": 1779.695,
+        "title": "The Reforging of Narsil"
+      },
+      {
+        "start_seconds": 1899.898,
+        "title": "Minas Tirith"
+      },
+      {
+        "start_seconds": 2233.356,
+        "title": "\"The Deep Breath Before the Plunge\""
+      },
+      {
+        "start_seconds": 2390.638,
+        "title": "Minas Morgul"
+      },
+      {
+        "start_seconds": 2625.832,
+        "title": "\"The Board is Set...\""
+      },
+      {
+        "start_seconds": 2661.242,
+        "title": "Osgiliath Invaded"
+      },
+      {
+        "start_seconds": 2798.212,
+        "title": "The Lighting of the Beacons"
+      },
+      {
+        "start_seconds": 2961.333,
+        "title": "Theoden's Decision"
+      },
+      {
+        "start_seconds": 3113.277,
+        "title": "The Fall of Osgiliath"
+      },
+      {
+        "start_seconds": 3369.95,
+        "title": "The Stairs of Cirith Ungol"
+      },
+      {
+        "start_seconds": 3489.778,
+        "title": "Allegiance to Denethor"
+      },
+      {
+        "start_seconds": 3671.209,
+        "title": "The Parting of Sam and Frodo"
+      },
+      {
+        "start_seconds": 3990.111,
+        "title": "The Sacrifice of Faramir"
+      },
+      {
+        "start_seconds": 4271.809,
+        "title": "Marshalling at Dunharrow"
+      },
+      {
+        "start_seconds": 4485.856,
+        "title": "Anduril - Flame of the West"
+      },
+      {
+        "start_seconds": 4767.513,
+        "title": "Aragorn Takes the Paths of the Dead"
+      },
+      {
+        "start_seconds": 4915.828,
+        "title": "\"No More Despair\""
+      },
+      {
+        "start_seconds": 4999.036,
+        "title": "Dwimorberg - The Haunted Mountain"
+      },
+      {
+        "start_seconds": 5119.865,
+        "title": "The Muster of Rohan"
+      },
+      {
+        "start_seconds": 5225.429,
+        "title": "The King of the Dead"
+      },
+      {
+        "start_seconds": 5399.352,
+        "title": "The Siege of Gondor"
+      },
+      {
+        "start_seconds": 5843.588,
+        "title": "Shelob's Lair"
+      },
+      {
+        "start_seconds": 6392.094,
+        "title": "Grond - The Hammer of the Underworld"
+      },
+      {
+        "start_seconds": 6428.464,
+        "title": "The Tomb of the Stewards"
+      },
+      {
+        "start_seconds": 6463.54,
+        "title": "Breaking the Gate of Gondor"
+      },
+      {
+        "start_seconds": 6530.357,
+        "title": "The Choices of Master Samwise"
+      },
+      {
+        "start_seconds": 6892.094,
+        "title": "Denethor's Madness"
+      },
+      {
+        "start_seconds": 6957.409,
+        "title": "The Ride of the Rohirrim"
+      },
+      {
+        "start_seconds": 7293.328,
+        "title": "The Pyre of Denethor"
+      },
+      {
+        "start_seconds": 7409.152,
+        "title": "The Battle of Pelennor Fields"
+      },
+      {
+        "start_seconds": 7640.216,
+        "title": "\"A Far Green Country\""
+      },
+      {
+        "start_seconds": 7730.64,
+        "title": "The Nazugl and His Prey"
+      },
+      {
+        "start_seconds": 7834.66,
+        "title": "The Black Ships"
+      },
+      {
+        "start_seconds": 7889.006,
+        "title": "Shieldmaiden of Rohan"
+      },
+      {
+        "start_seconds": 7940.349,
+        "title": "Victory at Minas Tirith"
+      },
+      {
+        "start_seconds": 8061.345,
+        "title": "The Passing of Theoden"
+      },
+      {
+        "start_seconds": 8187.554,
+        "title": "Oaths Fulfilled"
+      },
+      {
+        "start_seconds": 8294.995,
+        "title": "The Tower of Cirith Ungol"
+      },
+      {
+        "start_seconds": 8681.381,
+        "title": "The Last Debate"
+      },
+      {
+        "start_seconds": 8795.662,
+        "title": "The Land of Shadow"
+      },
+      {
+        "start_seconds": 8978.511,
+        "title": "The Black Gate Opens"
+      },
+      {
+        "start_seconds": 9253.578,
+        "title": "\"I Can't Carry It for You... But I Can Carry You\""
+      },
+      {
+        "start_seconds": 9385.876,
+        "title": "The Last Move"
+      },
+      {
+        "start_seconds": 9449.482,
+        "title": "Mount Doom"
+      },
+      {
+        "start_seconds": 9542.158,
+        "title": "\"The Eagles are Coming!\""
+      },
+      {
+        "start_seconds": 9576.192,
+        "title": "The Crack of Doom"
+      },
+      {
+        "start_seconds": 9914.738,
+        "title": "Sauron Defeated"
+      },
+      {
+        "start_seconds": 10048.121,
+        "title": "The End of All Things"
+      },
+      {
+        "start_seconds": 10258.373,
+        "title": "The Fellowship Reunited"
+      },
+      {
+        "start_seconds": 10401.433,
+        "title": "The Return of the King"
+      },
+      {
+        "start_seconds": 10693.308,
+        "title": "Homeward Bound"
+      },
+      {
+        "start_seconds": 10975.173,
+        "title": "The Grey Havens"
+      },
+      {
+        "start_seconds": 11532.521,
+        "title": "End Credits"
+      }
+    ],
+    "extended": [
+      {
+        "start_seconds": 0.0,
+        "title": "The Finding of the Ring"
+      },
+      {
+        "start_seconds": 384.301,
+        "title": "Journey to the Cross-roads"
+      },
+      {
+        "start_seconds": 561.352,
+        "title": "The Road to Isengard"
+      },
+      {
+        "start_seconds": 681.806,
+        "title": "The Voice of Saruman"
+      },
+      {
+        "start_seconds": 1103.269,
+        "title": "Return to Edoras"
+      },
+      {
+        "start_seconds": 1384.967,
+        "title": "Gollum's Villainy"
+      },
+      {
+        "start_seconds": 1623.288,
+        "title": "Eowyn's Dream"
+      },
+      {
+        "start_seconds": 1740.656,
+        "title": "The Palantir"
+      },
+      {
+        "start_seconds": 2226.391,
+        "title": "Arwen's Vision"
+      },
+      {
+        "start_seconds": 2402.525,
+        "title": "The Reforging of Narsil"
+      },
+      {
+        "start_seconds": 2522.729,
+        "title": "Minas Tirith"
+      },
+      {
+        "start_seconds": 2872.161,
+        "title": "The Decline of Gondor"
+      },
+      {
+        "start_seconds": 3018.599,
+        "title": "Cross-roads of the Fallen King"
+      },
+      {
+        "start_seconds": 3138.719,
+        "title": "\"The Deep Breath Before the Plunge\""
+      },
+      {
+        "start_seconds": 3335.29,
+        "title": "Minas Morgul"
+      },
+      {
+        "start_seconds": 3576.364,
+        "title": "Sam's Warning"
+      },
+      {
+        "start_seconds": 3623.662,
+        "title": "Pippin's Task"
+      },
+      {
+        "start_seconds": 3650.564,
+        "title": "Osgiliath Invaded"
+      },
+      {
+        "start_seconds": 3870.075,
+        "title": "The Lighting of the Beacons"
+      },
+      {
+        "start_seconds": 4035.823,
+        "title": "Theoden's Decision"
+      },
+      {
+        "start_seconds": 4235.273,
+        "title": "The Fall of Osgiliath"
+      },
+      {
+        "start_seconds": 4494.782,
+        "title": "The Wizard's Pupil"
+      },
+      {
+        "start_seconds": 4641.929,
+        "title": "The Stairs of Cirith Ungol"
+      },
+      {
+        "start_seconds": 4761.757,
+        "title": "\"Courage is the Best Defense\""
+      },
+      {
+        "start_seconds": 4801.046,
+        "title": "Peregrin of the Tower Guard"
+      },
+      {
+        "start_seconds": 4886.757,
+        "title": "Allegiance to Denethor"
+      },
+      {
+        "start_seconds": 5028.899,
+        "title": "The Parting of Sam and Frodo"
+      },
+      {
+        "start_seconds": 5347.801,
+        "title": "The Sacrifice of Faramir"
+      },
+      {
+        "start_seconds": 5637.549,
+        "title": "Marshalling at Dunharrow"
+      },
+      {
+        "start_seconds": 5888.007,
+        "title": "Anduril - Flame of the West"
+      },
+      {
+        "start_seconds": 6169.663,
+        "title": "Aragorn Takes the Paths of the Dead"
+      },
+      {
+        "start_seconds": 6334.203,
+        "title": "\"No More Despair\""
+      },
+      {
+        "start_seconds": 6417.411,
+        "title": "Dwimorberg - The Haunted Mountain"
+      },
+      {
+        "start_seconds": 6564.391,
+        "title": "The Muster of Rohan"
+      },
+      {
+        "start_seconds": 6669.955,
+        "title": "The Paths of the Dead"
+      },
+      {
+        "start_seconds": 7119.404,
+        "title": "The Siege of Gondor"
+      },
+      {
+        "start_seconds": 7655.231,
+        "title": "The Corsairs of Umbar"
+      },
+      {
+        "start_seconds": 7716.709,
+        "title": "Shelob's Lair"
+      },
+      {
+        "start_seconds": 8264.339,
+        "title": "Merry's Simple Courage"
+      },
+      {
+        "start_seconds": 8374.658,
+        "title": "Grond - The Hammer of the Underworld"
+      },
+      {
+        "start_seconds": 8411.028,
+        "title": "The Tomb of the Stewards"
+      },
+      {
+        "start_seconds": 8504.663,
+        "title": "Breaking the Gate of Gondor"
+      },
+      {
+        "start_seconds": 8571.48,
+        "title": "The Choices of Master Samwise"
+      },
+      {
+        "start_seconds": 8933.216,
+        "title": "Denethor's Madness"
+      },
+      {
+        "start_seconds": 8998.531,
+        "title": "The Witch King's Hour"
+      },
+      {
+        "start_seconds": 9143.551,
+        "title": "The Ride of the Rohirrim"
+      },
+      {
+        "start_seconds": 9397.972,
+        "title": "The Pyre of Denethor"
+      },
+      {
+        "start_seconds": 9525.057,
+        "title": "The Battle of Pelennor Fields"
+      },
+      {
+        "start_seconds": 9820.603,
+        "title": "\"A Far Green Country\""
+      },
+      {
+        "start_seconds": 9911.026,
+        "title": "The Nazugl and His Prey"
+      },
+      {
+        "start_seconds": 10016.798,
+        "title": "The Black Ships"
+      },
+      {
+        "start_seconds": 10069.393,
+        "title": "Shieldmaiden of Rohan"
+      },
+      {
+        "start_seconds": 10113.645,
+        "title": "Victory at Minas Tirith"
+      },
+      {
+        "start_seconds": 10269.342,
+        "title": "The Passing of Theoden"
+      },
+      {
+        "start_seconds": 10392.048,
+        "title": "Oaths Fulfilled"
+      },
+      {
+        "start_seconds": 10458.99,
+        "title": "The Houses of Healing"
+      },
+      {
+        "start_seconds": 10595.001,
+        "title": "Pippin Looks After Merry"
+      },
+      {
+        "start_seconds": 10647.053,
+        "title": "The Tower of Cirith Ungol"
+      },
+      {
+        "start_seconds": 11062.969,
+        "title": "The Last Debate"
+      },
+      {
+        "start_seconds": 11165.321,
+        "title": "Aragorn Masters the Palantir"
+      },
+      {
+        "start_seconds": 11254.41,
+        "title": "The Captain and the White Lady"
+      },
+      {
+        "start_seconds": 11304.543,
+        "title": "In the Company of Orcs"
+      },
+      {
+        "start_seconds": 11526.014,
+        "title": "The Land of Shadow"
+      },
+      {
+        "start_seconds": 11777.641,
+        "title": "The Mouth of Sauron"
+      },
+      {
+        "start_seconds": 11973.545,
+        "title": "The Black Gate Opens"
+      },
+      {
+        "start_seconds": 12187.342,
+        "title": "\"I Can't Carry It for You... But I Can Carry You\""
+      },
+      {
+        "start_seconds": 12319.641,
+        "title": "The Last Move"
+      },
+      {
+        "start_seconds": 12383.246,
+        "title": "Mount Doom"
+      },
+      {
+        "start_seconds": 12499.32,
+        "title": "\"The Eagles are Coming!\""
+      },
+      {
+        "start_seconds": 12533.354,
+        "title": "The Crack of Doom"
+      },
+      {
+        "start_seconds": 12871.901,
+        "title": "Sauron Defeated"
+      },
+      {
+        "start_seconds": 13005.284,
+        "title": "The End of All Things"
+      },
+      {
+        "start_seconds": 13214.66,
+        "title": "The Fellowship Reunited"
+      },
+      {
+        "start_seconds": 13357.719,
+        "title": "The Return of the King"
+      },
+      {
+        "start_seconds": 13650.387,
+        "title": "Homeward Bound"
+      },
+      {
+        "start_seconds": 13932.335,
+        "title": "The Grey Havens"
+      },
+      {
+        "start_seconds": 14491.31,
+        "title": "End Credits"
+      },
+      {
+        "start_seconds": 15158.352,
+        "title": "Fan Club Credits"
+      }
+    ]
+  },
+  "differences": [
+    {
+      "index": 1,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 5803,
+        "end_frame": 5804,
+        "start_time": "00:04:02",
+        "end_time": "00:04:02",
+        "duration_seconds": 0.0,
+        "chapter": "The Finding of the Ring"
+      },
+      "extended": {
+        "start_frame": 5803,
+        "end_frame": 6062,
+        "start_time": "00:04:02",
+        "end_time": "00:04:12",
+        "duration_seconds": 10.76,
+        "chapter": "The Finding of the Ring"
+      },
+      "duration_difference_seconds": 10.76,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          5804,
+          5932
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 2,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 14238,
+        "end_frame": 14239,
+        "start_time": "00:09:53",
+        "end_time": "00:09:53",
+        "duration_seconds": 0.0,
+        "chapter": "The Road to Isengard"
+      },
+      "extended": {
+        "start_frame": 14496,
+        "end_frame": 15147,
+        "start_time": "00:10:04",
+        "end_time": "00:10:31",
+        "duration_seconds": 27.11,
+        "chapter": "The Road to Isengard"
+      },
+      "duration_difference_seconds": 27.11,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          14497,
+          14713,
+          14930
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 3,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 15939,
+        "end_frame": 16049,
+        "start_time": "00:11:04",
+        "end_time": "00:11:09",
+        "duration_seconds": 4.55,
+        "chapter": "The Road to Isengard"
+      },
+      "extended": {
+        "start_frame": 16847,
+        "end_frame": 17073,
+        "start_time": "00:11:42",
+        "end_time": "00:11:52",
+        "duration_seconds": 9.38,
+        "chapter": "The Voice of Saruman"
+      },
+      "duration_difference_seconds": 4.84,
+      "images": {
+        "theatrical": [
+          15940
+        ],
+        "extended": [
+          16848
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 4,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 16102,
+        "end_frame": 16232,
+        "start_time": "00:11:11",
+        "end_time": "00:11:17",
+        "duration_seconds": 5.38,
+        "chapter": "The Road to Isengard"
+      },
+      "extended": {
+        "start_frame": 17126,
+        "end_frame": 25221,
+        "start_time": "00:11:54",
+        "end_time": "00:17:31",
+        "duration_seconds": 337.58,
+        "chapter": "The Voice of Saruman"
+      },
+      "duration_difference_seconds": 332.2,
+      "images": {
+        "theatrical": [
+          16103
+        ],
+        "extended": [
+          17127,
+          18282,
+          19438,
+          20595,
+          21751,
+          22908,
+          24064
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 5,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 17902,
+        "end_frame": 17903,
+        "start_time": "00:12:26",
+        "end_time": "00:12:26",
+        "duration_seconds": 0.0,
+        "chapter": "Return to Edoras"
+      },
+      "extended": {
+        "start_frame": 26891,
+        "end_frame": 27189,
+        "start_time": "00:18:41",
+        "end_time": "00:18:53",
+        "duration_seconds": 12.39,
+        "chapter": "Return to Edoras"
+      },
+      "duration_difference_seconds": 12.39,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          26892,
+          27040
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 6,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 18496,
+        "end_frame": 18497,
+        "start_time": "00:12:51",
+        "end_time": "00:12:51",
+        "duration_seconds": 0.0,
+        "chapter": "Return to Edoras"
+      },
+      "extended": {
+        "start_frame": 27782,
+        "end_frame": 28446,
+        "start_time": "00:19:18",
+        "end_time": "00:19:46",
+        "duration_seconds": 27.65,
+        "chapter": "Return to Edoras"
+      },
+      "duration_difference_seconds": 27.65,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          27783,
+          28003,
+          28224
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 7,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 20139,
+        "end_frame": 20140,
+        "start_time": "00:13:59",
+        "end_time": "00:13:59",
+        "duration_seconds": 0.0,
+        "chapter": "Return to Edoras"
+      },
+      "extended": {
+        "start_frame": 30088,
+        "end_frame": 31328,
+        "start_time": "00:20:54",
+        "end_time": "00:21:46",
+        "duration_seconds": 51.68,
+        "chapter": "Return to Edoras"
+      },
+      "duration_difference_seconds": 51.68,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          30089,
+          30294,
+          30501,
+          30708,
+          30914,
+          31121
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 8,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 20468,
+        "end_frame": 20589,
+        "start_time": "00:14:13",
+        "end_time": "00:14:18",
+        "duration_seconds": 5.0,
+        "chapter": "Return to Edoras"
+      },
+      "extended": {
+        "start_frame": 31656,
+        "end_frame": 31965,
+        "start_time": "00:22:00",
+        "end_time": "00:22:13",
+        "duration_seconds": 12.85,
+        "chapter": "Return to Edoras"
+      },
+      "duration_difference_seconds": 7.84,
+      "images": {
+        "theatrical": [
+          20469
+        ],
+        "extended": [
+          31657,
+          31810
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 9,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 27543,
+        "end_frame": 27544,
+        "start_time": "00:19:08",
+        "end_time": "00:19:08",
+        "duration_seconds": 0.0,
+        "chapter": "Gollum's Villainy"
+      },
+      "extended": {
+        "start_frame": 38919,
+        "end_frame": 41734,
+        "start_time": "00:27:03",
+        "end_time": "00:29:00",
+        "duration_seconds": 117.37,
+        "chapter": "Gollum's Villainy"
+      },
+      "duration_difference_seconds": 117.37,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          38920,
+          39321,
+          39723,
+          40125,
+          40527,
+          40929,
+          41331
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 10,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 35588,
+        "end_frame": 35627,
+        "start_time": "00:24:44",
+        "end_time": "00:24:45",
+        "duration_seconds": 1.58,
+        "chapter": "The Palantir"
+      },
+      "extended": {
+        "start_frame": 49778,
+        "end_frame": 49779,
+        "start_time": "00:34:36",
+        "end_time": "00:34:36",
+        "duration_seconds": 0.0,
+        "chapter": "The Palantir"
+      },
+      "duration_difference_seconds": 1.58,
+      "images": {
+        "theatrical": [
+          35589
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 11,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 35651,
+        "end_frame": 35652,
+        "start_time": "00:24:46",
+        "end_time": "00:24:46",
+        "duration_seconds": 0.0,
+        "chapter": "The Palantir"
+      },
+      "extended": {
+        "start_frame": 49803,
+        "end_frame": 49842,
+        "start_time": "00:34:37",
+        "end_time": "00:34:38",
+        "duration_seconds": 1.58,
+        "chapter": "The Palantir"
+      },
+      "duration_difference_seconds": 1.58,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          49804
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 12,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 38202,
+        "end_frame": 38447,
+        "start_time": "00:26:33",
+        "end_time": "00:26:43",
+        "duration_seconds": 10.18,
+        "chapter": "The Palantir"
+      },
+      "extended": {
+        "start_frame": 52392,
+        "end_frame": 53380,
+        "start_time": "00:36:25",
+        "end_time": "00:37:06",
+        "duration_seconds": 41.17,
+        "chapter": "The Palantir"
+      },
+      "duration_difference_seconds": 30.99,
+      "images": {
+        "theatrical": [
+          38203,
+          38324
+        ],
+        "extended": [
+          52393,
+          52589,
+          52787,
+          52984,
+          53182
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 13,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 51095,
+        "end_frame": 51145,
+        "start_time": "00:35:31",
+        "end_time": "00:35:33",
+        "duration_seconds": 2.04,
+        "chapter": "Minas Tirith"
+      },
+      "extended": {
+        "start_frame": 66028,
+        "end_frame": 66563,
+        "start_time": "00:45:53",
+        "end_time": "00:46:16",
+        "duration_seconds": 22.27,
+        "chapter": "Minas Tirith"
+      },
+      "duration_difference_seconds": 20.23,
+      "images": {
+        "theatrical": [
+          51096
+        ],
+        "extended": [
+          66029,
+          66206,
+          66384
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 14,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 53546,
+        "end_frame": 53663,
+        "start_time": "00:37:13",
+        "end_time": "00:37:18",
+        "duration_seconds": 4.84,
+        "chapter": "Minas Tirith"
+      },
+      "extended": {
+        "start_frame": 68964,
+        "end_frame": 75505,
+        "start_time": "00:47:56",
+        "end_time": "00:52:29",
+        "duration_seconds": 272.77,
+        "chapter": "The Decline of Gondor"
+      },
+      "duration_difference_seconds": 267.93,
+      "images": {
+        "theatrical": [
+          53547
+        ],
+        "extended": [
+          68965,
+          69898,
+          70832,
+          71767,
+          72701,
+          73636,
+          74570
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 15,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 53863,
+        "end_frame": 54039,
+        "start_time": "00:37:26",
+        "end_time": "00:37:33",
+        "duration_seconds": 7.3,
+        "chapter": "\"The Deep Breath Before the Plunge\""
+      },
+      "extended": {
+        "start_frame": 75702,
+        "end_frame": 76193,
+        "start_time": "00:52:37",
+        "end_time": "00:52:57",
+        "duration_seconds": 20.44,
+        "chapter": "\"The Deep Breath Before the Plunge\""
+      },
+      "duration_difference_seconds": 13.14,
+      "images": {
+        "theatrical": [
+          53864
+        ],
+        "extended": [
+          75703,
+          75865,
+          76029
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 16,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 54156,
+        "end_frame": 54157,
+        "start_time": "00:37:38",
+        "end_time": "00:37:38",
+        "duration_seconds": 0.0,
+        "chapter": "\"The Deep Breath Before the Plunge\""
+      },
+      "extended": {
+        "start_frame": 76310,
+        "end_frame": 76806,
+        "start_time": "00:53:02",
+        "end_time": "00:53:23",
+        "duration_seconds": 20.65,
+        "chapter": "\"The Deep Breath Before the Plunge\""
+      },
+      "duration_difference_seconds": 20.65,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          76311,
+          76475,
+          76640
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 17,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 63097,
+        "end_frame": 63098,
+        "start_time": "00:43:51",
+        "end_time": "00:43:51",
+        "duration_seconds": 0.0,
+        "chapter": "\"The Board is Set...\""
+      },
+      "extended": {
+        "start_frame": 85746,
+        "end_frame": 86881,
+        "start_time": "00:59:36",
+        "end_time": "01:00:23",
+        "duration_seconds": 47.3,
+        "chapter": "Minas Morgul"
+      },
+      "duration_difference_seconds": 47.3,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          85747,
+          85973,
+          86200,
+          86427,
+          86654
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 18,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 63868,
+        "end_frame": 63869,
+        "start_time": "00:44:23",
+        "end_time": "00:44:23",
+        "duration_seconds": 0.0,
+        "chapter": "Osgiliath Invaded"
+      },
+      "extended": {
+        "start_frame": 87651,
+        "end_frame": 88422,
+        "start_time": "01:00:55",
+        "end_time": "01:01:27",
+        "duration_seconds": 32.12,
+        "chapter": "Osgiliath Invaded"
+      },
+      "duration_difference_seconds": 32.12,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          87652,
+          87843,
+          88036,
+          88229
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 19,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 64504,
+        "end_frame": 64505,
+        "start_time": "00:44:50",
+        "end_time": "00:44:50",
+        "duration_seconds": 0.0,
+        "chapter": "Osgiliath Invaded"
+      },
+      "extended": {
+        "start_frame": 89057,
+        "end_frame": 90246,
+        "start_time": "01:01:54",
+        "end_time": "01:02:43",
+        "duration_seconds": 49.55,
+        "chapter": "Osgiliath Invaded"
+      },
+      "duration_difference_seconds": 49.55,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          89058,
+          89294,
+          89532,
+          89770,
+          90008
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 20,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 73514,
+        "end_frame": 73515,
+        "start_time": "00:51:06",
+        "end_time": "00:51:06",
+        "duration_seconds": 0.0,
+        "chapter": "Theoden's Decision"
+      },
+      "extended": {
+        "start_frame": 99255,
+        "end_frame": 100416,
+        "start_time": "01:08:59",
+        "end_time": "01:09:48",
+        "duration_seconds": 48.38,
+        "chapter": "Theoden's Decision"
+      },
+      "duration_difference_seconds": 48.38,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          99256,
+          99487,
+          99719,
+          99951,
+          100183
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 21,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 80797,
+        "end_frame": 80798,
+        "start_time": "00:56:09",
+        "end_time": "00:56:09",
+        "duration_seconds": 0.0,
+        "chapter": "The Fall of Osgiliath"
+      },
+      "extended": {
+        "start_frame": 107698,
+        "end_frame": 111295,
+        "start_time": "01:14:51",
+        "end_time": "01:17:21",
+        "duration_seconds": 149.98,
+        "chapter": "The Fall of Osgiliath"
+      },
+      "duration_difference_seconds": 149.98,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          107699,
+          108211,
+          108725,
+          109239,
+          109753,
+          110267,
+          110781
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 22,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 84612,
+        "end_frame": 84613,
+        "start_time": "00:58:48",
+        "end_time": "00:58:49",
+        "duration_seconds": 0.0,
+        "chapter": "Allegiance to Denethor"
+      },
+      "extended": {
+        "start_frame": 115109,
+        "end_frame": 117165,
+        "start_time": "01:20:00",
+        "end_time": "01:21:26",
+        "duration_seconds": 85.71,
+        "chapter": "\"Courage is the Best Defense\""
+      },
+      "duration_difference_seconds": 85.71,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          115110,
+          115402,
+          115696,
+          115990,
+          116283,
+          116577,
+          116871
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 23,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 97220,
+        "end_frame": 97221,
+        "start_time": "01:07:34",
+        "end_time": "01:07:34",
+        "duration_seconds": 0.0,
+        "chapter": "The Sacrifice of Faramir"
+      },
+      "extended": {
+        "start_frame": 129772,
+        "end_frame": 129966,
+        "start_time": "01:30:12",
+        "end_time": "01:30:20",
+        "duration_seconds": 8.05,
+        "chapter": "The Sacrifice of Faramir"
+      },
+      "duration_difference_seconds": 8.05,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          129773
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 24,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 107552,
+        "end_frame": 107553,
+        "start_time": "01:14:45",
+        "end_time": "01:14:45",
+        "duration_seconds": 0.0,
+        "chapter": "Marshalling at Dunharrow"
+      },
+      "extended": {
+        "start_frame": 140297,
+        "end_frame": 141171,
+        "start_time": "01:37:31",
+        "end_time": "01:38:07",
+        "duration_seconds": 36.41,
+        "chapter": "Marshalling at Dunharrow"
+      },
+      "duration_difference_seconds": 36.41,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          140298,
+          140515,
+          140734,
+          140952
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 25,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 115624,
+        "end_frame": 115629,
+        "start_time": "01:20:22",
+        "end_time": "01:20:22",
+        "duration_seconds": 0.17,
+        "chapter": "Aragorn Takes the Paths of the Dead"
+      },
+      "extended": {
+        "start_frame": 149242,
+        "end_frame": 149636,
+        "start_time": "01:43:44",
+        "end_time": "01:44:01",
+        "duration_seconds": 16.39,
+        "chapter": "Aragorn Takes the Paths of the Dead"
+      },
+      "duration_difference_seconds": 16.22,
+      "images": {
+        "theatrical": [
+          115625
+        ],
+        "extended": [
+          149243,
+          149439
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 26,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 120932,
+        "end_frame": 120933,
+        "start_time": "01:24:03",
+        "end_time": "01:24:03",
+        "duration_seconds": 0.0,
+        "chapter": "Dwimorberg - The Haunted Mountain"
+      },
+      "extended": {
+        "start_frame": 154939,
+        "end_frame": 155567,
+        "start_time": "01:47:42",
+        "end_time": "01:48:08",
+        "duration_seconds": 26.15,
+        "chapter": "Dwimorberg - The Haunted Mountain"
+      },
+      "duration_difference_seconds": 26.15,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          154940,
+          155148,
+          155357
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 27,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 125284,
+        "end_frame": 125285,
+        "start_time": "01:27:05",
+        "end_time": "01:27:05",
+        "duration_seconds": 0.0,
+        "chapter": "The Muster of Rohan"
+      },
+      "extended": {
+        "start_frame": 159918,
+        "end_frame": 163043,
+        "start_time": "01:51:09",
+        "end_time": "01:53:20",
+        "duration_seconds": 130.3,
+        "chapter": "The Muster of Rohan"
+      },
+      "duration_difference_seconds": 130.3,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          159919,
+          160364,
+          160810,
+          161257,
+          161703,
+          162150,
+          162596
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 28,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 129454,
+        "end_frame": 129455,
+        "start_time": "01:29:59",
+        "end_time": "01:29:59",
+        "duration_seconds": 0.0,
+        "chapter": "The King of the Dead"
+      },
+      "extended": {
+        "start_frame": 167212,
+        "end_frame": 170695,
+        "start_time": "01:56:14",
+        "end_time": "01:58:39",
+        "duration_seconds": 145.23,
+        "chapter": "The Paths of the Dead"
+      },
+      "duration_difference_seconds": 145.23,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          167213,
+          167709,
+          168207,
+          168704,
+          169202,
+          169699,
+          170197
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 29,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 130556,
+        "end_frame": 130557,
+        "start_time": "01:30:45",
+        "end_time": "01:30:45",
+        "duration_seconds": 0.0,
+        "chapter": "The Siege of Gondor"
+      },
+      "extended": {
+        "start_frame": 171796,
+        "end_frame": 172018,
+        "start_time": "01:59:25",
+        "end_time": "01:59:34",
+        "duration_seconds": 9.22,
+        "chapter": "The Siege of Gondor"
+      },
+      "duration_difference_seconds": 9.22,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          171797
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 30,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 130679,
+        "end_frame": 130707,
+        "start_time": "01:30:50",
+        "end_time": "01:30:51",
+        "duration_seconds": 1.13,
+        "chapter": "The Siege of Gondor"
+      },
+      "extended": {
+        "start_frame": 172137,
+        "end_frame": 172168,
+        "start_time": "01:59:39",
+        "end_time": "01:59:40",
+        "duration_seconds": 1.25,
+        "chapter": "The Siege of Gondor"
+      },
+      "duration_difference_seconds": 0.13,
+      "images": {
+        "theatrical": [
+          130680
+        ],
+        "extended": [
+          172138
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 31,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 136719,
+        "end_frame": 136720,
+        "start_time": "01:35:02",
+        "end_time": "01:35:02",
+        "duration_seconds": 0.0,
+        "chapter": "The Siege of Gondor"
+      },
+      "extended": {
+        "start_frame": 178180,
+        "end_frame": 178328,
+        "start_time": "02:03:51",
+        "end_time": "02:03:57",
+        "duration_seconds": 6.13,
+        "chapter": "The Siege of Gondor"
+      },
+      "duration_difference_seconds": 6.13,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          178181
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 32,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 138231,
+        "end_frame": 138232,
+        "start_time": "01:36:05",
+        "end_time": "01:36:05",
+        "duration_seconds": 0.0,
+        "chapter": "The Siege of Gondor"
+      },
+      "extended": {
+        "start_frame": 179839,
+        "end_frame": 180533,
+        "start_time": "02:05:00",
+        "end_time": "02:05:29",
+        "duration_seconds": 28.9,
+        "chapter": "The Siege of Gondor"
+      },
+      "duration_difference_seconds": 28.9,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          179840,
+          180070,
+          180301
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 33,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 138408,
+        "end_frame": 138409,
+        "start_time": "01:36:12",
+        "end_time": "01:36:12",
+        "duration_seconds": 0.0,
+        "chapter": "The Siege of Gondor"
+      },
+      "extended": {
+        "start_frame": 180709,
+        "end_frame": 180774,
+        "start_time": "02:05:37",
+        "end_time": "02:05:39",
+        "duration_seconds": 2.67,
+        "chapter": "The Siege of Gondor"
+      },
+      "duration_difference_seconds": 2.67,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          180710
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 34,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 139555,
+        "end_frame": 139562,
+        "start_time": "01:37:00",
+        "end_time": "01:37:00",
+        "duration_seconds": 0.25,
+        "chapter": "The Siege of Gondor"
+      },
+      "extended": {
+        "start_frame": 181920,
+        "end_frame": 182803,
+        "start_time": "02:06:27",
+        "end_time": "02:07:04",
+        "duration_seconds": 36.79,
+        "chapter": "The Siege of Gondor"
+      },
+      "duration_difference_seconds": 36.54,
+      "images": {
+        "theatrical": [
+          139556
+        ],
+        "extended": [
+          181921,
+          182140,
+          182361,
+          182582
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 35,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 139902,
+        "end_frame": 139903,
+        "start_time": "01:37:15",
+        "end_time": "01:37:15",
+        "duration_seconds": 0.0,
+        "chapter": "The Siege of Gondor"
+      },
+      "extended": {
+        "start_frame": 183143,
+        "end_frame": 183339,
+        "start_time": "02:07:18",
+        "end_time": "02:07:26",
+        "duration_seconds": 8.13,
+        "chapter": "The Siege of Gondor"
+      },
+      "duration_difference_seconds": 8.13,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          183144
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 36,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 140105,
+        "end_frame": 140106,
+        "start_time": "01:37:23",
+        "end_time": "01:37:23",
+        "duration_seconds": 0.0,
+        "chapter": "The Siege of Gondor"
+      },
+      "extended": {
+        "start_frame": 183541,
+        "end_frame": 184995,
+        "start_time": "02:07:35",
+        "end_time": "02:08:35",
+        "duration_seconds": 60.6,
+        "chapter": "The Siege of Gondor"
+      },
+      "duration_difference_seconds": 60.6,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          183542,
+          183748,
+          183956,
+          184164,
+          184371,
+          184579,
+          184787
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 37,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 153256,
+        "end_frame": 153257,
+        "start_time": "01:46:32",
+        "end_time": "01:46:32",
+        "duration_seconds": 0.0,
+        "chapter": "Shelob's Lair"
+      },
+      "extended": {
+        "start_frame": 198145,
+        "end_frame": 200791,
+        "start_time": "02:17:44",
+        "end_time": "02:19:34",
+        "duration_seconds": 110.32,
+        "chapter": "Shelob's Lair"
+      },
+      "duration_difference_seconds": 110.32,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          198146,
+          198523,
+          198901,
+          199279,
+          199657,
+          200035,
+          200413
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 38,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 154128,
+        "end_frame": 154129,
+        "start_time": "01:47:08",
+        "end_time": "01:47:08",
+        "duration_seconds": 0.0,
+        "chapter": "Grond - The Hammer of the Underworld"
+      },
+      "extended": {
+        "start_frame": 201662,
+        "end_frame": 202194,
+        "start_time": "02:20:10",
+        "end_time": "02:20:33",
+        "duration_seconds": 22.15,
+        "chapter": "Grond - The Hammer of the Underworld"
+      },
+      "duration_difference_seconds": 22.15,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          201663,
+          201839,
+          202016
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 39,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 154239,
+        "end_frame": 154388,
+        "start_time": "01:47:13",
+        "end_time": "01:47:19",
+        "duration_seconds": 6.17,
+        "chapter": "The Tomb of the Stewards"
+      },
+      "extended": {
+        "start_frame": 202304,
+        "end_frame": 203326,
+        "start_time": "02:20:37",
+        "end_time": "02:21:20",
+        "duration_seconds": 42.58,
+        "chapter": "The Tomb of the Stewards"
+      },
+      "duration_difference_seconds": 36.41,
+      "images": {
+        "theatrical": [
+          154240
+        ],
+        "extended": [
+          202305,
+          202508,
+          202712,
+          202917,
+          203121
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 40,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 168358,
+        "end_frame": 168472,
+        "start_time": "01:57:01",
+        "end_time": "01:57:06",
+        "duration_seconds": 4.71,
+        "chapter": "The Ride of the Rohirrim"
+      },
+      "extended": {
+        "start_frame": 217296,
+        "end_frame": 219226,
+        "start_time": "02:31:02",
+        "end_time": "02:32:23",
+        "duration_seconds": 80.45,
+        "chapter": "The Witch King's Hour"
+      },
+      "duration_difference_seconds": 75.74,
+      "images": {
+        "theatrical": [
+          168359
+        ],
+        "extended": [
+          217297,
+          217571,
+          217847,
+          218123,
+          218398,
+          218674,
+          218950
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 41,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 174147,
+        "end_frame": 174441,
+        "start_time": "02:01:03",
+        "end_time": "02:01:15",
+        "duration_seconds": 12.22,
+        "chapter": "The Ride of the Rohirrim"
+      },
+      "extended": {
+        "start_frame": 224901,
+        "end_frame": 224902,
+        "start_time": "02:36:20",
+        "end_time": "02:36:20",
+        "duration_seconds": 0.0,
+        "chapter": "The Ride of the Rohirrim"
+      },
+      "duration_difference_seconds": 12.22,
+      "images": {
+        "theatrical": [
+          174148,
+          174294
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 42,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 175821,
+        "end_frame": 175822,
+        "start_time": "02:02:13",
+        "end_time": "02:02:13",
+        "duration_seconds": 0.0,
+        "chapter": "The Pyre of Denethor"
+      },
+      "extended": {
+        "start_frame": 226282,
+        "end_frame": 226553,
+        "start_time": "02:37:17",
+        "end_time": "02:37:29",
+        "duration_seconds": 11.26,
+        "chapter": "The Pyre of Denethor"
+      },
+      "duration_difference_seconds": 11.26,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          226283,
+          226417
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 43,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 180139,
+        "end_frame": 180140,
+        "start_time": "02:05:13",
+        "end_time": "02:05:13",
+        "duration_seconds": 0.0,
+        "chapter": "The Battle of Pelennor Fields"
+      },
+      "extended": {
+        "start_frame": 230870,
+        "end_frame": 230956,
+        "start_time": "02:40:29",
+        "end_time": "02:40:32",
+        "duration_seconds": 3.55,
+        "chapter": "The Battle of Pelennor Fields"
+      },
+      "duration_difference_seconds": 3.55,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          230871
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 44,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 181151,
+        "end_frame": 181157,
+        "start_time": "02:05:55",
+        "end_time": "02:05:55",
+        "duration_seconds": 0.21,
+        "chapter": "The Battle of Pelennor Fields"
+      },
+      "extended": {
+        "start_frame": 231967,
+        "end_frame": 232010,
+        "start_time": "02:41:14",
+        "end_time": "02:41:16",
+        "duration_seconds": 1.75,
+        "chapter": "The Battle of Pelennor Fields"
+      },
+      "duration_difference_seconds": 1.54,
+      "images": {
+        "theatrical": [
+          181152
+        ],
+        "extended": [
+          231968
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 45,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 181214,
+        "end_frame": 181215,
+        "start_time": "02:05:58",
+        "end_time": "02:05:58",
+        "duration_seconds": 0.0,
+        "chapter": "The Battle of Pelennor Fields"
+      },
+      "extended": {
+        "start_frame": 232067,
+        "end_frame": 232252,
+        "start_time": "02:41:19",
+        "end_time": "02:41:26",
+        "duration_seconds": 7.67,
+        "chapter": "The Battle of Pelennor Fields"
+      },
+      "duration_difference_seconds": 7.67,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          232068
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 46,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 183181,
+        "end_frame": 183182,
+        "start_time": "02:07:20",
+        "end_time": "02:07:20",
+        "duration_seconds": 0.0,
+        "chapter": "The Battle of Pelennor Fields"
+      },
+      "extended": {
+        "start_frame": 234218,
+        "end_frame": 235459,
+        "start_time": "02:42:48",
+        "end_time": "02:43:40",
+        "duration_seconds": 51.72,
+        "chapter": "The Battle of Pelennor Fields"
+      },
+      "duration_difference_seconds": 51.72,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          234219,
+          234424,
+          234631,
+          234838,
+          235045,
+          235252
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 47,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 189146,
+        "end_frame": 189317,
+        "start_time": "02:11:28",
+        "end_time": "02:11:36",
+        "duration_seconds": 7.09,
+        "chapter": "The Black Ships"
+      },
+      "extended": {
+        "start_frame": 241423,
+        "end_frame": 241424,
+        "start_time": "02:47:49",
+        "end_time": "02:47:49",
+        "duration_seconds": 0.0,
+        "chapter": "The Black Ships"
+      },
+      "duration_difference_seconds": 7.09,
+      "images": {
+        "theatrical": [
+          189147
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 48,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 190621,
+        "end_frame": 190622,
+        "start_time": "02:12:30",
+        "end_time": "02:12:30",
+        "duration_seconds": 0.0,
+        "chapter": "Victory at Minas Tirith"
+      },
+      "extended": {
+        "start_frame": 242728,
+        "end_frame": 243040,
+        "start_time": "02:48:43",
+        "end_time": "02:48:56",
+        "duration_seconds": 12.97,
+        "chapter": "Victory at Minas Tirith"
+      },
+      "duration_difference_seconds": 12.97,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          242729,
+          242884
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 49,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 190692,
+        "end_frame": 190693,
+        "start_time": "02:12:33",
+        "end_time": "02:12:33",
+        "duration_seconds": 0.0,
+        "chapter": "Victory at Minas Tirith"
+      },
+      "extended": {
+        "start_frame": 243110,
+        "end_frame": 243340,
+        "start_time": "02:48:59",
+        "end_time": "02:49:09",
+        "duration_seconds": 9.55,
+        "chapter": "Victory at Minas Tirith"
+      },
+      "duration_difference_seconds": 9.55,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          243111
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 50,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 190872,
+        "end_frame": 190873,
+        "start_time": "02:12:40",
+        "end_time": "02:12:40",
+        "duration_seconds": 0.0,
+        "chapter": "Victory at Minas Tirith"
+      },
+      "extended": {
+        "start_frame": 243519,
+        "end_frame": 243812,
+        "start_time": "02:49:16",
+        "end_time": "02:49:28",
+        "duration_seconds": 12.18,
+        "chapter": "Victory at Minas Tirith"
+      },
+      "duration_difference_seconds": 12.18,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          243520,
+          243665
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 51,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 197825,
+        "end_frame": 198881,
+        "start_time": "02:17:30",
+        "end_time": "02:18:14",
+        "duration_seconds": 44.0,
+        "chapter": "Oaths Fulfilled"
+      },
+      "extended": {
+        "start_frame": 250764,
+        "end_frame": 255274,
+        "start_time": "02:54:18",
+        "end_time": "02:57:26",
+        "duration_seconds": 188.06,
+        "chapter": "Oaths Fulfilled"
+      },
+      "duration_difference_seconds": 144.06,
+      "images": {
+        "theatrical": [
+          197826,
+          198036,
+          198247,
+          198458,
+          198669
+        ],
+        "extended": [
+          250765,
+          251408,
+          252052,
+          252696,
+          253341,
+          253985,
+          254629
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 52,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 201058,
+        "end_frame": 201059,
+        "start_time": "02:19:45",
+        "end_time": "02:19:45",
+        "duration_seconds": 0.0,
+        "chapter": "The Tower of Cirith Ungol"
+      },
+      "extended": {
+        "start_frame": 257451,
+        "end_frame": 257815,
+        "start_time": "02:58:57",
+        "end_time": "02:59:12",
+        "duration_seconds": 15.14,
+        "chapter": "The Tower of Cirith Ungol"
+      },
+      "duration_difference_seconds": 15.14,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          257452,
+          257633
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 53,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 201216,
+        "end_frame": 201217,
+        "start_time": "02:19:52",
+        "end_time": "02:19:52",
+        "duration_seconds": 0.0,
+        "chapter": "The Tower of Cirith Ungol"
+      },
+      "extended": {
+        "start_frame": 257972,
+        "end_frame": 258137,
+        "start_time": "02:59:19",
+        "end_time": "02:59:26",
+        "duration_seconds": 6.84,
+        "chapter": "The Tower of Cirith Ungol"
+      },
+      "duration_difference_seconds": 6.84,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          257973
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 54,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 203045,
+        "end_frame": 203046,
+        "start_time": "02:21:08",
+        "end_time": "02:21:08",
+        "duration_seconds": 0.0,
+        "chapter": "The Tower of Cirith Ungol"
+      },
+      "extended": {
+        "start_frame": 259965,
+        "end_frame": 260147,
+        "start_time": "03:00:42",
+        "end_time": "03:00:50",
+        "duration_seconds": 7.55,
+        "chapter": "The Tower of Cirith Ungol"
+      },
+      "duration_difference_seconds": 7.55,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          259966
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 55,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 210179,
+        "end_frame": 210180,
+        "start_time": "02:26:06",
+        "end_time": "02:26:06",
+        "duration_seconds": 0.0,
+        "chapter": "The Last Debate"
+      },
+      "extended": {
+        "start_frame": 267280,
+        "end_frame": 267457,
+        "start_time": "03:05:47",
+        "end_time": "03:05:55",
+        "duration_seconds": 7.34,
+        "chapter": "The Last Debate"
+      },
+      "duration_difference_seconds": 7.34,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          267281
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 56,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 210319,
+        "end_frame": 210532,
+        "start_time": "02:26:11",
+        "end_time": "02:26:20",
+        "duration_seconds": 8.84,
+        "chapter": "The Last Debate"
+      },
+      "extended": {
+        "start_frame": 267596,
+        "end_frame": 269483,
+        "start_time": "03:06:00",
+        "end_time": "03:07:19",
+        "duration_seconds": 78.66,
+        "chapter": "The Last Debate"
+      },
+      "duration_difference_seconds": 69.82,
+      "images": {
+        "theatrical": [
+          210320
+        ],
+        "extended": [
+          267597,
+          267865,
+          268135,
+          268404,
+          268674,
+          268943,
+          269213
+        ]
+      },
+      "reordered_info": {
+        "time_range": "03:05:47\u201303:05:52",
+        "matching_frames": 22
+      }
+    },
+    {
+      "index": 57,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 210884,
+        "end_frame": 211132,
+        "start_time": "02:26:35",
+        "end_time": "02:26:45",
+        "duration_seconds": 10.3,
+        "chapter": "The Last Debate"
+      },
+      "extended": {
+        "start_frame": 269835,
+        "end_frame": 271038,
+        "start_time": "03:07:34",
+        "end_time": "03:08:24",
+        "duration_seconds": 50.13,
+        "chapter": "Aragorn Masters the Palantir"
+      },
+      "duration_difference_seconds": 39.83,
+      "images": {
+        "theatrical": [
+          210885,
+          211008
+        ],
+        "extended": [
+          269836,
+          270035,
+          270236,
+          270436,
+          270637,
+          270837
+        ]
+      },
+      "reordered_info": {
+        "time_range": "03:09:45\u201303:09:55",
+        "matching_frames": 169
+      }
+    },
+    {
+      "index": 58,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 211499,
+        "end_frame": 211515,
+        "start_time": "02:27:01",
+        "end_time": "02:27:01",
+        "duration_seconds": 0.63,
+        "chapter": "The Land of Shadow"
+      },
+      "extended": {
+        "start_frame": 271405,
+        "end_frame": 276336,
+        "start_time": "03:08:39",
+        "end_time": "03:12:05",
+        "duration_seconds": 205.62,
+        "chapter": "In the Company of Orcs"
+      },
+      "duration_difference_seconds": 204.99,
+      "images": {
+        "theatrical": [
+          211500
+        ],
+        "extended": [
+          271406,
+          272109,
+          272813,
+          273518,
+          274222,
+          274927,
+          275631
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 59,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 212250,
+        "end_frame": 212251,
+        "start_time": "02:27:32",
+        "end_time": "02:27:32",
+        "duration_seconds": 0.0,
+        "chapter": "The Land of Shadow"
+      },
+      "extended": {
+        "start_frame": 277071,
+        "end_frame": 279363,
+        "start_time": "03:12:36",
+        "end_time": "03:14:11",
+        "duration_seconds": 95.55,
+        "chapter": "The Land of Shadow"
+      },
+      "duration_difference_seconds": 95.55,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          277072,
+          277398,
+          277725,
+          278053,
+          278380,
+          278708,
+          279035
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 60,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 215935,
+        "end_frame": 215944,
+        "start_time": "02:30:06",
+        "end_time": "02:30:06",
+        "duration_seconds": 0.33,
+        "chapter": "The Black Gate Opens"
+      },
+      "extended": {
+        "start_frame": 283014,
+        "end_frame": 283047,
+        "start_time": "03:16:43",
+        "end_time": "03:16:45",
+        "duration_seconds": 1.33,
+        "chapter": "The Mouth of Sauron"
+      },
+      "duration_difference_seconds": 1.0,
+      "images": {
+        "theatrical": [
+          215936
+        ],
+        "extended": [
+          283015
+        ]
+      },
+      "reordered_info": {
+        "time_range": "03:16:45\u201303:16:45",
+        "matching_frames": 1
+      }
+    },
+    {
+      "index": 61,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 216816,
+        "end_frame": 216817,
+        "start_time": "02:30:42",
+        "end_time": "02:30:43",
+        "duration_seconds": 0.0,
+        "chapter": "The Black Gate Opens"
+      },
+      "extended": {
+        "start_frame": 283928,
+        "end_frame": 287078,
+        "start_time": "03:17:22",
+        "end_time": "03:19:33",
+        "duration_seconds": 131.34,
+        "chapter": "The Mouth of Sauron"
+      },
+      "duration_difference_seconds": 131.34,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          283929,
+          284378,
+          284828,
+          285278,
+          285728,
+          286178,
+          286628
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 62,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 216955,
+        "end_frame": 216956,
+        "start_time": "02:30:48",
+        "end_time": "02:30:48",
+        "duration_seconds": 0.0,
+        "chapter": "The Black Gate Opens"
+      },
+      "extended": {
+        "start_frame": 287216,
+        "end_frame": 287296,
+        "start_time": "03:19:39",
+        "end_time": "03:19:42",
+        "duration_seconds": 3.29,
+        "chapter": "The Black Gate Opens"
+      },
+      "duration_difference_seconds": 3.29,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          287217
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 63,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 227447,
+        "end_frame": 227448,
+        "start_time": "02:38:06",
+        "end_time": "02:38:06",
+        "duration_seconds": 0.0,
+        "chapter": "Mount Doom"
+      },
+      "extended": {
+        "start_frame": 298276,
+        "end_frame": 298349,
+        "start_time": "03:27:20",
+        "end_time": "03:27:23",
+        "duration_seconds": 3.0,
+        "chapter": "Mount Doom"
+      },
+      "duration_difference_seconds": 3.0,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          298277
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 64,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 250053,
+        "end_frame": 250066,
+        "start_time": "02:53:49",
+        "end_time": "02:53:49",
+        "duration_seconds": 0.5,
+        "chapter": "The Return of the King"
+      },
+      "extended": {
+        "start_frame": 320966,
+        "end_frame": 320967,
+        "start_time": "03:43:06",
+        "end_time": "03:43:06",
+        "duration_seconds": 0.0,
+        "chapter": "The Return of the King"
+      },
+      "duration_difference_seconds": 0.5,
+      "images": {
+        "theatrical": [
+          250054
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 65,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 276272,
+        "end_frame": 288941,
+        "start_time": "03:12:02",
+        "end_time": "03:20:51",
+        "duration_seconds": 528.36,
+        "chapter": "The Grey Havens"
+      },
+      "extended": {
+        "start_frame": 347173,
+        "end_frame": 378365,
+        "start_time": "04:01:19",
+        "end_time": "04:23:00",
+        "duration_seconds": 1300.91,
+        "chapter": "The Grey Havens"
+      },
+      "duration_difference_seconds": 772.56,
+      "images": {
+        "theatrical": [
+          276273,
+          278081,
+          279891,
+          281701,
+          283511,
+          285321,
+          287131
+        ],
+        "extended": [
+          347174,
+          351629,
+          356085,
+          360541,
+          364997,
+          369453,
+          373909
+        ]
+      },
+      "reordered_info": {
+        "time_range": "00:05:02\u201300:05:02",
+        "matching_frames": 1
+      }
+    },
+    {
+      "index": 66,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 288959,
+        "end_frame": 288979,
+        "start_time": "03:20:51",
+        "end_time": "03:20:52",
+        "duration_seconds": 0.79,
+        "chapter": "End Credits"
+      },
+      "extended": {
+        "start_frame": 378383,
+        "end_frame": 378390,
+        "start_time": "04:23:01",
+        "end_time": "04:23:01",
+        "duration_seconds": 0.25,
+        "chapter": "Fan Club Credits"
+      },
+      "duration_difference_seconds": 0.54,
+      "images": {
+        "theatrical": [
+          288960
+        ],
+        "extended": [
+          378384
+        ]
+      },
+      "reordered_info": null
+    }
+  ]
+}

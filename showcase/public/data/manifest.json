@@ -1,0 +1,52 @@
+{
+  "films": [
+    {
+      "slug": "fellowship",
+      "title": "The Fellowship of the Ring",
+      "year": 2001,
+      "total_differences": 83,
+      "theatrical_frames": 256674,
+      "extended_frames": 328264,
+      "hero_frame": 243589,
+      "stats": {
+        "added": 35,
+        "removed": 8,
+        "modified": 34,
+        "reordered": 6,
+        "extra_minutes": 50
+      }
+    },
+    {
+      "slug": "two_towers",
+      "title": "The Two Towers",
+      "year": 2002,
+      "total_differences": 81,
+      "theatrical_frames": 258120,
+      "extended_frames": 338664,
+      "hero_frame": 97963,
+      "stats": {
+        "added": 41,
+        "removed": 3,
+        "modified": 31,
+        "reordered": 6,
+        "extra_minutes": 57
+      }
+    },
+    {
+      "slug": "return_of_the_king",
+      "title": "The Return of the King",
+      "year": 2003,
+      "total_differences": 66,
+      "theatrical_frames": 289194,
+      "extended_frames": 378598,
+      "hero_frame": 107699,
+      "stats": {
+        "added": 42,
+        "removed": 4,
+        "modified": 16,
+        "reordered": 4,
+        "extra_minutes": 63
+      }
+    }
+  ]
+}
