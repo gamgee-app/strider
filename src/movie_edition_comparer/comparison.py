@@ -274,6 +274,7 @@ def analyze_match_pair(
         first_inner_b=b_hashes[0] if b_hashes else None,
         last_inner_a=a_hashes[-1] if a_hashes else None,
         last_inner_b=b_hashes[-1] if b_hashes else None,
+        reordered_matches=tuple(reordered_in_gap) if diff_type == DifferenceType.REORDERED else (),
     )
 
 

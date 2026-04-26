@@ -76,6 +76,7 @@ class SceneDifference:
     first_inner_b: FrameHash | None = None
     last_inner_a: FrameHash | None = None
     last_inner_b: FrameHash | None = None
+    reordered_matches: tuple['FrameMatch', ...] = ()
 
     def to_time(self, frame: int) -> timedelta:
         """Convert a frame index to a timedelta using this difference's fps."""

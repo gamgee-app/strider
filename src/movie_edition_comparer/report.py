@@ -55,9 +55,9 @@ def _type_label(difference_type: str) -> str:
 
 
 def _img_tag(frames_dir: str, frame_index: int) -> str:
-    """Return an <img> tag referencing a frame file, relative to the report."""
+    """Return an <img> tag wrapped in a link, relative to the report."""
     path = os.path.join(frames_dir, _frame_filename(max(frame_index, 0)))
-    return f'<img loading="lazy" src="{path}">'
+    return f'<a href="{path}" target="_blank"><img loading="lazy" src="{path}"></a>'
 
 
 def _diff_filename(idx_a: int, idx_b: int) -> str:
@@ -124,7 +124,7 @@ def _generate_diff_images(
 
 def _diff_img_tag(diff_dir: str, idx_a: int, idx_b: int) -> str:
     path = os.path.join(diff_dir, _diff_filename(idx_a, idx_b))
-    return f'<img loading="lazy" src="{path}">'
+    return f'<a href="{path}" target="_blank"><img loading="lazy" src="{path}"></a>'
 
 
 def _collect_frames(
@@ -332,7 +332,8 @@ def generate_report(
 
         sections.append(f"""
     <details class="diff" data-type="{diff.difference_type}"
-             data-a-start="{a_start_t}" data-b-start="{b_start_t}" data-duration="{dur_frames}"
+             data-a-start="{a_start_t}" data-b-start="{b_start_t}"
+             data-a-duration="{diff.a_range.inner_count}" data-b-duration="{diff.b_range.inner_count}"
              data-min-hd="{min_inner_hd:.0f}">
       <summary class="{type_cls}">
         <span class="diff-num">#{i + 1}</span>
@@ -357,6 +358,7 @@ def generate_report(
           <div class="b-row-label">After</div>{_bcell_img(after_a)}{_bcell_img(after_b)}{_bcell_img(after_diff)}
           <div></div>{_bcell_meta(em.a.index if em else None)}{_bcell_meta(em.b.index if em else None)}{_bcell_meta(cross_hd=after_cross)}
         </div>
+        {"<h3>Reordered</h3><p class='reorder-info'>Matching content also appears at " + _ts(diff.to_time(min(m.b.index for m in diff.reordered_matches))) + "&ndash;" + _ts(diff.to_time(max(m.b.index for m in diff.reordered_matches))) + " in " + label_b + " (" + str(len(diff.reordered_matches)) + " matching frames)</p>" if diff.reordered_matches else ""}
         {"<h3>Content &mdash; " + label_a + "</h3><div class='contact-sheet'>" + cs_a + "</div>" if cs_a else ""}
         {"<h3>Content &mdash; " + label_b + "</h3><div class='contact-sheet'>" + cs_b + "</div>" if cs_b else ""}
         {"<h3>Video</h3><div class='video-row' data-sync>" if a_has_content or b_has_content else ""}
@@ -391,6 +393,7 @@ def generate_report(
   h3 {{ margin: 16px 0 8px; color: #aaa; font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.05em; }}
   h3:first-child {{ margin-top: 0; }}
   .hint {{ color: #666; font-size: 0.8em; margin-bottom: 8px; }}
+  .reorder-info {{ color: #60a5fa; font-family: monospace; font-size: 0.85em; margin-bottom: 8px; }}
   .boundary-grid {{ display: grid; grid-template-columns: 4em 1fr 1fr 1fr; gap: 0 16px; }}
   .b-label {{ color: #aaa; font-weight: normal; font-size: 0.85em; text-align: center; padding-bottom: 4px; }}
   .b-row-label {{ color: #666; font-size: 0.85em; text-align: right; align-self: center; }}
@@ -443,7 +446,8 @@ def generate_report(
     <select id="sort-select">
       <option value="b-start" selected>Timestamp ({label_b})</option>
       <option value="a-start">Timestamp ({label_a})</option>
-      <option value="duration">Duration</option>
+      <option value="a-duration">Duration ({label_a})</option>
+      <option value="b-duration">Duration ({label_b})</option>
     </select>
     <label>Filter:</label>
     <div class="filter-group">
@@ -481,12 +485,9 @@ def generate_report(
 
   function applySort() {{
     const key = sortSelect.value;
+    const dataKey = {{'b-start': 'bStart', 'a-start': 'aStart', 'a-duration': 'aDuration', 'b-duration': 'bDuration'}}[key];
     const items = Array.from(container.querySelectorAll('.diff'));
-    items.sort((a, b) => {{
-      const av = parseFloat(a.dataset[key === 'b-start' ? 'bStart' : key === 'a-start' ? 'aStart' : 'duration']);
-      const bv = parseFloat(b.dataset[key === 'b-start' ? 'bStart' : key === 'a-start' ? 'aStart' : 'duration']);
-      return av - bv;
-    }});
+    items.sort((a, b) => parseFloat(a.dataset[dataKey]) - parseFloat(b.dataset[dataKey]));
     items.forEach(el => container.appendChild(el));
   }}
 
