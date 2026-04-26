@@ -177,13 +177,6 @@ export function Timeline({ data, selected, onSelect }: TimelineProps) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const selectedX = useMemo(() => {
-    if (!selected) return null;
-    const mark = [...aMarks, ...bMarks].find((m) => m.diff.index === selected.index);
-    if (!mark) return null;
-    return mark.x + mark.width / 2 + PAD;
-  }, [selected, aMarks, bMarks]);
-
   // Find the active chapter for the selected difference using frame-based lookup
   const activeChapterA = useMemo(() => {
     if (!selected) return null;
