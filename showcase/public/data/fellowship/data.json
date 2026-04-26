@@ -1,0 +1,2940 @@
+{
+  "film": {
+    "slug": "fellowship",
+    "title": "The Fellowship of the Ring",
+    "year": 2001,
+    "fps": 23.976216,
+    "theatrical_frames": 256674,
+    "extended_frames": 328264
+  },
+  "chapters": {
+    "theatrical": [
+      {
+        "start_seconds": 0.0,
+        "title": "Prologue: One Ring to Rule Them All..."
+      },
+      {
+        "start_seconds": 435.894,
+        "title": "The Shire"
+      },
+      {
+        "start_seconds": 696.905,
+        "title": "Very Old Friends"
+      },
+      {
+        "start_seconds": 941.482,
+        "title": "A Long-expected Party"
+      },
+      {
+        "start_seconds": 1205.121,
+        "title": "Farewell Dear Bilbo"
+      },
+      {
+        "start_seconds": 1469.885,
+        "title": "Keep It Secret, Keep It Safe"
+      },
+      {
+        "start_seconds": 1603.185,
+        "title": "The Account of Isildur"
+      },
+      {
+        "start_seconds": 1764.304,
+        "title": "The Shadow of the Past"
+      },
+      {
+        "start_seconds": 2310.975,
+        "title": "Saruman the White"
+      },
+      {
+        "start_seconds": 2588.085,
+        "title": "A Shortcut to Mushrooms"
+      },
+      {
+        "start_seconds": 2819.108,
+        "title": "Bucklebury Ferry"
+      },
+      {
+        "start_seconds": 2956.745,
+        "title": "At the Sign of The Prancing Pony"
+      },
+      {
+        "start_seconds": 3310.557,
+        "title": "The Nazgul"
+      },
+      {
+        "start_seconds": 3515.345,
+        "title": "The Spoiling of Isengard"
+      },
+      {
+        "start_seconds": 3617.697,
+        "title": "A Knife in the Dark"
+      },
+      {
+        "start_seconds": 3897.143,
+        "title": "The Caverns of Isengard"
+      },
+      {
+        "start_seconds": 4048.378,
+        "title": "Flight to the Ford"
+      },
+      {
+        "start_seconds": 4423.085,
+        "title": "Rivendell"
+      },
+      {
+        "start_seconds": 4542.204,
+        "title": "Many Meetings"
+      },
+      {
+        "start_seconds": 4751.288,
+        "title": "The Fate of the Ring"
+      },
+      {
+        "start_seconds": 4964.376,
+        "title": "The Sword That Was Broken"
+      },
+      {
+        "start_seconds": 5095.799,
+        "title": "The Evenstar"
+      },
+      {
+        "start_seconds": 5194.689,
+        "title": "The Council of Elrond"
+      },
+      {
+        "start_seconds": 5612.315,
+        "title": "Bilbo's Gifts"
+      },
+      {
+        "start_seconds": 5725.428,
+        "title": "The Ring Goes South"
+      },
+      {
+        "start_seconds": 5904.732,
+        "title": "The Pass of Caradhras"
+      },
+      {
+        "start_seconds": 6186.263,
+        "title": "Moria"
+      },
+      {
+        "start_seconds": 6473.509,
+        "title": "A Journey in the Dark"
+      },
+      {
+        "start_seconds": 6769.638,
+        "title": "Balin's Tomb"
+      },
+      {
+        "start_seconds": 7305.965,
+        "title": "The Bridge of Khazad-dum"
+      },
+      {
+        "start_seconds": 7887.421,
+        "title": "Lothlorien"
+      },
+      {
+        "start_seconds": 8273.765,
+        "title": "The Mirror of Galadriel"
+      },
+      {
+        "start_seconds": 8602.427,
+        "title": "The Fighting Uruk-hai"
+      },
+      {
+        "start_seconds": 8702.652,
+        "title": "Farewell to Lorien"
+      },
+      {
+        "start_seconds": 8755.372,
+        "title": "The Great River"
+      },
+      {
+        "start_seconds": 8919.953,
+        "title": "Parth Galen"
+      },
+      {
+        "start_seconds": 9310.092,
+        "title": "The Breaking of the Fellowship"
+      },
+      {
+        "start_seconds": 9709.909,
+        "title": "The Departure of Boromir"
+      },
+      {
+        "start_seconds": 9864.605,
+        "title": "The Road Goes Ever On..."
+      },
+      {
+        "start_seconds": 10242.733,
+        "title": "Credits"
+      }
+    ],
+    "extended": [
+      {
+        "start_seconds": 0.0,
+        "title": "Prologue: One Ring to Rule Them All..."
+      },
+      {
+        "start_seconds": 456.79,
+        "title": "Concerning Hobbits"
+      },
+      {
+        "start_seconds": 635.76,
+        "title": "The Shire"
+      },
+      {
+        "start_seconds": 939.814,
+        "title": "Very Old Friends"
+      },
+      {
+        "start_seconds": 1198.4470000000001,
+        "title": "A Long-expected Party"
+      },
+      {
+        "start_seconds": 1532.573,
+        "title": "Farewell Dear Bilbo"
+      },
+      {
+        "start_seconds": 1797.337,
+        "title": "Keep It Secret, Keep It Safe"
+      },
+      {
+        "start_seconds": 1930.637,
+        "title": "The Account of Isildur"
+      },
+      {
+        "start_seconds": 2091.756,
+        "title": "At The Green Dragon"
+      },
+      {
+        "start_seconds": 2178.134,
+        "title": "The Shadow of the Past"
+      },
+      {
+        "start_seconds": 2704.118,
+        "title": "The Passing of the Elves"
+      },
+      {
+        "start_seconds": 2804.26,
+        "title": "Saruman the White"
+      },
+      {
+        "start_seconds": 3081.37,
+        "title": "A Short Cut to Mushrooms"
+      },
+      {
+        "start_seconds": 3312.392,
+        "title": "Bucklebury Ferry"
+      },
+      {
+        "start_seconds": 3450.03,
+        "title": "At the Sign of The Prancing Pony"
+      },
+      {
+        "start_seconds": 3811.474,
+        "title": "The Nazgul"
+      },
+      {
+        "start_seconds": 4036.074,
+        "title": "The Midgewater Marshes"
+      },
+      {
+        "start_seconds": 4133.546,
+        "title": "The Spoiling of Isengard"
+      },
+      {
+        "start_seconds": 4235.898,
+        "title": "A Knife in the Dark"
+      },
+      {
+        "start_seconds": 4515.344,
+        "title": "The Caverns of Isengard"
+      },
+      {
+        "start_seconds": 4666.579,
+        "title": "Flight to the Ford"
+      },
+      {
+        "start_seconds": 5051.546,
+        "title": "Rivendell"
+      },
+      {
+        "start_seconds": 5172.459,
+        "title": "Many Meetings"
+      },
+      {
+        "start_seconds": 5381.543,
+        "title": "The Fate of the Ring"
+      },
+      {
+        "start_seconds": 5594.631,
+        "title": "The Sword That Was Broken"
+      },
+      {
+        "start_seconds": 5754.04,
+        "title": "The Evenstar"
+      },
+      {
+        "start_seconds": 5852.93,
+        "title": "The Council of Elrond"
+      },
+      {
+        "start_seconds": 6338.374,
+        "title": "Gilraen's Memorial"
+      },
+      {
+        "start_seconds": 6412.156,
+        "title": "Bilbo's Gifts"
+      },
+      {
+        "start_seconds": 6515.551,
+        "title": "The Departure of the Fellowship"
+      },
+      {
+        "start_seconds": 6592.961,
+        "title": "The Ring Goes South"
+      },
+      {
+        "start_seconds": 6778.772,
+        "title": "The Pass of Caradhras"
+      },
+      {
+        "start_seconds": 7065.058,
+        "title": "Moria"
+      },
+      {
+        "start_seconds": 7450.36,
+        "title": "A Journey in the Dark"
+      },
+      {
+        "start_seconds": 7840.75,
+        "title": "Balin's Tomb"
+      },
+      {
+        "start_seconds": 8405.48,
+        "title": "The Bridge of Khazad-dum"
+      },
+      {
+        "start_seconds": 8986.937,
+        "title": "Lothlorien"
+      },
+      {
+        "start_seconds": 9179.587,
+        "title": "Caras Galadhon"
+      },
+      {
+        "start_seconds": 9616.607,
+        "title": "The Mirror of Galadriel"
+      },
+      {
+        "start_seconds": 9956.614,
+        "title": "The Fighting Uruk-hai"
+      },
+      {
+        "start_seconds": 10056.839,
+        "title": "Farewell to Lorien"
+      },
+      {
+        "start_seconds": 10380.495,
+        "title": "The Great River"
+      },
+      {
+        "start_seconds": 10672.746,
+        "title": "Parth Galen"
+      },
+      {
+        "start_seconds": 11060.675,
+        "title": "The Breaking of the Fellowship"
+      },
+      {
+        "start_seconds": 11496.444,
+        "title": "The Departure of Boromir"
+      },
+      {
+        "start_seconds": 11658.772,
+        "title": "The Road Goes Ever On..."
+      },
+      {
+        "start_seconds": 12036.858,
+        "title": "Credits"
+      },
+      {
+        "start_seconds": 12496.818,
+        "title": "Official Fan Club Credits"
+      }
+    ]
+  },
+  "differences": [
+    {
+      "index": 1,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 2229,
+        "end_frame": 2231,
+        "start_time": "00:01:32",
+        "end_time": "00:01:33",
+        "duration_seconds": 0.04,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "extended": {
+        "start_frame": 2229,
+        "end_frame": 2234,
+        "start_time": "00:01:32",
+        "end_time": "00:01:33",
+        "duration_seconds": 0.17,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "duration_difference_seconds": 0.13,
+      "images": {
+        "theatrical": [
+          2230
+        ],
+        "extended": [
+          2230
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 2,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 2245,
+        "end_frame": 2273,
+        "start_time": "00:01:33",
+        "end_time": "00:01:34",
+        "duration_seconds": 1.13,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "extended": {
+        "start_frame": 2251,
+        "end_frame": 2272,
+        "start_time": "00:01:33",
+        "end_time": "00:01:34",
+        "duration_seconds": 0.83,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "duration_difference_seconds": 0.29,
+      "images": {
+        "theatrical": [
+          2246
+        ],
+        "extended": [
+          2252
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 3,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 2317,
+        "end_frame": 2324,
+        "start_time": "00:01:36",
+        "end_time": "00:01:36",
+        "duration_seconds": 0.25,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "extended": {
+        "start_frame": 2319,
+        "end_frame": 2323,
+        "start_time": "00:01:36",
+        "end_time": "00:01:36",
+        "duration_seconds": 0.13,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "duration_difference_seconds": 0.13,
+      "images": {
+        "theatrical": [
+          2318
+        ],
+        "extended": [
+          2320
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 4,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 2346,
+        "end_frame": 2350,
+        "start_time": "00:01:37",
+        "end_time": "00:01:38",
+        "duration_seconds": 0.13,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "extended": {
+        "start_frame": 2341,
+        "end_frame": 2351,
+        "start_time": "00:01:37",
+        "end_time": "00:01:38",
+        "duration_seconds": 0.38,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "duration_difference_seconds": 0.25,
+      "images": {
+        "theatrical": [
+          2347
+        ],
+        "extended": [
+          2342
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 5,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 7128,
+        "end_frame": 7257,
+        "start_time": "00:04:57",
+        "end_time": "00:05:02",
+        "duration_seconds": 5.34,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "extended": {
+        "start_frame": 7128,
+        "end_frame": 7774,
+        "start_time": "00:04:57",
+        "end_time": "00:05:24",
+        "duration_seconds": 26.9,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "duration_difference_seconds": 21.56,
+      "images": {
+        "theatrical": [
+          7129
+        ],
+        "extended": [
+          7129,
+          7343,
+          7558
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 6,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 8824,
+        "end_frame": 8847,
+        "start_time": "00:06:08",
+        "end_time": "00:06:08",
+        "duration_seconds": 0.92,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "extended": {
+        "start_frame": 9341,
+        "end_frame": 9342,
+        "start_time": "00:06:29",
+        "end_time": "00:06:29",
+        "duration_seconds": 0.0,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "duration_difference_seconds": 0.92,
+      "images": {
+        "theatrical": [
+          8825
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 7,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 10203,
+        "end_frame": 11014,
+        "start_time": "00:07:05",
+        "end_time": "00:07:39",
+        "duration_seconds": 33.78,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "extended": {
+        "start_frame": 10720,
+        "end_frame": 15457,
+        "start_time": "00:07:27",
+        "end_time": "00:10:44",
+        "duration_seconds": 197.53,
+        "chapter": "Prologue: One Ring to Rule Them All..."
+      },
+      "duration_difference_seconds": 163.75,
+      "images": {
+        "theatrical": [
+          10204,
+          10405,
+          10608,
+          10811
+        ],
+        "extended": [
+          10721,
+          11396,
+          12073,
+          12750,
+          13426,
+          14103,
+          14780
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 8,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 12494,
+        "end_frame": 12779,
+        "start_time": "00:08:41",
+        "end_time": "00:08:52",
+        "duration_seconds": 11.85,
+        "chapter": "The Shire"
+      },
+      "extended": {
+        "start_frame": 16937,
+        "end_frame": 17418,
+        "start_time": "00:11:46",
+        "end_time": "00:12:06",
+        "duration_seconds": 20.02,
+        "chapter": "The Shire"
+      },
+      "duration_difference_seconds": 8.17,
+      "images": {
+        "theatrical": [
+          12495,
+          12636
+        ],
+        "extended": [
+          16938,
+          17097,
+          17257
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 9,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 12982,
+        "end_frame": 13021,
+        "start_time": "00:09:01",
+        "end_time": "00:09:03",
+        "duration_seconds": 1.58,
+        "chapter": "The Shire"
+      },
+      "extended": {
+        "start_frame": 17621,
+        "end_frame": 17661,
+        "start_time": "00:12:14",
+        "end_time": "00:12:16",
+        "duration_seconds": 1.63,
+        "chapter": "The Shire"
+      },
+      "duration_difference_seconds": 0.04,
+      "images": {
+        "theatrical": [
+          12983
+        ],
+        "extended": [
+          17622
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 10,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 13069,
+        "end_frame": 13348,
+        "start_time": "00:09:05",
+        "end_time": "00:09:16",
+        "duration_seconds": 11.59,
+        "chapter": "The Shire"
+      },
+      "extended": {
+        "start_frame": 17708,
+        "end_frame": 17911,
+        "start_time": "00:12:18",
+        "end_time": "00:12:27",
+        "duration_seconds": 8.43,
+        "chapter": "The Shire"
+      },
+      "duration_difference_seconds": 3.17,
+      "images": {
+        "theatrical": [
+          13070,
+          13208
+        ],
+        "extended": [
+          17709
+        ]
+      },
+      "reordered_info": {
+        "time_range": "00:08:56\u201300:08:56",
+        "matching_frames": 1
+      }
+    },
+    {
+      "index": 11,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 13543,
+        "end_frame": 14252,
+        "start_time": "00:09:24",
+        "end_time": "00:09:54",
+        "duration_seconds": 29.53,
+        "chapter": "The Shire"
+      },
+      "extended": {
+        "start_frame": 18106,
+        "end_frame": 20051,
+        "start_time": "00:12:35",
+        "end_time": "00:13:56",
+        "duration_seconds": 81.08,
+        "chapter": "The Shire"
+      },
+      "duration_difference_seconds": 51.55,
+      "images": {
+        "theatrical": [
+          13544,
+          13779,
+          14015
+        ],
+        "extended": [
+          18107,
+          18383,
+          18661,
+          18939,
+          19217,
+          19495,
+          19773
+        ]
+      },
+      "reordered_info": {
+        "time_range": "00:10:16\u201300:10:22",
+        "matching_frames": 86
+      }
+    },
+    {
+      "index": 12,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 14314,
+        "end_frame": 14315,
+        "start_time": "00:09:57",
+        "end_time": "00:09:57",
+        "duration_seconds": 0.0,
+        "chapter": "The Shire"
+      },
+      "extended": {
+        "start_frame": 20113,
+        "end_frame": 20119,
+        "start_time": "00:13:58",
+        "end_time": "00:13:59",
+        "duration_seconds": 0.21,
+        "chapter": "The Shire"
+      },
+      "duration_difference_seconds": 0.21,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          20114
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 13,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 14335,
+        "end_frame": 14336,
+        "start_time": "00:09:57",
+        "end_time": "00:09:57",
+        "duration_seconds": 0.0,
+        "chapter": "The Shire"
+      },
+      "extended": {
+        "start_frame": 20139,
+        "end_frame": 20146,
+        "start_time": "00:13:59",
+        "end_time": "00:14:00",
+        "duration_seconds": 0.25,
+        "chapter": "The Shire"
+      },
+      "duration_difference_seconds": 0.25,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          20140
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 14,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 15719,
+        "end_frame": 15725,
+        "start_time": "00:10:55",
+        "end_time": "00:10:55",
+        "duration_seconds": 0.21,
+        "chapter": "The Shire"
+      },
+      "extended": {
+        "start_frame": 21529,
+        "end_frame": 21541,
+        "start_time": "00:14:57",
+        "end_time": "00:14:58",
+        "duration_seconds": 0.46,
+        "chapter": "The Shire"
+      },
+      "duration_difference_seconds": 0.25,
+      "images": {
+        "theatrical": [
+          15720
+        ],
+        "extended": [
+          21530
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 15,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 15895,
+        "end_frame": 15896,
+        "start_time": "00:11:02",
+        "end_time": "00:11:02",
+        "duration_seconds": 0.0,
+        "chapter": "The Shire"
+      },
+      "extended": {
+        "start_frame": 21711,
+        "end_frame": 21720,
+        "start_time": "00:15:05",
+        "end_time": "00:15:05",
+        "duration_seconds": 0.33,
+        "chapter": "The Shire"
+      },
+      "duration_difference_seconds": 0.33,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          21712
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 16,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 25085,
+        "end_frame": 25086,
+        "start_time": "00:17:26",
+        "end_time": "00:17:26",
+        "duration_seconds": 0.0,
+        "chapter": "A Long-expected Party"
+      },
+      "extended": {
+        "start_frame": 31246,
+        "end_frame": 32937,
+        "start_time": "00:21:43",
+        "end_time": "00:22:53",
+        "duration_seconds": 70.49,
+        "chapter": "A Long-expected Party"
+      },
+      "duration_difference_seconds": 70.49,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          31247,
+          31487,
+          31729,
+          31970,
+          32212,
+          32453,
+          32695
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 17,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 42393,
+        "end_frame": 42502,
+        "start_time": "00:29:28",
+        "end_time": "00:29:32",
+        "duration_seconds": 4.5,
+        "chapter": "The Shadow of the Past"
+      },
+      "extended": {
+        "start_frame": 50244,
+        "end_frame": 52092,
+        "start_time": "00:34:55",
+        "end_time": "00:36:12",
+        "duration_seconds": 77.03,
+        "chapter": "At The Green Dragon"
+      },
+      "duration_difference_seconds": 72.53,
+      "images": {
+        "theatrical": [
+          42394
+        ],
+        "extended": [
+          50245,
+          50508,
+          50772,
+          51036,
+          51300,
+          51564,
+          51828
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 18,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 48560,
+        "end_frame": 48570,
+        "start_time": "00:33:45",
+        "end_time": "00:33:45",
+        "duration_seconds": 0.38,
+        "chapter": "The Shadow of the Past"
+      },
+      "extended": {
+        "start_frame": 58150,
+        "end_frame": 58151,
+        "start_time": "00:40:25",
+        "end_time": "00:40:25",
+        "duration_seconds": 0.0,
+        "chapter": "The Shadow of the Past"
+      },
+      "duration_difference_seconds": 0.38,
+      "images": {
+        "theatrical": [
+          48561
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 19,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 48570,
+        "end_frame": 48571,
+        "start_time": "00:33:45",
+        "end_time": "00:33:45",
+        "duration_seconds": 0.0,
+        "chapter": "The Shadow of the Past"
+      },
+      "extended": {
+        "start_frame": 58151,
+        "end_frame": 58161,
+        "start_time": "00:40:25",
+        "end_time": "00:40:25",
+        "duration_seconds": 0.38,
+        "chapter": "The Shadow of the Past"
+      },
+      "duration_difference_seconds": 0.38,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          58152
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 20,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 55042,
+        "end_frame": 55350,
+        "start_time": "00:38:15",
+        "end_time": "00:38:28",
+        "duration_seconds": 12.8,
+        "chapter": "The Shadow of the Past"
+      },
+      "extended": {
+        "start_frame": 64635,
+        "end_frame": 67178,
+        "start_time": "00:44:55",
+        "end_time": "00:46:41",
+        "duration_seconds": 106.02,
+        "chapter": "The Shadow of the Past"
+      },
+      "duration_difference_seconds": 93.22,
+      "images": {
+        "theatrical": [
+          55043,
+          55196
+        ],
+        "extended": [
+          64636,
+          64998,
+          65361,
+          65724,
+          66088,
+          66451,
+          66814
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 21,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 71633,
+        "end_frame": 71634,
+        "start_time": "00:49:47",
+        "end_time": "00:49:47",
+        "duration_seconds": 0.0,
+        "chapter": "At the Sign of The Prancing Pony"
+      },
+      "extended": {
+        "start_frame": 83460,
+        "end_frame": 83529,
+        "start_time": "00:58:00",
+        "end_time": "00:58:03",
+        "duration_seconds": 2.84,
+        "chapter": "At the Sign of The Prancing Pony"
+      },
+      "duration_difference_seconds": 2.84,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          83461
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 22,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 73241,
+        "end_frame": 73242,
+        "start_time": "00:50:54",
+        "end_time": "00:50:54",
+        "duration_seconds": 0.0,
+        "chapter": "At the Sign of The Prancing Pony"
+      },
+      "extended": {
+        "start_frame": 85136,
+        "end_frame": 85189,
+        "start_time": "00:59:10",
+        "end_time": "00:59:13",
+        "duration_seconds": 2.17,
+        "chapter": "At the Sign of The Prancing Pony"
+      },
+      "duration_difference_seconds": 2.17,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          85137
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 23,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 73362,
+        "end_frame": 73363,
+        "start_time": "00:50:59",
+        "end_time": "00:50:59",
+        "duration_seconds": 0.0,
+        "chapter": "At the Sign of The Prancing Pony"
+      },
+      "extended": {
+        "start_frame": 85309,
+        "end_frame": 85372,
+        "start_time": "00:59:18",
+        "end_time": "00:59:20",
+        "duration_seconds": 2.59,
+        "chapter": "At the Sign of The Prancing Pony"
+      },
+      "duration_difference_seconds": 2.59,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          85310
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 24,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 81353,
+        "end_frame": 81354,
+        "start_time": "00:56:33",
+        "end_time": "00:56:33",
+        "duration_seconds": 0.0,
+        "chapter": "The Nazgul"
+      },
+      "extended": {
+        "start_frame": 93363,
+        "end_frame": 93405,
+        "start_time": "01:04:53",
+        "end_time": "01:04:55",
+        "duration_seconds": 1.71,
+        "chapter": "The Nazgul"
+      },
+      "duration_difference_seconds": 1.71,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          93364
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 25,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 82727,
+        "end_frame": 82814,
+        "start_time": "00:57:30",
+        "end_time": "00:57:34",
+        "duration_seconds": 3.59,
+        "chapter": "The Nazgul"
+      },
+      "extended": {
+        "start_frame": 94778,
+        "end_frame": 95160,
+        "start_time": "01:05:53",
+        "end_time": "01:06:08",
+        "duration_seconds": 15.89,
+        "chapter": "The Nazgul"
+      },
+      "duration_difference_seconds": 12.3,
+      "images": {
+        "theatrical": [
+          82728
+        ],
+        "extended": [
+          94779,
+          94969
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 26,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 82828,
+        "end_frame": 82930,
+        "start_time": "00:57:34",
+        "end_time": "00:57:38",
+        "duration_seconds": 4.21,
+        "chapter": "The Nazgul"
+      },
+      "extended": {
+        "start_frame": 95174,
+        "end_frame": 95415,
+        "start_time": "01:06:09",
+        "end_time": "01:06:19",
+        "duration_seconds": 10.01,
+        "chapter": "The Nazgul"
+      },
+      "duration_difference_seconds": 5.8,
+      "images": {
+        "theatrical": [
+          82829
+        ],
+        "extended": [
+          95175,
+          95294
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 27,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 84283,
+        "end_frame": 84284,
+        "start_time": "00:58:35",
+        "end_time": "00:58:35",
+        "duration_seconds": 0.0,
+        "chapter": "The Nazgul"
+      },
+      "extended": {
+        "start_frame": 96768,
+        "end_frame": 99106,
+        "start_time": "01:07:15",
+        "end_time": "01:08:53",
+        "duration_seconds": 97.47,
+        "chapter": "The Nazgul"
+      },
+      "duration_difference_seconds": 97.47,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          96769,
+          97102,
+          97436,
+          97770,
+          98104,
+          98438,
+          98772
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 28,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 97063,
+        "end_frame": 97064,
+        "start_time": "01:07:28",
+        "end_time": "01:07:28",
+        "duration_seconds": 0.0,
+        "chapter": "The Caverns of Isengard"
+      },
+      "extended": {
+        "start_frame": 111885,
+        "end_frame": 112175,
+        "start_time": "01:17:46",
+        "end_time": "01:17:58",
+        "duration_seconds": 12.05,
+        "chapter": "The Caverns of Isengard"
+      },
+      "duration_difference_seconds": 12.05,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          111886,
+          112030
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 29,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 104485,
+        "end_frame": 104486,
+        "start_time": "01:12:37",
+        "end_time": "01:12:37",
+        "duration_seconds": 0.0,
+        "chapter": "Flight to the Ford"
+      },
+      "extended": {
+        "start_frame": 119596,
+        "end_frame": 119598,
+        "start_time": "01:23:08",
+        "end_time": "01:23:08",
+        "duration_seconds": 0.04,
+        "chapter": "Flight to the Ford"
+      },
+      "duration_difference_seconds": 0.04,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          119597
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 30,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 104540,
+        "end_frame": 104545,
+        "start_time": "01:12:40",
+        "end_time": "01:12:40",
+        "duration_seconds": 0.17,
+        "chapter": "Flight to the Ford"
+      },
+      "extended": {
+        "start_frame": 119652,
+        "end_frame": 119653,
+        "start_time": "01:23:10",
+        "end_time": "01:23:10",
+        "duration_seconds": 0.0,
+        "chapter": "Flight to the Ford"
+      },
+      "duration_difference_seconds": 0.17,
+      "images": {
+        "theatrical": [
+          104541
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 31,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 104568,
+        "end_frame": 104569,
+        "start_time": "01:12:41",
+        "end_time": "01:12:41",
+        "duration_seconds": 0.0,
+        "chapter": "Flight to the Ford"
+      },
+      "extended": {
+        "start_frame": 119676,
+        "end_frame": 119680,
+        "start_time": "01:23:11",
+        "end_time": "01:23:11",
+        "duration_seconds": 0.13,
+        "chapter": "Flight to the Ford"
+      },
+      "duration_difference_seconds": 0.13,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          119677
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 32,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 119565,
+        "end_frame": 119636,
+        "start_time": "01:23:06",
+        "end_time": "01:23:09",
+        "duration_seconds": 2.92,
+        "chapter": "The Sword That Was Broken"
+      },
+      "extended": {
+        "start_frame": 134676,
+        "end_frame": 135418,
+        "start_time": "01:33:37",
+        "end_time": "01:34:08",
+        "duration_seconds": 30.91,
+        "chapter": "The Sword That Was Broken"
+      },
+      "duration_difference_seconds": 27.99,
+      "images": {
+        "theatrical": [
+          119566
+        ],
+        "extended": [
+          134677,
+          134861,
+          135047,
+          135232
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 33,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 125922,
+        "end_frame": 126066,
+        "start_time": "01:27:31",
+        "end_time": "01:27:37",
+        "duration_seconds": 5.96,
+        "chapter": "The Council of Elrond"
+      },
+      "extended": {
+        "start_frame": 141704,
+        "end_frame": 143483,
+        "start_time": "01:38:30",
+        "end_time": "01:39:44",
+        "duration_seconds": 74.16,
+        "chapter": "The Council of Elrond"
+      },
+      "duration_difference_seconds": 68.19,
+      "images": {
+        "theatrical": [
+          125923
+        ],
+        "extended": [
+          141705,
+          141958,
+          142212,
+          142466,
+          142720,
+          142974,
+          143228
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 34,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 126097,
+        "end_frame": 126171,
+        "start_time": "01:27:39",
+        "end_time": "01:27:42",
+        "duration_seconds": 3.04,
+        "chapter": "The Council of Elrond"
+      },
+      "extended": {
+        "start_frame": 143514,
+        "end_frame": 143579,
+        "start_time": "01:39:45",
+        "end_time": "01:39:48",
+        "duration_seconds": 2.67,
+        "chapter": "The Council of Elrond"
+      },
+      "duration_difference_seconds": 0.38,
+      "images": {
+        "theatrical": [
+          126098
+        ],
+        "extended": [
+          143515
+        ]
+      },
+      "reordered_info": {
+        "time_range": "01:38:53\u201301:38:54",
+        "matching_frames": 10
+      }
+    },
+    {
+      "index": 35,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 134812,
+        "end_frame": 134813,
+        "start_time": "01:33:42",
+        "end_time": "01:33:42",
+        "duration_seconds": 0.0,
+        "chapter": "Bilbo's Gifts"
+      },
+      "extended": {
+        "start_frame": 152220,
+        "end_frame": 153757,
+        "start_time": "01:45:48",
+        "end_time": "01:46:52",
+        "duration_seconds": 64.06,
+        "chapter": "Gilraen's Memorial"
+      },
+      "duration_difference_seconds": 64.06,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          152221,
+          152439,
+          152659,
+          152878,
+          153098,
+          153317,
+          153537
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 36,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 136181,
+        "end_frame": 136187,
+        "start_time": "01:34:39",
+        "end_time": "01:34:40",
+        "duration_seconds": 0.21,
+        "chapter": "Bilbo's Gifts"
+      },
+      "extended": {
+        "start_frame": 155130,
+        "end_frame": 155131,
+        "start_time": "01:47:50",
+        "end_time": "01:47:50",
+        "duration_seconds": 0.0,
+        "chapter": "Bilbo's Gifts"
+      },
+      "duration_difference_seconds": 0.21,
+      "images": {
+        "theatrical": [
+          136182
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 37,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 137272,
+        "end_frame": 137273,
+        "start_time": "01:35:25",
+        "end_time": "01:35:25",
+        "duration_seconds": 0.0,
+        "chapter": "Bilbo's Gifts"
+      },
+      "extended": {
+        "start_frame": 156216,
+        "end_frame": 158073,
+        "start_time": "01:48:35",
+        "end_time": "01:49:52",
+        "duration_seconds": 77.41,
+        "chapter": "Bilbo's Gifts"
+      },
+      "duration_difference_seconds": 77.41,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          156217,
+          156481,
+          156746,
+          157011,
+          157277,
+          157542,
+          157807
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 38,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 140112,
+        "end_frame": 140113,
+        "start_time": "01:37:23",
+        "end_time": "01:37:23",
+        "duration_seconds": 0.0,
+        "chapter": "The Ring Goes South"
+      },
+      "extended": {
+        "start_frame": 160912,
+        "end_frame": 161069,
+        "start_time": "01:51:51",
+        "end_time": "01:51:57",
+        "duration_seconds": 6.51,
+        "chapter": "The Ring Goes South"
+      },
+      "duration_difference_seconds": 6.51,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          160913
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 39,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 148053,
+        "end_frame": 148054,
+        "start_time": "01:42:54",
+        "end_time": "01:42:55",
+        "duration_seconds": 0.0,
+        "chapter": "The Pass of Caradhras"
+      },
+      "extended": {
+        "start_frame": 169009,
+        "end_frame": 169124,
+        "start_time": "01:57:29",
+        "end_time": "01:57:33",
+        "duration_seconds": 4.75,
+        "chapter": "The Pass of Caradhras"
+      },
+      "duration_difference_seconds": 4.75,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          169010
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 40,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 148481,
+        "end_frame": 148482,
+        "start_time": "01:43:12",
+        "end_time": "01:43:12",
+        "duration_seconds": 0.0,
+        "chapter": "Moria"
+      },
+      "extended": {
+        "start_frame": 169551,
+        "end_frame": 170726,
+        "start_time": "01:57:51",
+        "end_time": "01:58:40",
+        "duration_seconds": 48.97,
+        "chapter": "Moria"
+      },
+      "duration_difference_seconds": 48.97,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          169552,
+          169786,
+          170021,
+          170256,
+          170491
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 41,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 148547,
+        "end_frame": 148548,
+        "start_time": "01:43:15",
+        "end_time": "01:43:15",
+        "duration_seconds": 0.0,
+        "chapter": "Moria"
+      },
+      "extended": {
+        "start_frame": 170791,
+        "end_frame": 170880,
+        "start_time": "01:58:43",
+        "end_time": "01:58:47",
+        "duration_seconds": 3.67,
+        "chapter": "Moria"
+      },
+      "duration_difference_seconds": 3.67,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          170792
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 42,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 148651,
+        "end_frame": 148670,
+        "start_time": "01:43:19",
+        "end_time": "01:43:20",
+        "duration_seconds": 0.75,
+        "chapter": "Moria"
+      },
+      "extended": {
+        "start_frame": 170983,
+        "end_frame": 171284,
+        "start_time": "01:58:51",
+        "end_time": "01:59:03",
+        "duration_seconds": 12.51,
+        "chapter": "Moria"
+      },
+      "duration_difference_seconds": 11.76,
+      "images": {
+        "theatrical": [
+          148652
+        ],
+        "extended": [
+          170984,
+          171133
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 43,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 149966,
+        "end_frame": 150116,
+        "start_time": "01:44:14",
+        "end_time": "01:44:21",
+        "duration_seconds": 6.21,
+        "chapter": "Moria"
+      },
+      "extended": {
+        "start_frame": 172580,
+        "end_frame": 173201,
+        "start_time": "01:59:57",
+        "end_time": "02:00:23",
+        "duration_seconds": 25.86,
+        "chapter": "Moria"
+      },
+      "duration_difference_seconds": 19.64,
+      "images": {
+        "theatrical": [
+          149967
+        ],
+        "extended": [
+          172581,
+          172787,
+          172994
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 44,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 150159,
+        "end_frame": 150160,
+        "start_time": "01:44:22",
+        "end_time": "01:44:22",
+        "duration_seconds": 0.0,
+        "chapter": "Moria"
+      },
+      "extended": {
+        "start_frame": 173244,
+        "end_frame": 173581,
+        "start_time": "02:00:25",
+        "end_time": "02:00:39",
+        "duration_seconds": 14.01,
+        "chapter": "Moria"
+      },
+      "duration_difference_seconds": 14.01,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          173245,
+          173412
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 45,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 156394,
+        "end_frame": 156456,
+        "start_time": "01:48:42",
+        "end_time": "01:48:45",
+        "duration_seconds": 2.54,
+        "chapter": "A Journey in the Dark"
+      },
+      "extended": {
+        "start_frame": 179815,
+        "end_frame": 181687,
+        "start_time": "02:04:59",
+        "end_time": "02:06:17",
+        "duration_seconds": 78.04,
+        "chapter": "A Journey in the Dark"
+      },
+      "duration_difference_seconds": 75.49,
+      "images": {
+        "theatrical": [
+          156395
+        ],
+        "extended": [
+          179816,
+          180082,
+          180349,
+          180617,
+          180884,
+          181152,
+          181419
+        ]
+      },
+      "reordered_info": {
+        "time_range": "02:06:23\u201302:06:26",
+        "matching_frames": 45
+      }
+    },
+    {
+      "index": 46,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 156603,
+        "end_frame": 156604,
+        "start_time": "01:48:51",
+        "end_time": "01:48:51",
+        "duration_seconds": 0.0,
+        "chapter": "A Journey in the Dark"
+      },
+      "extended": {
+        "start_frame": 181834,
+        "end_frame": 181896,
+        "start_time": "02:06:23",
+        "end_time": "02:06:26",
+        "duration_seconds": 2.54,
+        "chapter": "A Journey in the Dark"
+      },
+      "duration_difference_seconds": 2.54,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          181835
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 47,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 157480,
+        "end_frame": 157486,
+        "start_time": "01:49:28",
+        "end_time": "01:49:28",
+        "duration_seconds": 0.21,
+        "chapter": "A Journey in the Dark"
+      },
+      "extended": {
+        "start_frame": 182775,
+        "end_frame": 182776,
+        "start_time": "02:07:03",
+        "end_time": "02:07:03",
+        "duration_seconds": 0.0,
+        "chapter": "A Journey in the Dark"
+      },
+      "duration_difference_seconds": 0.21,
+      "images": {
+        "theatrical": [
+          157481
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 48,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 158466,
+        "end_frame": 158467,
+        "start_time": "01:50:09",
+        "end_time": "01:50:09",
+        "duration_seconds": 0.0,
+        "chapter": "A Journey in the Dark"
+      },
+      "extended": {
+        "start_frame": 183758,
+        "end_frame": 184148,
+        "start_time": "02:07:44",
+        "end_time": "02:08:00",
+        "duration_seconds": 16.22,
+        "chapter": "A Journey in the Dark"
+      },
+      "duration_difference_seconds": 16.22,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          183759,
+          183953
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 49,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 169279,
+        "end_frame": 169357,
+        "start_time": "01:57:40",
+        "end_time": "01:57:43",
+        "duration_seconds": 3.21,
+        "chapter": "Balin's Tomb"
+      },
+      "extended": {
+        "start_frame": 194960,
+        "end_frame": 195642,
+        "start_time": "02:15:31",
+        "end_time": "02:15:59",
+        "duration_seconds": 28.4,
+        "chapter": "Balin's Tomb"
+      },
+      "duration_difference_seconds": 25.19,
+      "images": {
+        "theatrical": [
+          169280
+        ],
+        "extended": [
+          194961,
+          195187,
+          195414
+        ]
+      },
+      "reordered_info": {
+        "time_range": "02:16:04\u201302:16:07",
+        "matching_frames": 43
+      }
+    },
+    {
+      "index": 50,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 169457,
+        "end_frame": 169458,
+        "start_time": "01:57:47",
+        "end_time": "01:57:47",
+        "duration_seconds": 0.0,
+        "chapter": "Balin's Tomb"
+      },
+      "extended": {
+        "start_frame": 195742,
+        "end_frame": 195820,
+        "start_time": "02:16:04",
+        "end_time": "02:16:07",
+        "duration_seconds": 3.21,
+        "chapter": "Balin's Tomb"
+      },
+      "duration_difference_seconds": 3.21,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          195743
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 51,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 191100,
+        "end_frame": 191787,
+        "start_time": "02:12:50",
+        "end_time": "02:13:19",
+        "duration_seconds": 28.61,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 217462,
+        "end_frame": 220644,
+        "start_time": "02:31:09",
+        "end_time": "02:33:22",
+        "duration_seconds": 132.67,
+        "chapter": "Lothlorien"
+      },
+      "duration_difference_seconds": 104.06,
+      "images": {
+        "theatrical": [
+          191101,
+          191329,
+          191558
+        ],
+        "extended": [
+          217463,
+          217916,
+          218371,
+          218825,
+          219280,
+          219734,
+          220189
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 52,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 192682,
+        "end_frame": 192746,
+        "start_time": "02:13:56",
+        "end_time": "02:13:59",
+        "duration_seconds": 2.63,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 221539,
+        "end_frame": 221872,
+        "start_time": "02:33:59",
+        "end_time": "02:34:13",
+        "duration_seconds": 13.85,
+        "chapter": "Caras Galadhon"
+      },
+      "duration_difference_seconds": 11.22,
+      "images": {
+        "theatrical": [
+          192683
+        ],
+        "extended": [
+          221540,
+          221705
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 53,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 192911,
+        "end_frame": 192991,
+        "start_time": "02:14:05",
+        "end_time": "02:14:09",
+        "duration_seconds": 3.29,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 222037,
+        "end_frame": 222148,
+        "start_time": "02:34:20",
+        "end_time": "02:34:25",
+        "duration_seconds": 4.59,
+        "chapter": "Caras Galadhon"
+      },
+      "duration_difference_seconds": 1.29,
+      "images": {
+        "theatrical": [
+          192912
+        ],
+        "extended": [
+          222038
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 54,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 193070,
+        "end_frame": 193071,
+        "start_time": "02:14:12",
+        "end_time": "02:14:12",
+        "duration_seconds": 0.0,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 222233,
+        "end_frame": 222242,
+        "start_time": "02:34:28",
+        "end_time": "02:34:29",
+        "duration_seconds": 0.33,
+        "chapter": "Caras Galadhon"
+      },
+      "duration_difference_seconds": 0.33,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          222234
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 55,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 193187,
+        "end_frame": 193189,
+        "start_time": "02:14:17",
+        "end_time": "02:14:17",
+        "duration_seconds": 0.04,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 222361,
+        "end_frame": 222378,
+        "start_time": "02:34:34",
+        "end_time": "02:34:34",
+        "duration_seconds": 0.67,
+        "chapter": "Caras Galadhon"
+      },
+      "duration_difference_seconds": 0.63,
+      "images": {
+        "theatrical": [
+          193188
+        ],
+        "extended": [
+          222362
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 56,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 193214,
+        "end_frame": 193215,
+        "start_time": "02:14:18",
+        "end_time": "02:14:18",
+        "duration_seconds": 0.0,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 222404,
+        "end_frame": 222418,
+        "start_time": "02:34:36",
+        "end_time": "02:34:36",
+        "duration_seconds": 0.54,
+        "chapter": "Caras Galadhon"
+      },
+      "duration_difference_seconds": 0.54,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          222405
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 57,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 193285,
+        "end_frame": 193331,
+        "start_time": "02:14:21",
+        "end_time": "02:14:23",
+        "duration_seconds": 1.88,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 222488,
+        "end_frame": 222822,
+        "start_time": "02:34:39",
+        "end_time": "02:34:53",
+        "duration_seconds": 13.89,
+        "chapter": "Caras Galadhon"
+      },
+      "duration_difference_seconds": 12.01,
+      "images": {
+        "theatrical": [
+          193286
+        ],
+        "extended": [
+          222489,
+          222655
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 58,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 193558,
+        "end_frame": 193725,
+        "start_time": "02:14:32",
+        "end_time": "02:14:39",
+        "duration_seconds": 6.92,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 223049,
+        "end_frame": 223932,
+        "start_time": "02:35:02",
+        "end_time": "02:35:39",
+        "duration_seconds": 36.79,
+        "chapter": "Caras Galadhon"
+      },
+      "duration_difference_seconds": 29.86,
+      "images": {
+        "theatrical": [
+          193559
+        ],
+        "extended": [
+          223050,
+          223269,
+          223490,
+          223711
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 59,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 193769,
+        "end_frame": 193994,
+        "start_time": "02:14:41",
+        "end_time": "02:14:51",
+        "duration_seconds": 9.34,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 223976,
+        "end_frame": 224527,
+        "start_time": "02:35:41",
+        "end_time": "02:36:04",
+        "duration_seconds": 22.94,
+        "chapter": "Caras Galadhon"
+      },
+      "duration_difference_seconds": 13.6,
+      "images": {
+        "theatrical": [
+          193770
+        ],
+        "extended": [
+          223977,
+          224159,
+          224343
+        ]
+      },
+      "reordered_info": {
+        "time_range": "02:36:35\u201302:36:35",
+        "matching_frames": 1
+      }
+    },
+    {
+      "index": 60,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 194091,
+        "end_frame": 194092,
+        "start_time": "02:14:55",
+        "end_time": "02:14:55",
+        "duration_seconds": 0.0,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 224615,
+        "end_frame": 224666,
+        "start_time": "02:36:08",
+        "end_time": "02:36:10",
+        "duration_seconds": 2.09,
+        "chapter": "Caras Galadhon"
+      },
+      "duration_difference_seconds": 2.09,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          224616
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 61,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 194201,
+        "end_frame": 194594,
+        "start_time": "02:14:59",
+        "end_time": "02:15:16",
+        "duration_seconds": 16.35,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 224775,
+        "end_frame": 225650,
+        "start_time": "02:36:14",
+        "end_time": "02:36:51",
+        "duration_seconds": 36.45,
+        "chapter": "Caras Galadhon"
+      },
+      "duration_difference_seconds": 20.1,
+      "images": {
+        "theatrical": [
+          194202,
+          194397
+        ],
+        "extended": [
+          224776,
+          224993,
+          225212,
+          225431
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 62,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 195445,
+        "end_frame": 195578,
+        "start_time": "02:15:51",
+        "end_time": "02:15:57",
+        "duration_seconds": 5.51,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 226501,
+        "end_frame": 226804,
+        "start_time": "02:37:26",
+        "end_time": "02:37:39",
+        "duration_seconds": 12.6,
+        "chapter": "Caras Galadhon"
+      },
+      "duration_difference_seconds": 7.09,
+      "images": {
+        "theatrical": [
+          195446
+        ],
+        "extended": [
+          226502,
+          226652
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 63,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 195675,
+        "end_frame": 195676,
+        "start_time": "02:16:01",
+        "end_time": "02:16:01",
+        "duration_seconds": 0.0,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 226901,
+        "end_frame": 227872,
+        "start_time": "02:37:43",
+        "end_time": "02:38:24",
+        "duration_seconds": 40.46,
+        "chapter": "Caras Galadhon"
+      },
+      "duration_difference_seconds": 40.46,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          226902,
+          227095,
+          227289,
+          227483,
+          227677
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 64,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 196518,
+        "end_frame": 196532,
+        "start_time": "02:16:36",
+        "end_time": "02:16:36",
+        "duration_seconds": 0.54,
+        "chapter": "Lothlorien"
+      },
+      "extended": {
+        "start_frame": 228727,
+        "end_frame": 228728,
+        "start_time": "02:38:59",
+        "end_time": "02:38:59",
+        "duration_seconds": 0.0,
+        "chapter": "Caras Galadhon"
+      },
+      "duration_difference_seconds": 0.54,
+      "images": {
+        "theatrical": [
+          196519
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 65,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 205468,
+        "end_frame": 205656,
+        "start_time": "02:22:49",
+        "end_time": "02:22:57",
+        "duration_seconds": 7.8,
+        "chapter": "The Mirror of Galadriel"
+      },
+      "extended": {
+        "start_frame": 237664,
+        "end_frame": 238124,
+        "start_time": "02:45:12",
+        "end_time": "02:45:31",
+        "duration_seconds": 19.14,
+        "chapter": "The Mirror of Galadriel"
+      },
+      "duration_difference_seconds": 11.34,
+      "images": {
+        "theatrical": [
+          205469
+        ],
+        "extended": [
+          237665,
+          237894
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 66,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 208654,
+        "end_frame": 208655,
+        "start_time": "02:25:02",
+        "end_time": "02:25:02",
+        "duration_seconds": 0.0,
+        "chapter": "The Fighting Uruk-hai"
+      },
+      "extended": {
+        "start_frame": 241122,
+        "end_frame": 243216,
+        "start_time": "02:47:36",
+        "end_time": "02:49:04",
+        "duration_seconds": 87.29,
+        "chapter": "The Fighting Uruk-hai"
+      },
+      "duration_difference_seconds": 87.29,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          241123,
+          241421,
+          241720,
+          242019,
+          242318,
+          242617,
+          242916
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 67,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 208707,
+        "end_frame": 208775,
+        "start_time": "02:25:04",
+        "end_time": "02:25:07",
+        "duration_seconds": 2.79,
+        "chapter": "Farewell to Lorien"
+      },
+      "extended": {
+        "start_frame": 243268,
+        "end_frame": 243269,
+        "start_time": "02:49:06",
+        "end_time": "02:49:06",
+        "duration_seconds": 0.0,
+        "chapter": "Farewell to Lorien"
+      },
+      "duration_difference_seconds": 2.79,
+      "images": {
+        "theatrical": [
+          208708
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 68,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 208945,
+        "end_frame": 208948,
+        "start_time": "02:25:14",
+        "end_time": "02:25:14",
+        "duration_seconds": 0.08,
+        "chapter": "Farewell to Lorien"
+      },
+      "extended": {
+        "start_frame": 243439,
+        "end_frame": 243444,
+        "start_time": "02:49:13",
+        "end_time": "02:49:13",
+        "duration_seconds": 0.17,
+        "chapter": "Farewell to Lorien"
+      },
+      "duration_difference_seconds": 0.08,
+      "images": {
+        "theatrical": [
+          208946
+        ],
+        "extended": [
+          243440
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 69,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 209092,
+        "end_frame": 209093,
+        "start_time": "02:25:20",
+        "end_time": "02:25:20",
+        "duration_seconds": 0.0,
+        "chapter": "Farewell to Lorien"
+      },
+      "extended": {
+        "start_frame": 243588,
+        "end_frame": 247441,
+        "start_time": "02:49:19",
+        "end_time": "02:52:00",
+        "duration_seconds": 160.66,
+        "chapter": "Farewell to Lorien"
+      },
+      "duration_difference_seconds": 160.66,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          243589,
+          244138,
+          244688,
+          245239,
+          245789,
+          246340,
+          246890
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 70,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 209296,
+        "end_frame": 209358,
+        "start_time": "02:25:29",
+        "end_time": "02:25:31",
+        "duration_seconds": 2.54,
+        "chapter": "Farewell to Lorien"
+      },
+      "extended": {
+        "start_frame": 247644,
+        "end_frame": 247645,
+        "start_time": "02:52:08",
+        "end_time": "02:52:08",
+        "duration_seconds": 0.0,
+        "chapter": "Farewell to Lorien"
+      },
+      "duration_difference_seconds": 2.54,
+      "images": {
+        "theatrical": [
+          209297
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 71,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 209743,
+        "end_frame": 209801,
+        "start_time": "02:25:47",
+        "end_time": "02:25:50",
+        "duration_seconds": 2.38,
+        "chapter": "Farewell to Lorien"
+      },
+      "extended": {
+        "start_frame": 248030,
+        "end_frame": 248080,
+        "start_time": "02:52:24",
+        "end_time": "02:52:26",
+        "duration_seconds": 2.04,
+        "chapter": "Farewell to Lorien"
+      },
+      "duration_difference_seconds": 0.33,
+      "images": {
+        "theatrical": [
+          209744
+        ],
+        "extended": [
+          248031
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 72,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 209918,
+        "end_frame": 209919,
+        "start_time": "02:25:55",
+        "end_time": "02:25:55",
+        "duration_seconds": 0.0,
+        "chapter": "Farewell to Lorien"
+      },
+      "extended": {
+        "start_frame": 248197,
+        "end_frame": 248883,
+        "start_time": "02:52:31",
+        "end_time": "02:53:00",
+        "duration_seconds": 28.57,
+        "chapter": "Farewell to Lorien"
+      },
+      "duration_difference_seconds": 28.57,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          248198,
+          248425,
+          248654
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 73,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 211963,
+        "end_frame": 211964,
+        "start_time": "02:27:20",
+        "end_time": "02:27:20",
+        "duration_seconds": 0.0,
+        "chapter": "The Great River"
+      },
+      "extended": {
+        "start_frame": 250927,
+        "end_frame": 253915,
+        "start_time": "02:54:25",
+        "end_time": "02:56:30",
+        "duration_seconds": 124.58,
+        "chapter": "The Great River"
+      },
+      "duration_difference_seconds": 124.58,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          250928,
+          251353,
+          251780,
+          252207,
+          252634,
+          253061,
+          253488
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 74,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 220826,
+        "end_frame": 220832,
+        "start_time": "02:33:30",
+        "end_time": "02:33:30",
+        "duration_seconds": 0.21,
+        "chapter": "Parth Galen"
+      },
+      "extended": {
+        "start_frame": 262777,
+        "end_frame": 262784,
+        "start_time": "03:02:39",
+        "end_time": "03:02:40",
+        "duration_seconds": 0.25,
+        "chapter": "Parth Galen"
+      },
+      "duration_difference_seconds": 0.04,
+      "images": {
+        "theatrical": [
+          220827
+        ],
+        "extended": [
+          262778
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 75,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 220845,
+        "end_frame": 220851,
+        "start_time": "02:33:31",
+        "end_time": "02:33:31",
+        "duration_seconds": 0.21,
+        "chapter": "Parth Galen"
+      },
+      "extended": {
+        "start_frame": 262797,
+        "end_frame": 262802,
+        "start_time": "03:02:40",
+        "end_time": "03:02:40",
+        "duration_seconds": 0.17,
+        "chapter": "Parth Galen"
+      },
+      "duration_difference_seconds": 0.04,
+      "images": {
+        "theatrical": [
+          220846
+        ],
+        "extended": [
+          262798
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 76,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 227232,
+        "end_frame": 227233,
+        "start_time": "02:37:57",
+        "end_time": "02:37:57",
+        "duration_seconds": 0.0,
+        "chapter": "The Breaking of the Fellowship"
+      },
+      "extended": {
+        "start_frame": 269183,
+        "end_frame": 269327,
+        "start_time": "03:07:07",
+        "end_time": "03:07:13",
+        "duration_seconds": 5.96,
+        "chapter": "The Breaking of the Fellowship"
+      },
+      "duration_difference_seconds": 5.96,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          269184
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 77,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 228046,
+        "end_frame": 228047,
+        "start_time": "02:38:31",
+        "end_time": "02:38:31",
+        "duration_seconds": 0.0,
+        "chapter": "The Breaking of the Fellowship"
+      },
+      "extended": {
+        "start_frame": 270140,
+        "end_frame": 270578,
+        "start_time": "03:07:46",
+        "end_time": "03:08:05",
+        "duration_seconds": 18.23,
+        "chapter": "The Breaking of the Fellowship"
+      },
+      "duration_difference_seconds": 18.23,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          270141,
+          270359
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 78,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 228173,
+        "end_frame": 228204,
+        "start_time": "02:38:36",
+        "end_time": "02:38:37",
+        "duration_seconds": 1.25,
+        "chapter": "The Breaking of the Fellowship"
+      },
+      "extended": {
+        "start_frame": 270704,
+        "end_frame": 270887,
+        "start_time": "03:08:10",
+        "end_time": "03:08:18",
+        "duration_seconds": 7.59,
+        "chapter": "The Breaking of the Fellowship"
+      },
+      "duration_difference_seconds": 6.34,
+      "images": {
+        "theatrical": [
+          228174
+        ],
+        "extended": [
+          270705
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 79,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 228360,
+        "end_frame": 228361,
+        "start_time": "02:38:44",
+        "end_time": "02:38:44",
+        "duration_seconds": 0.0,
+        "chapter": "The Breaking of the Fellowship"
+      },
+      "extended": {
+        "start_frame": 271043,
+        "end_frame": 271161,
+        "start_time": "03:08:24",
+        "end_time": "03:08:29",
+        "duration_seconds": 4.88,
+        "chapter": "The Breaking of the Fellowship"
+      },
+      "duration_difference_seconds": 4.88,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          271044
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 80,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 228628,
+        "end_frame": 228685,
+        "start_time": "02:38:55",
+        "end_time": "02:38:57",
+        "duration_seconds": 2.34,
+        "chapter": "The Breaking of the Fellowship"
+      },
+      "extended": {
+        "start_frame": 271428,
+        "end_frame": 271457,
+        "start_time": "03:08:40",
+        "end_time": "03:08:41",
+        "duration_seconds": 1.17,
+        "chapter": "The Breaking of the Fellowship"
+      },
+      "duration_difference_seconds": 1.17,
+      "images": {
+        "theatrical": [
+          228629
+        ],
+        "extended": [
+          271429
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 81,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 232376,
+        "end_frame": 232377,
+        "start_time": "02:41:31",
+        "end_time": "02:41:31",
+        "duration_seconds": 0.0,
+        "chapter": "The Breaking of the Fellowship"
+      },
+      "extended": {
+        "start_frame": 275148,
+        "end_frame": 275211,
+        "start_time": "03:11:15",
+        "end_time": "03:11:18",
+        "duration_seconds": 2.59,
+        "chapter": "The Breaking of the Fellowship"
+      },
+      "duration_difference_seconds": 2.59,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          275149
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 82,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 236422,
+        "end_frame": 236492,
+        "start_time": "02:44:20",
+        "end_time": "02:44:23",
+        "duration_seconds": 2.88,
+        "chapter": "The Departure of Boromir"
+      },
+      "extended": {
+        "start_frame": 279256,
+        "end_frame": 279509,
+        "start_time": "03:14:07",
+        "end_time": "03:14:17",
+        "duration_seconds": 10.51,
+        "chapter": "The Departure of Boromir"
+      },
+      "duration_difference_seconds": 7.63,
+      "images": {
+        "theatrical": [
+          236423
+        ],
+        "extended": [
+          279257,
+          279382
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 83,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 245400,
+        "end_frame": 256438,
+        "start_time": "02:50:35",
+        "end_time": "02:58:15",
+        "duration_seconds": 460.33,
+        "chapter": "The Road Goes Ever On..."
+      },
+      "extended": {
+        "start_frame": 288416,
+        "end_frame": 328054,
+        "start_time": "03:20:29",
+        "end_time": "03:48:02",
+        "duration_seconds": 1653.18,
+        "chapter": "The Road Goes Ever On..."
+      },
+      "duration_difference_seconds": 1192.85,
+      "images": {
+        "theatrical": [
+          245401,
+          246976,
+          248553,
+          250130,
+          251707,
+          253284,
+          254861
+        ],
+        "extended": [
+          288417,
+          294078,
+          299741,
+          305403,
+          311066,
+          316728,
+          322391
+        ]
+      },
+      "reordered_info": null
+    }
+  ]
+}

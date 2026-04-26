@@ -1,3 +1,10 @@
 /data/*.db
 /dist/
 /out/
+/frames/
+__pycache__/
+*.pyc
+.coverage
+.idea/
+report.html
+alignment_data.json

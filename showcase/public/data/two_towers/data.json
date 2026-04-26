@@ -1,0 +1,3008 @@
+{
+  "film": {
+    "slug": "two_towers",
+    "title": "The Two Towers",
+    "year": 2002,
+    "fps": 23.976216,
+    "theatrical_frames": 258120,
+    "extended_frames": 338664
+  },
+  "chapters": {
+    "theatrical": [
+      {
+        "start_seconds": 0.0,
+        "title": "The Foundations of Stone"
+      },
+      {
+        "start_seconds": 248.707,
+        "title": "The Taming of Smeagol"
+      },
+      {
+        "start_seconds": 692.108,
+        "title": "The Uruk-hai"
+      },
+      {
+        "start_seconds": 737.654,
+        "title": "The Three Hunters"
+      },
+      {
+        "start_seconds": 867.158,
+        "title": "The Burning of the Westfold"
+      },
+      {
+        "start_seconds": 1050.508,
+        "title": "The Banishment of Eomer"
+      },
+      {
+        "start_seconds": 1218.551,
+        "title": "On the Trail of the Uruk-hai"
+      },
+      {
+        "start_seconds": 1272.688,
+        "title": "Night Camp at Fangorn"
+      },
+      {
+        "start_seconds": 1451.033,
+        "title": "The Riders of Rohan"
+      },
+      {
+        "start_seconds": 1698.322,
+        "title": "Traces of Merry and Pippin"
+      },
+      {
+        "start_seconds": 1850.39,
+        "title": "Treebeard"
+      },
+      {
+        "start_seconds": 2059.641,
+        "title": "The Passage of the Marshes"
+      },
+      {
+        "start_seconds": 2478.559,
+        "title": "The White Rider"
+      },
+      {
+        "start_seconds": 2815.229,
+        "title": "Fangorn Forest"
+      },
+      {
+        "start_seconds": 2855.394,
+        "title": "The Black Gate is Closed"
+      },
+      {
+        "start_seconds": 3173.087,
+        "title": "The King of the Golden Hall"
+      },
+      {
+        "start_seconds": 3860.732,
+        "title": "Simbelmyne on the Burial Mounds"
+      },
+      {
+        "start_seconds": 3974.387,
+        "title": "The King's Decision"
+      },
+      {
+        "start_seconds": 4165.161,
+        "title": "A Daughter of Kings"
+      },
+      {
+        "start_seconds": 4251.205,
+        "title": "Exodus from Edoras"
+      },
+      {
+        "start_seconds": 4315.811,
+        "title": "The Forests of Ithilien"
+      },
+      {
+        "start_seconds": 4418.456,
+        "title": "Gollum and Smeagol"
+      },
+      {
+        "start_seconds": 4568.022,
+        "title": "Of Herbs and Stewed Rabbit"
+      },
+      {
+        "start_seconds": 4815.436,
+        "title": "Dwarf Women"
+      },
+      {
+        "start_seconds": 4892.596,
+        "title": "The Evenstar"
+      },
+      {
+        "start_seconds": 5161.365,
+        "title": "The Wolves of Isengard"
+      },
+      {
+        "start_seconds": 5559.262,
+        "title": "Helm's Deep"
+      },
+      {
+        "start_seconds": 5706.326,
+        "title": "Isengard Unleashed"
+      },
+      {
+        "start_seconds": 5862.356,
+        "title": "The Grace of the Valar"
+      },
+      {
+        "start_seconds": 5960.329,
+        "title": "Arwen's Fate"
+      },
+      {
+        "start_seconds": 6182.676,
+        "title": "The Story Foreseen from Lorien"
+      },
+      {
+        "start_seconds": 6328.656,
+        "title": "The Window on the West"
+      },
+      {
+        "start_seconds": 6504.373,
+        "title": "The Forbidden Pool"
+      },
+      {
+        "start_seconds": 6944.771,
+        "title": "Aragorn's Return"
+      },
+      {
+        "start_seconds": 7278.021,
+        "title": "Entmoot"
+      },
+      {
+        "start_seconds": 7357.892,
+        "title": "The Glittering Caves"
+      },
+      {
+        "start_seconds": 7476.135,
+        "title": "\"Where is the Horse and the Rider?\""
+      },
+      {
+        "start_seconds": 7580.865,
+        "title": "The Host of the Eldar"
+      },
+      {
+        "start_seconds": 7793.285,
+        "title": "The Battle of the Hornburg"
+      },
+      {
+        "start_seconds": 8169.244,
+        "title": "Old Entish"
+      },
+      {
+        "start_seconds": 8268.594,
+        "title": "The Breach of the Deeping Wall"
+      },
+      {
+        "start_seconds": 8473.423,
+        "title": "The Entmoot Decides"
+      },
+      {
+        "start_seconds": 8578.57,
+        "title": "Retreat to the Hornburg"
+      },
+      {
+        "start_seconds": 8935.51,
+        "title": "Master Peregrin's Plan"
+      },
+      {
+        "start_seconds": 9020.303,
+        "title": "Osgiliath"
+      },
+      {
+        "start_seconds": 9055.046,
+        "title": "The Last March of the Ents"
+      },
+      {
+        "start_seconds": 9191.265,
+        "title": "The Nazgul Attack"
+      },
+      {
+        "start_seconds": 9343.251,
+        "title": "Forth Eorlingas"
+      },
+      {
+        "start_seconds": 9621.737,
+        "title": "The Flooding of Isengard"
+      },
+      {
+        "start_seconds": 9768.092,
+        "title": "The Tales That Really Mattered..."
+      },
+      {
+        "start_seconds": 10056.213,
+        "title": "\"The Battle for Middle-earth is About to Begin\""
+      },
+      {
+        "start_seconds": 10155.896,
+        "title": "Gollum's Plan"
+      },
+      {
+        "start_seconds": 10301.291,
+        "title": "End Credits"
+      }
+    ],
+    "extended": [
+      {
+        "start_seconds": 0.0,
+        "title": "The Foundations of Stone"
+      },
+      {
+        "start_seconds": 248.707,
+        "title": "Elven Rope"
+      },
+      {
+        "start_seconds": 370.787,
+        "title": "The Taming of Smeagol"
+      },
+      {
+        "start_seconds": 884.926,
+        "title": "The Uruk-hai"
+      },
+      {
+        "start_seconds": 1026.567,
+        "title": "The Three Hunters"
+      },
+      {
+        "start_seconds": 1156.072,
+        "title": "The Burning of the Westfold"
+      },
+      {
+        "start_seconds": 1383.716,
+        "title": "Massacre at the Fords of Isen"
+      },
+      {
+        "start_seconds": 1438.27,
+        "title": "The Banishment of Eomer"
+      },
+      {
+        "start_seconds": 1629.002,
+        "title": "On the Trail of the Uruk-hai"
+      },
+      {
+        "start_seconds": 1683.14,
+        "title": "Night Camp at Fangorn"
+      },
+      {
+        "start_seconds": 1898.188,
+        "title": "The Riders of Rohan"
+      },
+      {
+        "start_seconds": 2145.477,
+        "title": "The Fate of Merry and Pippin"
+      },
+      {
+        "start_seconds": 2297.545,
+        "title": "Treebeard"
+      },
+      {
+        "start_seconds": 2507.171,
+        "title": "The Passage of the Marshes"
+      },
+      {
+        "start_seconds": 3049.672,
+        "title": "The White Rider"
+      },
+      {
+        "start_seconds": 3499.371,
+        "title": "The Song of the Entwives"
+      },
+      {
+        "start_seconds": 3640.136,
+        "title": "The Heir of Numenor"
+      },
+      {
+        "start_seconds": 3768.264,
+        "title": "The Black Gate is Closed"
+      },
+      {
+        "start_seconds": 4085.957,
+        "title": "Ent Draft"
+      },
+      {
+        "start_seconds": 4361.691,
+        "title": "The King of the Golden Hall"
+      },
+      {
+        "start_seconds": 5057.302,
+        "title": "The Funeral of Theodred"
+      },
+      {
+        "start_seconds": 5141.178,
+        "title": "Simbelmyne on the Burial Mounds"
+      },
+      {
+        "start_seconds": 5254.291,
+        "title": "The King's Decision"
+      },
+      {
+        "start_seconds": 5445.065,
+        "title": "Brego"
+      },
+      {
+        "start_seconds": 5550.545,
+        "title": "The Ring of Barahir"
+      },
+      {
+        "start_seconds": 5670.999,
+        "title": "A Daughter of Kings"
+      },
+      {
+        "start_seconds": 5757.001,
+        "title": "Exodus from Edoras"
+      },
+      {
+        "start_seconds": 5821.274,
+        "title": "The Forests of Ithilien"
+      },
+      {
+        "start_seconds": 5923.918,
+        "title": "Gollum and Smeagol"
+      },
+      {
+        "start_seconds": 6073.484,
+        "title": "Of Herbs and Stewed Rabbit"
+      },
+      {
+        "start_seconds": 6394.18,
+        "title": "Dwarf Women"
+      },
+      {
+        "start_seconds": 6435.93,
+        "title": "One of the Dunedain"
+      },
+      {
+        "start_seconds": 6585.788,
+        "title": "The Evenstar"
+      },
+      {
+        "start_seconds": 6892.344,
+        "title": "The Wolves of Isengard"
+      },
+      {
+        "start_seconds": 7290.534,
+        "title": "Helm's Deep"
+      },
+      {
+        "start_seconds": 7451.069,
+        "title": "Isengard Unleashed"
+      },
+      {
+        "start_seconds": 7607.1,
+        "title": "The Grace of the Valar"
+      },
+      {
+        "start_seconds": 7704.78,
+        "title": "Arwen's Fate"
+      },
+      {
+        "start_seconds": 7927.42,
+        "title": "The Story Foreseen from Lorien"
+      },
+      {
+        "start_seconds": 8073.399,
+        "title": "The Window on the West"
+      },
+      {
+        "start_seconds": 8303.504,
+        "title": "Sons of the Steward"
+      },
+      {
+        "start_seconds": 8582.575,
+        "title": "The Forbidden Pool"
+      },
+      {
+        "start_seconds": 9024.266,
+        "title": "Aragorn's Return"
+      },
+      {
+        "start_seconds": 9357.515,
+        "title": "Entmoot"
+      },
+      {
+        "start_seconds": 9437.387,
+        "title": "The Glittering Caves"
+      },
+      {
+        "start_seconds": 9625.658,
+        "title": "\"Where is the Horse and the Rider?\""
+      },
+      {
+        "start_seconds": 9730.388,
+        "title": "\"Don't Be Hasty, Master Meriadoc!\""
+      },
+      {
+        "start_seconds": 9781.063,
+        "title": "The Host of the Eldar"
+      },
+      {
+        "start_seconds": 9993.484,
+        "title": "The Battle of the Hornburg"
+      },
+      {
+        "start_seconds": 10377.534,
+        "title": "Old Entish"
+      },
+      {
+        "start_seconds": 10474.59,
+        "title": "The Breach of the Deeping Wall"
+      },
+      {
+        "start_seconds": 10679.711,
+        "title": "The Entmoot Decides"
+      },
+      {
+        "start_seconds": 10784.858,
+        "title": "The Retreat to the Hornburg"
+      },
+      {
+        "start_seconds": 11147.345,
+        "title": "Master Peregrin's Plan"
+      },
+      {
+        "start_seconds": 11232.43,
+        "title": "Osgiliath"
+      },
+      {
+        "start_seconds": 11267.173,
+        "title": "The Last March of the Ents"
+      },
+      {
+        "start_seconds": 11416.697,
+        "title": "The Nazgul Attack"
+      },
+      {
+        "start_seconds": 11568.683,
+        "title": "Forth Eorlingas"
+      },
+      {
+        "start_seconds": 11847.169,
+        "title": "The Flooding of Isengard"
+      },
+      {
+        "start_seconds": 11993.524,
+        "title": "The Tales That Really Mattered..."
+      },
+      {
+        "start_seconds": 12278.809,
+        "title": "Fangorn Comes to Helm's Deep"
+      },
+      {
+        "start_seconds": 12331.32,
+        "title": "The Final Tally"
+      },
+      {
+        "start_seconds": 12371.902,
+        "title": "Flotsam and Jetsam"
+      },
+      {
+        "start_seconds": 12495.692,
+        "title": "Farewell to Faramir"
+      },
+      {
+        "start_seconds": 12645.55,
+        "title": "\"The Battle for Middle-earth is About to Begin\""
+      },
+      {
+        "start_seconds": 12745.233,
+        "title": "Gollum's Plan"
+      },
+      {
+        "start_seconds": 12889.752,
+        "title": "End Credits"
+      },
+      {
+        "start_seconds": 13426.538,
+        "title": "Fan Club Credits"
+      }
+    ]
+  },
+  "differences": [
+    {
+      "index": 1,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 5962,
+        "end_frame": 6228,
+        "start_time": "00:04:08",
+        "end_time": "00:04:19",
+        "duration_seconds": 11.05,
+        "chapter": "The Foundations of Stone"
+      },
+      "extended": {
+        "start_frame": 5962,
+        "end_frame": 9068,
+        "start_time": "00:04:08",
+        "end_time": "00:06:18",
+        "duration_seconds": 129.5,
+        "chapter": "The Foundations of Stone"
+      },
+      "duration_difference_seconds": 118.45,
+      "images": {
+        "theatrical": [
+          5963,
+          6095
+        ],
+        "extended": [
+          5963,
+          6405,
+          6849,
+          7293,
+          7736,
+          8180,
+          8624
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 2,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 8810,
+        "end_frame": 8811,
+        "start_time": "00:06:07",
+        "end_time": "00:06:07",
+        "duration_seconds": 0.0,
+        "chapter": "The Taming of Smeagol"
+      },
+      "extended": {
+        "start_frame": 11650,
+        "end_frame": 12152,
+        "start_time": "00:08:05",
+        "end_time": "00:08:26",
+        "duration_seconds": 20.9,
+        "chapter": "The Taming of Smeagol"
+      },
+      "duration_difference_seconds": 20.9,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          11651,
+          11817,
+          11984
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 3,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 16348,
+        "end_frame": 16398,
+        "start_time": "00:11:21",
+        "end_time": "00:11:23",
+        "duration_seconds": 2.04,
+        "chapter": "The Taming of Smeagol"
+      },
+      "extended": {
+        "start_frame": 19689,
+        "end_frame": 19817,
+        "start_time": "00:13:41",
+        "end_time": "00:13:46",
+        "duration_seconds": 5.3,
+        "chapter": "The Taming of Smeagol"
+      },
+      "duration_difference_seconds": 3.25,
+      "images": {
+        "theatrical": [
+          16349
+        ],
+        "extended": [
+          19690
+        ]
+      },
+      "reordered_info": {
+        "time_range": "00:14:25\u201300:14:25",
+        "matching_frames": 2
+      }
+    },
+    {
+      "index": 4,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 16447,
+        "end_frame": 16594,
+        "start_time": "00:11:25",
+        "end_time": "00:11:32",
+        "duration_seconds": 6.09,
+        "chapter": "The Taming of Smeagol"
+      },
+      "extended": {
+        "start_frame": 19866,
+        "end_frame": 21217,
+        "start_time": "00:13:48",
+        "end_time": "00:14:44",
+        "duration_seconds": 56.31,
+        "chapter": "The Taming of Smeagol"
+      },
+      "duration_difference_seconds": 50.22,
+      "images": {
+        "theatrical": [
+          16448
+        ],
+        "extended": [
+          19867,
+          20091,
+          20316,
+          20541,
+          20766,
+          20991
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 5,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 16995,
+        "end_frame": 17110,
+        "start_time": "00:11:48",
+        "end_time": "00:11:53",
+        "duration_seconds": 4.75,
+        "chapter": "The Uruk-hai"
+      },
+      "extended": {
+        "start_frame": 21618,
+        "end_frame": 24044,
+        "start_time": "00:15:01",
+        "end_time": "00:16:42",
+        "duration_seconds": 101.14,
+        "chapter": "The Uruk-hai"
+      },
+      "duration_difference_seconds": 96.39,
+      "images": {
+        "theatrical": [
+          16996
+        ],
+        "extended": [
+          21619,
+          21964,
+          22311,
+          22657,
+          23004,
+          23350,
+          23697
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 6,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 17198,
+        "end_frame": 17248,
+        "start_time": "00:11:57",
+        "end_time": "00:11:59",
+        "duration_seconds": 2.04,
+        "chapter": "The Uruk-hai"
+      },
+      "extended": {
+        "start_frame": 24132,
+        "end_frame": 24134,
+        "start_time": "00:16:46",
+        "end_time": "00:16:46",
+        "duration_seconds": 0.04,
+        "chapter": "The Uruk-hai"
+      },
+      "duration_difference_seconds": 2.0,
+      "images": {
+        "theatrical": [
+          17199
+        ],
+        "extended": [
+          24133
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 7,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 17295,
+        "end_frame": 17296,
+        "start_time": "00:12:01",
+        "end_time": "00:12:01",
+        "duration_seconds": 0.0,
+        "chapter": "The Uruk-hai"
+      },
+      "extended": {
+        "start_frame": 24181,
+        "end_frame": 24223,
+        "start_time": "00:16:48",
+        "end_time": "00:16:50",
+        "duration_seconds": 1.71,
+        "chapter": "The Uruk-hai"
+      },
+      "duration_difference_seconds": 1.71,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          24182
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 8,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 23042,
+        "end_frame": 23158,
+        "start_time": "00:16:01",
+        "end_time": "00:16:05",
+        "duration_seconds": 4.8,
+        "chapter": "The Burning of the Westfold"
+      },
+      "extended": {
+        "start_frame": 29969,
+        "end_frame": 31099,
+        "start_time": "00:20:49",
+        "end_time": "00:21:37",
+        "duration_seconds": 47.09,
+        "chapter": "The Burning of the Westfold"
+      },
+      "duration_difference_seconds": 42.29,
+      "images": {
+        "theatrical": [
+          23043
+        ],
+        "extended": [
+          29970,
+          30195,
+          30421,
+          30647,
+          30873
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 9,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 23586,
+        "end_frame": 23587,
+        "start_time": "00:16:23",
+        "end_time": "00:16:23",
+        "duration_seconds": 0.0,
+        "chapter": "The Burning of the Westfold"
+      },
+      "extended": {
+        "start_frame": 31527,
+        "end_frame": 31552,
+        "start_time": "00:21:54",
+        "end_time": "00:21:55",
+        "duration_seconds": 1.0,
+        "chapter": "The Burning of the Westfold"
+      },
+      "duration_difference_seconds": 1.0,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          31528
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 10,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 23626,
+        "end_frame": 23627,
+        "start_time": "00:16:25",
+        "end_time": "00:16:25",
+        "duration_seconds": 0.0,
+        "chapter": "The Burning of the Westfold"
+      },
+      "extended": {
+        "start_frame": 31591,
+        "end_frame": 31616,
+        "start_time": "00:21:57",
+        "end_time": "00:21:58",
+        "duration_seconds": 1.0,
+        "chapter": "The Burning of the Westfold"
+      },
+      "duration_difference_seconds": 1.0,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          31592
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 11,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 25186,
+        "end_frame": 25255,
+        "start_time": "00:17:30",
+        "end_time": "00:17:33",
+        "duration_seconds": 2.84,
+        "chapter": "The Burning of the Westfold"
+      },
+      "extended": {
+        "start_frame": 33175,
+        "end_frame": 34554,
+        "start_time": "00:23:03",
+        "end_time": "00:24:01",
+        "duration_seconds": 57.47,
+        "chapter": "The Burning of the Westfold"
+      },
+      "duration_difference_seconds": 54.64,
+      "images": {
+        "theatrical": [
+          25187
+        ],
+        "extended": [
+          33176,
+          33404,
+          33634,
+          33864,
+          34094,
+          34324
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 12,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 25327,
+        "end_frame": 25328,
+        "start_time": "00:17:36",
+        "end_time": "00:17:36",
+        "duration_seconds": 0.0,
+        "chapter": "The Banishment of Eomer"
+      },
+      "extended": {
+        "start_frame": 34626,
+        "end_frame": 34751,
+        "start_time": "00:24:04",
+        "end_time": "00:24:09",
+        "duration_seconds": 5.17,
+        "chapter": "The Banishment of Eomer"
+      },
+      "duration_difference_seconds": 5.17,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          34627
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 13,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 29021,
+        "end_frame": 29119,
+        "start_time": "00:20:10",
+        "end_time": "00:20:14",
+        "duration_seconds": 4.05,
+        "chapter": "The Banishment of Eomer"
+      },
+      "extended": {
+        "start_frame": 38452,
+        "end_frame": 38960,
+        "start_time": "00:26:43",
+        "end_time": "00:27:04",
+        "duration_seconds": 21.15,
+        "chapter": "The Banishment of Eomer"
+      },
+      "duration_difference_seconds": 17.1,
+      "images": {
+        "theatrical": [
+          29022
+        ],
+        "extended": [
+          38453,
+          38621,
+          38790
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 14,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 32944,
+        "end_frame": 32945,
+        "start_time": "00:22:54",
+        "end_time": "00:22:54",
+        "duration_seconds": 0.0,
+        "chapter": "Night Camp at Fangorn"
+      },
+      "extended": {
+        "start_frame": 42785,
+        "end_frame": 43606,
+        "start_time": "00:29:44",
+        "end_time": "00:30:18",
+        "duration_seconds": 34.2,
+        "chapter": "Night Camp at Fangorn"
+      },
+      "duration_difference_seconds": 34.2,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          42786,
+          42990,
+          43195,
+          43400
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 15,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 33054,
+        "end_frame": 33081,
+        "start_time": "00:22:58",
+        "end_time": "00:22:59",
+        "duration_seconds": 1.08,
+        "chapter": "Night Camp at Fangorn"
+      },
+      "extended": {
+        "start_frame": 43715,
+        "end_frame": 43802,
+        "start_time": "00:30:23",
+        "end_time": "00:30:26",
+        "duration_seconds": 3.59,
+        "chapter": "Night Camp at Fangorn"
+      },
+      "duration_difference_seconds": 2.5,
+      "images": {
+        "theatrical": [
+          33055
+        ],
+        "extended": [
+          43716
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 16,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 47105,
+        "end_frame": 47106,
+        "start_time": "00:32:44",
+        "end_time": "00:32:44",
+        "duration_seconds": 0.0,
+        "chapter": "Treebeard"
+      },
+      "extended": {
+        "start_frame": 57826,
+        "end_frame": 57836,
+        "start_time": "00:40:11",
+        "end_time": "00:40:12",
+        "duration_seconds": 0.38,
+        "chapter": "Treebeard"
+      },
+      "duration_difference_seconds": 0.38,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          57827
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 17,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 51002,
+        "end_frame": 51003,
+        "start_time": "00:35:27",
+        "end_time": "00:35:27",
+        "duration_seconds": 0.0,
+        "chapter": "The Passage of the Marshes"
+      },
+      "extended": {
+        "start_frame": 61732,
+        "end_frame": 64696,
+        "start_time": "00:42:54",
+        "end_time": "00:44:58",
+        "duration_seconds": 123.58,
+        "chapter": "The Passage of the Marshes"
+      },
+      "duration_difference_seconds": 123.58,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          61733,
+          62155,
+          62578,
+          63002,
+          63425,
+          63849,
+          64272
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 18,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 60724,
+        "end_frame": 60815,
+        "start_time": "00:42:12",
+        "end_time": "00:42:16",
+        "duration_seconds": 3.75,
+        "chapter": "The White Rider"
+      },
+      "extended": {
+        "start_frame": 74417,
+        "end_frame": 74988,
+        "start_time": "00:51:43",
+        "end_time": "00:52:07",
+        "duration_seconds": 23.77,
+        "chapter": "The White Rider"
+      },
+      "duration_difference_seconds": 20.02,
+      "images": {
+        "theatrical": [
+          60725
+        ],
+        "extended": [
+          74418,
+          74607,
+          74797
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 19,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 62854,
+        "end_frame": 62855,
+        "start_time": "00:43:41",
+        "end_time": "00:43:41",
+        "duration_seconds": 0.0,
+        "chapter": "The White Rider"
+      },
+      "extended": {
+        "start_frame": 77027,
+        "end_frame": 77088,
+        "start_time": "00:53:32",
+        "end_time": "00:53:35",
+        "duration_seconds": 2.5,
+        "chapter": "The White Rider"
+      },
+      "duration_difference_seconds": 2.5,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          77028
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 20,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 62939,
+        "end_frame": 63020,
+        "start_time": "00:43:45",
+        "end_time": "00:43:48",
+        "duration_seconds": 3.34,
+        "chapter": "The White Rider"
+      },
+      "extended": {
+        "start_frame": 77172,
+        "end_frame": 77388,
+        "start_time": "00:53:38",
+        "end_time": "00:53:47",
+        "duration_seconds": 8.97,
+        "chapter": "The White Rider"
+      },
+      "duration_difference_seconds": 5.63,
+      "images": {
+        "theatrical": [
+          62940
+        ],
+        "extended": [
+          77173
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 21,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 65633,
+        "end_frame": 65634,
+        "start_time": "00:45:37",
+        "end_time": "00:45:37",
+        "duration_seconds": 0.0,
+        "chapter": "The White Rider"
+      },
+      "extended": {
+        "start_frame": 80001,
+        "end_frame": 80010,
+        "start_time": "00:55:36",
+        "end_time": "00:55:37",
+        "duration_seconds": 0.33,
+        "chapter": "The White Rider"
+      },
+      "duration_difference_seconds": 0.33,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          80002
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 22,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 65817,
+        "end_frame": 65818,
+        "start_time": "00:45:45",
+        "end_time": "00:45:45",
+        "duration_seconds": 0.0,
+        "chapter": "The White Rider"
+      },
+      "extended": {
+        "start_frame": 80193,
+        "end_frame": 82218,
+        "start_time": "00:55:44",
+        "end_time": "00:57:09",
+        "duration_seconds": 84.42,
+        "chapter": "The White Rider"
+      },
+      "duration_difference_seconds": 84.42,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          80194,
+          80482,
+          80771,
+          81060,
+          81350,
+          81639,
+          81928
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 23,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 67497,
+        "end_frame": 67499,
+        "start_time": "00:46:55",
+        "end_time": "00:46:55",
+        "duration_seconds": 0.04,
+        "chapter": "The White Rider"
+      },
+      "extended": {
+        "start_frame": 83897,
+        "end_frame": 84719,
+        "start_time": "00:58:19",
+        "end_time": "00:58:53",
+        "duration_seconds": 34.24,
+        "chapter": "The White Rider"
+      },
+      "duration_difference_seconds": 34.2,
+      "images": {
+        "theatrical": [
+          67498
+        ],
+        "extended": [
+          83898,
+          84102,
+          84308,
+          84513
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 24,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 67633,
+        "end_frame": 68461,
+        "start_time": "00:47:00",
+        "end_time": "00:47:35",
+        "duration_seconds": 34.49,
+        "chapter": "Fangorn Forest"
+      },
+      "extended": {
+        "start_frame": 84853,
+        "end_frame": 90348,
+        "start_time": "00:58:59",
+        "end_time": "01:02:48",
+        "duration_seconds": 229.14,
+        "chapter": "The Song of the Entwives"
+      },
+      "duration_difference_seconds": 194.65,
+      "images": {
+        "theatrical": [
+          67634,
+          67840,
+          68047,
+          68254
+        ],
+        "extended": [
+          84854,
+          85638,
+          86423,
+          87208,
+          87993,
+          88778,
+          89563
+        ]
+      },
+      "reordered_info": {
+        "time_range": "01:11:19\u201301:11:35",
+        "matching_frames": 7
+      }
+    },
+    {
+      "index": 25,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 76077,
+        "end_frame": 76078,
+        "start_time": "00:52:53",
+        "end_time": "00:52:53",
+        "duration_seconds": 0.0,
+        "chapter": "The Black Gate is Closed"
+      },
+      "extended": {
+        "start_frame": 97962,
+        "end_frame": 104584,
+        "start_time": "01:08:05",
+        "end_time": "01:12:41",
+        "duration_seconds": 276.15,
+        "chapter": "The Black Gate is Closed"
+      },
+      "duration_difference_seconds": 276.15,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          97963,
+          98908,
+          99854,
+          100800,
+          101746,
+          102692,
+          103638
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 26,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 91590,
+        "end_frame": 91591,
+        "start_time": "01:03:40",
+        "end_time": "01:03:40",
+        "duration_seconds": 0.0,
+        "chapter": "The King of the Golden Hall"
+      },
+      "extended": {
+        "start_frame": 120096,
+        "end_frame": 120280,
+        "start_time": "01:23:28",
+        "end_time": "01:23:36",
+        "duration_seconds": 7.63,
+        "chapter": "The King of the Golden Hall"
+      },
+      "duration_difference_seconds": 7.63,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          120097
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 27,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 92564,
+        "end_frame": 92565,
+        "start_time": "01:04:20",
+        "end_time": "01:04:20",
+        "duration_seconds": 0.0,
+        "chapter": "The King of the Golden Hall"
+      },
+      "extended": {
+        "start_frame": 121253,
+        "end_frame": 123252,
+        "start_time": "01:24:17",
+        "end_time": "01:25:40",
+        "duration_seconds": 83.33,
+        "chapter": "The King of the Golden Hall"
+      },
+      "duration_difference_seconds": 83.33,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          121254,
+          121538,
+          121824,
+          122109,
+          122395,
+          122680,
+          122966
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 28,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 99863,
+        "end_frame": 99977,
+        "start_time": "01:09:25",
+        "end_time": "01:09:29",
+        "duration_seconds": 4.71,
+        "chapter": "The King's Decision"
+      },
+      "extended": {
+        "start_frame": 130550,
+        "end_frame": 136080,
+        "start_time": "01:30:44",
+        "end_time": "01:34:35",
+        "duration_seconds": 230.6,
+        "chapter": "The King's Decision"
+      },
+      "duration_difference_seconds": 225.89,
+      "images": {
+        "theatrical": [
+          99864
+        ],
+        "extended": [
+          130551,
+          131340,
+          132130,
+          132920,
+          133710,
+          134500,
+          135290
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 29,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 101926,
+        "end_frame": 102046,
+        "start_time": "01:10:51",
+        "end_time": "01:10:56",
+        "duration_seconds": 4.96,
+        "chapter": "A Daughter of Kings"
+      },
+      "extended": {
+        "start_frame": 138029,
+        "end_frame": 138030,
+        "start_time": "01:35:56",
+        "end_time": "01:35:56",
+        "duration_seconds": 0.0,
+        "chapter": "A Daughter of Kings"
+      },
+      "duration_difference_seconds": 4.96,
+      "images": {
+        "theatrical": [
+          101927
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 30,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 102235,
+        "end_frame": 102302,
+        "start_time": "01:11:04",
+        "end_time": "01:11:06",
+        "duration_seconds": 2.75,
+        "chapter": "Exodus from Edoras"
+      },
+      "extended": {
+        "start_frame": 138219,
+        "end_frame": 138397,
+        "start_time": "01:36:04",
+        "end_time": "01:36:12",
+        "duration_seconds": 7.38,
+        "chapter": "Exodus from Edoras"
+      },
+      "duration_difference_seconds": 4.63,
+      "images": {
+        "theatrical": [
+          102236
+        ],
+        "extended": [
+          138220
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 31,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 115697,
+        "end_frame": 115909,
+        "start_time": "01:20:25",
+        "end_time": "01:20:34",
+        "duration_seconds": 8.8,
+        "chapter": "Dwarf Women"
+      },
+      "extended": {
+        "start_frame": 151800,
+        "end_frame": 153269,
+        "start_time": "01:45:31",
+        "end_time": "01:46:32",
+        "duration_seconds": 61.23,
+        "chapter": "Of Herbs and Stewed Rabbit"
+      },
+      "duration_difference_seconds": 52.43,
+      "images": {
+        "theatrical": [
+          115698
+        ],
+        "extended": [
+          151801,
+          152009,
+          152219,
+          152429,
+          152639,
+          152849,
+          153059
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 32,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 116931,
+        "end_frame": 116932,
+        "start_time": "01:21:16",
+        "end_time": "01:21:16",
+        "duration_seconds": 0.0,
+        "chapter": "Dwarf Women"
+      },
+      "extended": {
+        "start_frame": 154291,
+        "end_frame": 154308,
+        "start_time": "01:47:15",
+        "end_time": "01:47:15",
+        "duration_seconds": 0.67,
+        "chapter": "Dwarf Women"
+      },
+      "duration_difference_seconds": 0.67,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          154292
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 33,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 116985,
+        "end_frame": 116986,
+        "start_time": "01:21:19",
+        "end_time": "01:21:19",
+        "duration_seconds": 0.0,
+        "chapter": "Dwarf Women"
+      },
+      "extended": {
+        "start_frame": 154361,
+        "end_frame": 154589,
+        "start_time": "01:47:18",
+        "end_time": "01:47:27",
+        "duration_seconds": 9.47,
+        "chapter": "One of the Dunedain"
+      },
+      "duration_difference_seconds": 9.47,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          154362
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 34,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 117050,
+        "end_frame": 117116,
+        "start_time": "01:21:21",
+        "end_time": "01:21:24",
+        "duration_seconds": 2.71,
+        "chapter": "Dwarf Women"
+      },
+      "extended": {
+        "start_frame": 154653,
+        "end_frame": 154968,
+        "start_time": "01:47:30",
+        "end_time": "01:47:43",
+        "duration_seconds": 13.1,
+        "chapter": "One of the Dunedain"
+      },
+      "duration_difference_seconds": 10.39,
+      "images": {
+        "theatrical": [
+          117051
+        ],
+        "extended": [
+          154654,
+          154810
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 35,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 117233,
+        "end_frame": 117417,
+        "start_time": "01:21:29",
+        "end_time": "01:21:37",
+        "duration_seconds": 7.63,
+        "chapter": "Dwarf Women"
+      },
+      "extended": {
+        "start_frame": 155085,
+        "end_frame": 158059,
+        "start_time": "01:47:48",
+        "end_time": "01:49:52",
+        "duration_seconds": 124.0,
+        "chapter": "One of the Dunedain"
+      },
+      "duration_difference_seconds": 116.37,
+      "images": {
+        "theatrical": [
+          117234
+        ],
+        "extended": [
+          155086,
+          155509,
+          155934,
+          156359,
+          156784,
+          157209,
+          157634
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 36,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 117508,
+        "end_frame": 117511,
+        "start_time": "01:21:41",
+        "end_time": "01:21:41",
+        "duration_seconds": 0.08,
+        "chapter": "The Evenstar"
+      },
+      "extended": {
+        "start_frame": 158150,
+        "end_frame": 158152,
+        "start_time": "01:49:56",
+        "end_time": "01:49:56",
+        "duration_seconds": 0.04,
+        "chapter": "The Evenstar"
+      },
+      "duration_difference_seconds": 0.04,
+      "images": {
+        "theatrical": [
+          117509
+        ],
+        "extended": [
+          158151
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 37,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 117635,
+        "end_frame": 117637,
+        "start_time": "01:21:46",
+        "end_time": "01:21:46",
+        "duration_seconds": 0.04,
+        "chapter": "The Evenstar"
+      },
+      "extended": {
+        "start_frame": 158276,
+        "end_frame": 158279,
+        "start_time": "01:50:01",
+        "end_time": "01:50:01",
+        "duration_seconds": 0.08,
+        "chapter": "The Evenstar"
+      },
+      "duration_difference_seconds": 0.04,
+      "images": {
+        "theatrical": [
+          117636
+        ],
+        "extended": [
+          158277
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 38,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 122209,
+        "end_frame": 123065,
+        "start_time": "01:24:57",
+        "end_time": "01:25:32",
+        "duration_seconds": 35.66,
+        "chapter": "The Evenstar"
+      },
+      "extended": {
+        "start_frame": 162851,
+        "end_frame": 164567,
+        "start_time": "01:53:12",
+        "end_time": "01:54:23",
+        "duration_seconds": 71.53,
+        "chapter": "The Evenstar"
+      },
+      "duration_difference_seconds": 35.87,
+      "images": {
+        "theatrical": [
+          122210,
+          122423,
+          122637,
+          122851
+        ],
+        "extended": [
+          162852,
+          163096,
+          163341,
+          163586,
+          163831,
+          164076,
+          164321
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 39,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 124914,
+        "end_frame": 124916,
+        "start_time": "01:26:49",
+        "end_time": "01:26:49",
+        "duration_seconds": 0.04,
+        "chapter": "The Wolves of Isengard"
+      },
+      "extended": {
+        "start_frame": 166416,
+        "end_frame": 166417,
+        "start_time": "01:55:40",
+        "end_time": "01:55:40",
+        "duration_seconds": 0.0,
+        "chapter": "The Wolves of Isengard"
+      },
+      "duration_difference_seconds": 0.04,
+      "images": {
+        "theatrical": [
+          124915
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 40,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 124931,
+        "end_frame": 124932,
+        "start_time": "01:26:50",
+        "end_time": "01:26:50",
+        "duration_seconds": 0.0,
+        "chapter": "The Wolves of Isengard"
+      },
+      "extended": {
+        "start_frame": 166432,
+        "end_frame": 166434,
+        "start_time": "01:55:41",
+        "end_time": "01:55:41",
+        "duration_seconds": 0.04,
+        "chapter": "The Wolves of Isengard"
+      },
+      "duration_difference_seconds": 0.04,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          166433
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 41,
+      "type": "unique_to_a",
+      "theatrical": {
+        "start_frame": 126457,
+        "end_frame": 126459,
+        "start_time": "01:27:54",
+        "end_time": "01:27:54",
+        "duration_seconds": 0.04,
+        "chapter": "The Wolves of Isengard"
+      },
+      "extended": {
+        "start_frame": 167959,
+        "end_frame": 167960,
+        "start_time": "01:56:45",
+        "end_time": "01:56:45",
+        "duration_seconds": 0.0,
+        "chapter": "The Wolves of Isengard"
+      },
+      "duration_difference_seconds": 0.04,
+      "images": {
+        "theatrical": [
+          126458
+        ],
+        "extended": []
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 42,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 126495,
+        "end_frame": 126496,
+        "start_time": "01:27:55",
+        "end_time": "01:27:55",
+        "duration_seconds": 0.0,
+        "chapter": "The Wolves of Isengard"
+      },
+      "extended": {
+        "start_frame": 167996,
+        "end_frame": 167998,
+        "start_time": "01:56:46",
+        "end_time": "01:56:46",
+        "duration_seconds": 0.04,
+        "chapter": "The Wolves of Isengard"
+      },
+      "duration_difference_seconds": 0.04,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          167997
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 43,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 128072,
+        "end_frame": 128073,
+        "start_time": "01:29:01",
+        "end_time": "01:29:01",
+        "duration_seconds": 0.0,
+        "chapter": "The Wolves of Isengard"
+      },
+      "extended": {
+        "start_frame": 169574,
+        "end_frame": 169582,
+        "start_time": "01:57:52",
+        "end_time": "01:57:52",
+        "duration_seconds": 0.29,
+        "chapter": "The Wolves of Isengard"
+      },
+      "duration_difference_seconds": 0.29,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          169575
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 44,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 134901,
+        "end_frame": 134902,
+        "start_time": "01:33:46",
+        "end_time": "01:33:46",
+        "duration_seconds": 0.0,
+        "chapter": "Helm's Deep"
+      },
+      "extended": {
+        "start_frame": 176410,
+        "end_frame": 176734,
+        "start_time": "02:02:37",
+        "end_time": "02:02:51",
+        "duration_seconds": 13.47,
+        "chapter": "Helm's Deep"
+      },
+      "duration_difference_seconds": 13.47,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          176411,
+          176572
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 45,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 155641,
+        "end_frame": 155825,
+        "start_time": "01:48:11",
+        "end_time": "01:48:19",
+        "duration_seconds": 7.63,
+        "chapter": "The Window on the West"
+      },
+      "extended": {
+        "start_frame": 197473,
+        "end_frame": 198087,
+        "start_time": "02:17:16",
+        "end_time": "02:17:41",
+        "duration_seconds": 25.57,
+        "chapter": "The Window on the West"
+      },
+      "duration_difference_seconds": 17.93,
+      "images": {
+        "theatrical": [
+          155642
+        ],
+        "extended": [
+          197474,
+          197677,
+          197882
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 46,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 155948,
+        "end_frame": 156119,
+        "start_time": "01:48:24",
+        "end_time": "01:48:31",
+        "duration_seconds": 7.09,
+        "chapter": "The Window on the West"
+      },
+      "extended": {
+        "start_frame": 198210,
+        "end_frame": 199153,
+        "start_time": "02:17:46",
+        "end_time": "02:18:26",
+        "duration_seconds": 39.29,
+        "chapter": "The Window on the West"
+      },
+      "duration_difference_seconds": 32.2,
+      "images": {
+        "theatrical": [
+          155949
+        ],
+        "extended": [
+          198211,
+          198445,
+          198681,
+          198917
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 47,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 156205,
+        "end_frame": 156206,
+        "start_time": "01:48:34",
+        "end_time": "01:48:35",
+        "duration_seconds": 0.0,
+        "chapter": "The Forbidden Pool"
+      },
+      "extended": {
+        "start_frame": 199239,
+        "end_frame": 205776,
+        "start_time": "02:18:29",
+        "end_time": "02:23:02",
+        "duration_seconds": 272.6,
+        "chapter": "Sons of the Steward"
+      },
+      "duration_difference_seconds": 272.6,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          199240,
+          200172,
+          201106,
+          202040,
+          202974,
+          203908,
+          204842
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 48,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 156457,
+        "end_frame": 156524,
+        "start_time": "01:48:45",
+        "end_time": "01:48:48",
+        "duration_seconds": 2.75,
+        "chapter": "The Forbidden Pool"
+      },
+      "extended": {
+        "start_frame": 206027,
+        "end_frame": 206095,
+        "start_time": "02:23:12",
+        "end_time": "02:23:15",
+        "duration_seconds": 2.79,
+        "chapter": "The Forbidden Pool"
+      },
+      "duration_difference_seconds": 0.04,
+      "images": {
+        "theatrical": [
+          156458
+        ],
+        "extended": [
+          206028
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 49,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 160529,
+        "end_frame": 160530,
+        "start_time": "01:51:35",
+        "end_time": "01:51:35",
+        "duration_seconds": 0.0,
+        "chapter": "The Forbidden Pool"
+      },
+      "extended": {
+        "start_frame": 210099,
+        "end_frame": 210103,
+        "start_time": "02:26:02",
+        "end_time": "02:26:02",
+        "duration_seconds": 0.13,
+        "chapter": "The Forbidden Pool"
+      },
+      "duration_difference_seconds": 0.13,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          210100
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 50,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 160559,
+        "end_frame": 160560,
+        "start_time": "01:51:36",
+        "end_time": "01:51:36",
+        "duration_seconds": 0.0,
+        "chapter": "The Forbidden Pool"
+      },
+      "extended": {
+        "start_frame": 210132,
+        "end_frame": 210137,
+        "start_time": "02:26:04",
+        "end_time": "02:26:04",
+        "duration_seconds": 0.17,
+        "chapter": "The Forbidden Pool"
+      },
+      "duration_difference_seconds": 0.17,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          210133
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 51,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 160590,
+        "end_frame": 160704,
+        "start_time": "01:51:37",
+        "end_time": "01:51:42",
+        "duration_seconds": 4.71,
+        "chapter": "The Forbidden Pool"
+      },
+      "extended": {
+        "start_frame": 210167,
+        "end_frame": 210562,
+        "start_time": "02:26:05",
+        "end_time": "02:26:22",
+        "duration_seconds": 16.43,
+        "chapter": "The Forbidden Pool"
+      },
+      "duration_difference_seconds": 11.72,
+      "images": {
+        "theatrical": [
+          160591
+        ],
+        "extended": [
+          210168,
+          210364
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 52,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 176567,
+        "end_frame": 176568,
+        "start_time": "02:02:44",
+        "end_time": "02:02:44",
+        "duration_seconds": 0.0,
+        "chapter": "The Glittering Caves"
+      },
+      "extended": {
+        "start_frame": 226425,
+        "end_frame": 226434,
+        "start_time": "02:37:23",
+        "end_time": "02:37:24",
+        "duration_seconds": 0.33,
+        "chapter": "The Glittering Caves"
+      },
+      "duration_difference_seconds": 0.33,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          226426
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 53,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 176643,
+        "end_frame": 176644,
+        "start_time": "02:02:47",
+        "end_time": "02:02:47",
+        "duration_seconds": 0.0,
+        "chapter": "The Glittering Caves"
+      },
+      "extended": {
+        "start_frame": 226509,
+        "end_frame": 228046,
+        "start_time": "02:37:27",
+        "end_time": "02:38:31",
+        "duration_seconds": 64.06,
+        "chapter": "The Glittering Caves"
+      },
+      "duration_difference_seconds": 64.06,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          226510,
+          226728,
+          226948,
+          227167,
+          227387,
+          227606,
+          227826
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 54,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 176841,
+        "end_frame": 176842,
+        "start_time": "02:02:55",
+        "end_time": "02:02:55",
+        "duration_seconds": 0.0,
+        "chapter": "The Glittering Caves"
+      },
+      "extended": {
+        "start_frame": 228243,
+        "end_frame": 228372,
+        "start_time": "02:38:39",
+        "end_time": "02:38:44",
+        "duration_seconds": 5.34,
+        "chapter": "The Glittering Caves"
+      },
+      "duration_difference_seconds": 5.34,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          228244
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 55,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 178099,
+        "end_frame": 178100,
+        "start_time": "02:03:48",
+        "end_time": "02:03:48",
+        "duration_seconds": 0.0,
+        "chapter": "The Glittering Caves"
+      },
+      "extended": {
+        "start_frame": 229629,
+        "end_frame": 229637,
+        "start_time": "02:39:37",
+        "end_time": "02:39:37",
+        "duration_seconds": 0.29,
+        "chapter": "The Glittering Caves"
+      },
+      "duration_difference_seconds": 0.29,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          229630
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 56,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 181758,
+        "end_frame": 181759,
+        "start_time": "02:06:20",
+        "end_time": "02:06:20",
+        "duration_seconds": 0.0,
+        "chapter": "\"Where is the Horse and the Rider?\""
+      },
+      "extended": {
+        "start_frame": 233295,
+        "end_frame": 234511,
+        "start_time": "02:42:10",
+        "end_time": "02:43:00",
+        "duration_seconds": 50.68,
+        "chapter": "\"Where is the Horse and the Rider?\""
+      },
+      "duration_difference_seconds": 50.68,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          233296,
+          233497,
+          233700,
+          233903,
+          234105,
+          234308
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 57,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 194758,
+        "end_frame": 194894,
+        "start_time": "02:15:22",
+        "end_time": "02:15:28",
+        "duration_seconds": 5.63,
+        "chapter": "The Battle of the Hornburg"
+      },
+      "extended": {
+        "start_frame": 247510,
+        "end_frame": 247840,
+        "start_time": "02:52:03",
+        "end_time": "02:52:16",
+        "duration_seconds": 13.72,
+        "chapter": "The Battle of the Hornburg"
+      },
+      "duration_difference_seconds": 8.09,
+      "images": {
+        "theatrical": [
+          194759
+        ],
+        "extended": [
+          247511,
+          247675
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 58,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 195865,
+        "end_frame": 196193,
+        "start_time": "02:16:09",
+        "end_time": "02:16:22",
+        "duration_seconds": 13.64,
+        "chapter": "The Battle of the Hornburg"
+      },
+      "extended": {
+        "start_frame": 248811,
+        "end_frame": 248819,
+        "start_time": "02:52:57",
+        "end_time": "02:52:57",
+        "duration_seconds": 0.29,
+        "chapter": "The Battle of the Hornburg"
+      },
+      "duration_difference_seconds": 13.35,
+      "images": {
+        "theatrical": [
+          195866,
+          196029
+        ],
+        "extended": [
+          248812
+        ]
+      },
+      "reordered_info": {
+        "time_range": "02:42:16\u201302:42:17",
+        "matching_frames": 2
+      }
+    },
+    {
+      "index": 59,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 196211,
+        "end_frame": 196214,
+        "start_time": "02:16:23",
+        "end_time": "02:16:23",
+        "duration_seconds": 0.08,
+        "chapter": "Old Entish"
+      },
+      "extended": {
+        "start_frame": 248837,
+        "end_frame": 248841,
+        "start_time": "02:52:58",
+        "end_time": "02:52:58",
+        "duration_seconds": 0.13,
+        "chapter": "Old Entish"
+      },
+      "duration_difference_seconds": 0.04,
+      "images": {
+        "theatrical": [
+          196212
+        ],
+        "extended": [
+          248838
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 60,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 196280,
+        "end_frame": 196281,
+        "start_time": "02:16:26",
+        "end_time": "02:16:26",
+        "duration_seconds": 0.0,
+        "chapter": "Old Entish"
+      },
+      "extended": {
+        "start_frame": 248907,
+        "end_frame": 248953,
+        "start_time": "02:53:01",
+        "end_time": "02:53:03",
+        "duration_seconds": 1.88,
+        "chapter": "Old Entish"
+      },
+      "duration_difference_seconds": 1.88,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          248908
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 61,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 196353,
+        "end_frame": 196358,
+        "start_time": "02:16:29",
+        "end_time": "02:16:29",
+        "duration_seconds": 0.17,
+        "chapter": "Old Entish"
+      },
+      "extended": {
+        "start_frame": 249025,
+        "end_frame": 249038,
+        "start_time": "02:53:06",
+        "end_time": "02:53:06",
+        "duration_seconds": 0.5,
+        "chapter": "Old Entish"
+      },
+      "duration_difference_seconds": 0.33,
+      "images": {
+        "theatrical": [
+          196354
+        ],
+        "extended": [
+          249026
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 62,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 196446,
+        "end_frame": 196447,
+        "start_time": "02:16:33",
+        "end_time": "02:16:33",
+        "duration_seconds": 0.0,
+        "chapter": "Old Entish"
+      },
+      "extended": {
+        "start_frame": 249126,
+        "end_frame": 249157,
+        "start_time": "02:53:10",
+        "end_time": "02:53:11",
+        "duration_seconds": 1.25,
+        "chapter": "Old Entish"
+      },
+      "duration_difference_seconds": 1.25,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          249127
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 63,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 196499,
+        "end_frame": 196500,
+        "start_time": "02:16:35",
+        "end_time": "02:16:35",
+        "duration_seconds": 0.0,
+        "chapter": "Old Entish"
+      },
+      "extended": {
+        "start_frame": 249209,
+        "end_frame": 249221,
+        "start_time": "02:53:14",
+        "end_time": "02:53:14",
+        "duration_seconds": 0.46,
+        "chapter": "Old Entish"
+      },
+      "duration_difference_seconds": 0.46,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          249210
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 64,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 196556,
+        "end_frame": 196557,
+        "start_time": "02:16:37",
+        "end_time": "02:16:37",
+        "duration_seconds": 0.0,
+        "chapter": "Old Entish"
+      },
+      "extended": {
+        "start_frame": 249275,
+        "end_frame": 249322,
+        "start_time": "02:53:16",
+        "end_time": "02:53:18",
+        "duration_seconds": 1.92,
+        "chapter": "Old Entish"
+      },
+      "duration_difference_seconds": 1.92,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          249276
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 65,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 196706,
+        "end_frame": 196707,
+        "start_time": "02:16:44",
+        "end_time": "02:16:44",
+        "duration_seconds": 0.0,
+        "chapter": "Old Entish"
+      },
+      "extended": {
+        "start_frame": 249471,
+        "end_frame": 249489,
+        "start_time": "02:53:24",
+        "end_time": "02:53:25",
+        "duration_seconds": 0.71,
+        "chapter": "Old Entish"
+      },
+      "duration_difference_seconds": 0.71,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          249472
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 66,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 197052,
+        "end_frame": 197053,
+        "start_time": "02:16:58",
+        "end_time": "02:16:58",
+        "duration_seconds": 0.0,
+        "chapter": "Old Entish"
+      },
+      "extended": {
+        "start_frame": 249841,
+        "end_frame": 249862,
+        "start_time": "02:53:40",
+        "end_time": "02:53:41",
+        "duration_seconds": 0.83,
+        "chapter": "Old Entish"
+      },
+      "duration_difference_seconds": 0.83,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          249842
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 67,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 197538,
+        "end_frame": 197539,
+        "start_time": "02:17:18",
+        "end_time": "02:17:18",
+        "duration_seconds": 0.0,
+        "chapter": "Old Entish"
+      },
+      "extended": {
+        "start_frame": 250352,
+        "end_frame": 250357,
+        "start_time": "02:54:01",
+        "end_time": "02:54:01",
+        "duration_seconds": 0.17,
+        "chapter": "Old Entish"
+      },
+      "duration_difference_seconds": 0.17,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          250353
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 68,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 197650,
+        "end_frame": 197651,
+        "start_time": "02:17:23",
+        "end_time": "02:17:23",
+        "duration_seconds": 0.0,
+        "chapter": "Old Entish"
+      },
+      "extended": {
+        "start_frame": 250468,
+        "end_frame": 250542,
+        "start_time": "02:54:06",
+        "end_time": "02:54:09",
+        "duration_seconds": 3.04,
+        "chapter": "Old Entish"
+      },
+      "duration_difference_seconds": 3.04,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          250469
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 69,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 202644,
+        "end_frame": 202659,
+        "start_time": "02:20:51",
+        "end_time": "02:20:52",
+        "duration_seconds": 0.58,
+        "chapter": "The Breach of the Deeping Wall"
+      },
+      "extended": {
+        "start_frame": 255535,
+        "end_frame": 255557,
+        "start_time": "02:57:37",
+        "end_time": "02:57:38",
+        "duration_seconds": 0.88,
+        "chapter": "The Breach of the Deeping Wall"
+      },
+      "duration_difference_seconds": 0.29,
+      "images": {
+        "theatrical": [
+          202645
+        ],
+        "extended": [
+          255536
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 70,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 208082,
+        "end_frame": 208083,
+        "start_time": "02:24:38",
+        "end_time": "02:24:38",
+        "duration_seconds": 0.0,
+        "chapter": "Retreat to the Hornburg"
+      },
+      "extended": {
+        "start_frame": 260980,
+        "end_frame": 261011,
+        "start_time": "03:01:24",
+        "end_time": "03:01:26",
+        "duration_seconds": 1.25,
+        "chapter": "The Retreat to the Hornburg"
+      },
+      "duration_difference_seconds": 1.25,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          260981
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 71,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 208708,
+        "end_frame": 208709,
+        "start_time": "02:25:04",
+        "end_time": "02:25:04",
+        "duration_seconds": 0.0,
+        "chapter": "Retreat to the Hornburg"
+      },
+      "extended": {
+        "start_frame": 261636,
+        "end_frame": 261740,
+        "start_time": "03:01:52",
+        "end_time": "03:01:56",
+        "duration_seconds": 4.3,
+        "chapter": "The Retreat to the Hornburg"
+      },
+      "duration_difference_seconds": 4.3,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          261637
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 72,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 218499,
+        "end_frame": 218729,
+        "start_time": "02:31:53",
+        "end_time": "02:32:02",
+        "duration_seconds": 9.55,
+        "chapter": "The Last March of the Ents"
+      },
+      "extended": {
+        "start_frame": 271537,
+        "end_frame": 272086,
+        "start_time": "03:08:45",
+        "end_time": "03:09:08",
+        "duration_seconds": 22.86,
+        "chapter": "The Last March of the Ents"
+      },
+      "duration_difference_seconds": 13.3,
+      "images": {
+        "theatrical": [
+          218500
+        ],
+        "extended": [
+          271538,
+          271720,
+          271903
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 73,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 218881,
+        "end_frame": 218885,
+        "start_time": "02:32:09",
+        "end_time": "02:32:09",
+        "duration_seconds": 0.13,
+        "chapter": "The Last March of the Ents"
+      },
+      "extended": {
+        "start_frame": 272238,
+        "end_frame": 272241,
+        "start_time": "03:09:14",
+        "end_time": "03:09:14",
+        "duration_seconds": 0.08,
+        "chapter": "The Last March of the Ents"
+      },
+      "duration_difference_seconds": 0.04,
+      "images": {
+        "theatrical": [
+          218882
+        ],
+        "extended": [
+          272239
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 74,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 237865,
+        "end_frame": 237866,
+        "start_time": "02:45:20",
+        "end_time": "02:45:20",
+        "duration_seconds": 0.0,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "extended": {
+        "start_frame": 291222,
+        "end_frame": 291231,
+        "start_time": "03:22:26",
+        "end_time": "03:22:26",
+        "duration_seconds": 0.33,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "duration_difference_seconds": 0.33,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          291223
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 75,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 237908,
+        "end_frame": 237909,
+        "start_time": "02:45:22",
+        "end_time": "02:45:22",
+        "duration_seconds": 0.0,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "extended": {
+        "start_frame": 291273,
+        "end_frame": 291315,
+        "start_time": "03:22:28",
+        "end_time": "03:22:30",
+        "duration_seconds": 1.71,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "duration_difference_seconds": 1.71,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          291274
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 76,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 237932,
+        "end_frame": 237995,
+        "start_time": "02:45:23",
+        "end_time": "02:45:26",
+        "duration_seconds": 2.59,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "extended": {
+        "start_frame": 291338,
+        "end_frame": 291395,
+        "start_time": "03:22:31",
+        "end_time": "03:22:33",
+        "duration_seconds": 2.34,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "duration_difference_seconds": 0.25,
+      "images": {
+        "theatrical": [
+          237933
+        ],
+        "extended": [
+          291339
+        ]
+      },
+      "reordered_info": {
+        "time_range": "03:24:38\u201303:24:41",
+        "matching_frames": 48
+      }
+    },
+    {
+      "index": 77,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 238062,
+        "end_frame": 238123,
+        "start_time": "02:45:29",
+        "end_time": "02:45:31",
+        "duration_seconds": 2.5,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "extended": {
+        "start_frame": 291462,
+        "end_frame": 291494,
+        "start_time": "03:22:36",
+        "end_time": "03:22:37",
+        "duration_seconds": 1.29,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "duration_difference_seconds": 1.21,
+      "images": {
+        "theatrical": [
+          238063
+        ],
+        "extended": [
+          291463
+        ]
+      },
+      "reordered_info": {
+        "time_range": "03:22:40\u201303:22:43",
+        "matching_frames": 55
+      }
+    },
+    {
+      "index": 78,
+      "type": "reordered",
+      "theatrical": {
+        "start_frame": 238196,
+        "end_frame": 238378,
+        "start_time": "02:45:34",
+        "end_time": "02:45:42",
+        "duration_seconds": 7.55,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "extended": {
+        "start_frame": 291567,
+        "end_frame": 291653,
+        "start_time": "03:22:40",
+        "end_time": "03:22:44",
+        "duration_seconds": 3.55,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "duration_difference_seconds": 4.0,
+      "images": {
+        "theatrical": [
+          238197
+        ],
+        "extended": [
+          291568
+        ]
+      },
+      "reordered_info": {
+        "time_range": "03:25:23\u201303:25:31",
+        "matching_frames": 139
+      }
+    },
+    {
+      "index": 79,
+      "type": "unique_to_b",
+      "theatrical": {
+        "start_frame": 238500,
+        "end_frame": 238501,
+        "start_time": "02:45:47",
+        "end_time": "02:45:47",
+        "duration_seconds": 0.0,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "extended": {
+        "start_frame": 291775,
+        "end_frame": 291789,
+        "start_time": "03:22:49",
+        "end_time": "03:22:49",
+        "duration_seconds": 0.54,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "duration_difference_seconds": 0.54,
+      "images": {
+        "theatrical": [],
+        "extended": [
+          291776
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 80,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 241092,
+        "end_frame": 241108,
+        "start_time": "02:47:35",
+        "end_time": "02:47:36",
+        "duration_seconds": 0.63,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "extended": {
+        "start_frame": 294396,
+        "end_frame": 303190,
+        "start_time": "03:24:38",
+        "end_time": "03:30:45",
+        "duration_seconds": 366.74,
+        "chapter": "The Tales That Really Mattered..."
+      },
+      "duration_difference_seconds": 366.11,
+      "images": {
+        "theatrical": [
+          241093
+        ],
+        "extended": [
+          294397,
+          295652,
+          296908,
+          298164,
+          299421,
+          300677,
+          301933
+        ]
+      },
+      "reordered_info": null
+    },
+    {
+      "index": 81,
+      "type": "modified",
+      "theatrical": {
+        "start_frame": 246985,
+        "end_frame": 257921,
+        "start_time": "02:51:41",
+        "end_time": "02:59:17",
+        "duration_seconds": 456.08,
+        "chapter": "Gollum's Plan"
+      },
+      "extended": {
+        "start_frame": 309067,
+        "end_frame": 338469,
+        "start_time": "03:34:50",
+        "end_time": "03:55:16",
+        "duration_seconds": 1226.26,
+        "chapter": "End Credits"
+      },
+      "duration_difference_seconds": 770.18,
+      "images": {
+        "theatrical": [
+          246986,
+          248547,
+          250109,
+          251671,
+          253234,
+          254796,
+          256358
+        ],
+        "extended": [
+          309068,
+          313267,
+          317467,
+          321667,
+          325868,
+          330068,
+          334268
+        ]
+      },
+      "reordered_info": null
+    }
+  ]
+}

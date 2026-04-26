@@ -1,0 +1,6 @@
+outs:
+- md5: 3bbd5f0436fe1dfa923ac4462be52e03
+  size: 597200896
+  isexec: true
+  hash: md5
+  path: return_of_the_king.db
