@@ -1,0 +1,6 @@
+outs:
+- md5: cccb96bf607e1b4be78b6ee35bc6a21c
+  size: 533929984
+  isexec: true
+  hash: md5
+  path: two_towers.db
