@@ -2,5 +2,5 @@
     autostage = true
     remote = r2
 ['remote "r2"']
-    url = s3://movie-edition-hashes
-    endpointurl = https://206e709bb72c8903c7a655d9a5192932.r2.cloudflarestorage.com
+    url = s3://movie-hashes
+    endpointurl = https://49ede006bc2dca4685ed269280aa3419.r2.cloudflarestorage.com
