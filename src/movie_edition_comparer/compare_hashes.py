@@ -13,7 +13,7 @@ def configure_parser(parser: argparse.ArgumentParser):
     """Add compare arguments to an argument parser."""
     parser.add_argument("--edition-a", required=True, help="Edition name for edition A (e.g. 'theatrical')")
     parser.add_argument("--edition-b", required=True, help="Edition name for edition B (e.g. 'extended')")
-    parser.add_argument("--db", default="data/frame_hashes.db", help="Path to database file")
+    parser.add_argument("--db", required=True, help="Path to movie database file (e.g. 'data/two_towers.db')")
     parser.add_argument("--label-a", default="a", help="Short label for edition A (used in filenames)")
     parser.add_argument("--label-b", default="b", help="Short label for edition B (used in filenames)")
     parser.add_argument("--movie-a", default=None, help="Path to edition A video file (enables trimming/frames)")

@@ -9,9 +9,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from movie_edition_comparer.algorithms import HASH_COLUMN
 from movie_edition_comparer.db import (
-    FRAME_HASHES_TABLE,
     make_db_fetcher,
     read_hashes_from_db,
     read_unique_matches,
@@ -29,15 +27,15 @@ def db_path(tmp_path):
     path = str(tmp_path / "test.db")
     with closing(sqlite3.connect(path)) as conn:
         conn.execute(f"""
-            CREATE TABLE {FRAME_HASHES_TABLE} (
+            CREATE TABLE frame_hashes (
                 edition TEXT NOT NULL,
                 frame_index INTEGER NOT NULL,
-                {HASH_COLUMN} TEXT NOT NULL,
+                hash_block_mean_0 TEXT NOT NULL,
                 PRIMARY KEY (edition, frame_index)
             )
         """)
         conn.executemany(
-            f"INSERT INTO {FRAME_HASHES_TABLE} (edition, frame_index, {HASH_COLUMN}) VALUES (?, ?, ?)",
+            f"INSERT INTO frame_hashes (edition, frame_index, hash_block_mean_0) VALUES (?, ?, ?)",
             [
                 # Edition A: frames 0–4 with unique hashes
                 ("theatrical", 0, "aaaa"),
@@ -128,7 +126,7 @@ class TestReadUniqueMatches:
         # Insert a duplicate hash in theatrical
         with closing(sqlite3.connect(db_path)) as conn:
             conn.execute(
-                f"INSERT INTO {FRAME_HASHES_TABLE} (edition, frame_index, {HASH_COLUMN}) VALUES (?, ?, ?)",
+                f"INSERT INTO frame_hashes (edition, frame_index, hash_block_mean_0) VALUES (?, ?, ?)",
                 ("theatrical", 5, "aaaa"),  # aaaa now appears twice in theatrical
             )
             conn.commit()
@@ -140,7 +138,7 @@ class TestReadUniqueMatches:
         """Editions with no common hashes return empty list."""
         with closing(sqlite3.connect(db_path)) as conn:
             conn.execute(
-                f"INSERT INTO {FRAME_HASHES_TABLE} (edition, frame_index, {HASH_COLUMN}) VALUES (?, ?, ?)",
+                f"INSERT INTO frame_hashes (edition, frame_index, hash_block_mean_0) VALUES (?, ?, ?)",
                 ("directors_cut", 0, "zzzz"),
             )
             conn.commit()
@@ -152,10 +150,10 @@ class TestReadUniqueMatches:
         path = str(tmp_path / "empty.db")
         with closing(sqlite3.connect(path)) as conn:
             conn.execute(f"""
-                CREATE TABLE {FRAME_HASHES_TABLE} (
+                CREATE TABLE frame_hashes (
                     edition TEXT NOT NULL,
                     frame_index INTEGER NOT NULL,
-                    {HASH_COLUMN} TEXT NOT NULL,
+                    hash_block_mean_0 TEXT NOT NULL,
                     PRIMARY KEY (edition, frame_index)
                 )
             """)

@@ -4,12 +4,15 @@ import cv2
 import numpy as np
 from numpy import ndarray
 
-HASH_COLUMN = "hash"
 
-
-def hash_frame(img: ndarray) -> str:
+def hash_frame_block_mean_0(img: ndarray) -> str:
     """Compute the block mean hash (mode 0) for a video frame."""
     return serialize(cv2.img_hash.blockMeanHash(img, mode=0))
+
+
+def hash_frame_block_mean_1(img: ndarray) -> str:
+    """Compute the block mean hash (mode 1) for a video frame."""
+    return serialize(cv2.img_hash.blockMeanHash(img, mode=1))
 
 
 def hash_frame_md5(img: ndarray) -> str:

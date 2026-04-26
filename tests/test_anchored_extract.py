@@ -12,7 +12,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from movie_edition_comparer.algorithms import hash_frame_md5
-from movie_edition_comparer.db import FRAME_HASHES_TABLE, fetch_md5_landmarks
+from movie_edition_comparer.db import fetch_md5_landmarks
 from movie_edition_comparer.video import _anchored_extract
 
 
@@ -174,7 +174,7 @@ def md5_db(tmp_path):
     path = str(tmp_path / "test.db")
     with closing(sqlite3.connect(path)) as conn:
         conn.execute(f"""
-            CREATE TABLE {FRAME_HASHES_TABLE} (
+            CREATE TABLE frame_hashes (
                 edition TEXT NOT NULL,
                 frame_index INTEGER NOT NULL,
                 hash TEXT NOT NULL,
@@ -197,7 +197,7 @@ def md5_db(tmp_path):
             rows.append(("test_edition", i, f"bmh_{i}", f"md5_{i}"))
 
         conn.executemany(
-            f"INSERT INTO {FRAME_HASHES_TABLE} "
+            f"INSERT INTO frame_hashes "
             f"(edition, frame_index, hash, hash_md5) VALUES (?, ?, ?, ?)",
             rows,
         )

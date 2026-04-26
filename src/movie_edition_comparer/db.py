@@ -3,11 +3,7 @@
 import sqlite3
 from contextlib import closing
 
-from movie_edition_comparer.algorithms import HASH_COLUMN
 from movie_edition_comparer.models import FrameHash, FrameMatch, HashFetcher
-
-FRAME_HASHES_TABLE = "frame_hashes"
-CHAPTERS_TABLE = "chapters"
 
 
 def read_hashes_from_db(
@@ -17,9 +13,9 @@ def read_hashes_from_db(
     with closing(sqlite3.connect(db_path)) as connection:
         cursor = connection.cursor()
         cursor.execute(
-            f"SELECT frame_index, {HASH_COLUMN} "
-            f"FROM {FRAME_HASHES_TABLE} "
-            f"WHERE edition = ? AND frame_index >= ? AND frame_index < ?",
+            "SELECT frame_index, hash_block_mean_0 "
+            "FROM frame_hashes "
+            "WHERE edition = ? AND frame_index >= ? AND frame_index < ?",
             (edition, start, end),
         )
         return [FrameHash(row[0], row[1]) for row in cursor.fetchall()]
@@ -48,10 +44,10 @@ def fetch_md5_landmarks(
             start = max(0, center - window // 2)
             end = center + window // 2
             cursor.execute(
-                f"SELECT frame_index, hash_md5 "
-                f"FROM {FRAME_HASHES_TABLE} "
-                f"WHERE edition = ? AND frame_index >= ? AND frame_index < ? "
-                f"ORDER BY ABS(frame_index - ?)",
+                "SELECT frame_index, hash_md5 "
+                "FROM frame_hashes "
+                "WHERE edition = ? AND frame_index >= ? AND frame_index < ? "
+                "ORDER BY ABS(frame_index - ?)",
                 (edition, start, end, center),
             )
             seen: set[str] = set()
@@ -82,17 +78,17 @@ def read_unique_matches(
     """
     with closing(sqlite3.connect(db_path)) as connection:
         cursor = connection.cursor()
-        cursor.execute(f"""
+        cursor.execute("""
             WITH a_unique AS (
-                    SELECT {HASH_COLUMN} AS hash
-                    FROM {FRAME_HASHES_TABLE}
+                    SELECT hash_block_mean_0 AS hash
+                    FROM frame_hashes
                     WHERE edition = ?
                     GROUP BY hash
                     HAVING count(1) = 1
                 ),
                 b_unique AS (
-                    SELECT {HASH_COLUMN} AS hash
-                    FROM {FRAME_HASHES_TABLE}
+                    SELECT hash_block_mean_0 AS hash
+                    FROM frame_hashes
                     WHERE edition = ?
                     GROUP BY hash
                     HAVING count(1) = 1
@@ -103,13 +99,13 @@ def read_unique_matches(
                     SELECT hash FROM b_unique
                 )
             SELECT
-                a.frame_index, a.{HASH_COLUMN},
-                b.frame_index, b.{HASH_COLUMN}
-            FROM {FRAME_HASHES_TABLE} a
-            JOIN {FRAME_HASHES_TABLE} b ON a.{HASH_COLUMN} = b.{HASH_COLUMN}
+                a.frame_index, a.hash_block_mean_0,
+                b.frame_index, b.hash_block_mean_0
+            FROM frame_hashes a
+            JOIN frame_hashes b ON a.hash_block_mean_0 = b.hash_block_mean_0
             WHERE a.edition = ?
               AND b.edition = ?
-              AND a.{HASH_COLUMN} IN (SELECT hash FROM common)
+              AND a.hash_block_mean_0 IN (SELECT hash FROM common)
             ORDER BY a.frame_index
         """, (edition_a, edition_b, edition_a, edition_b))
         return [
