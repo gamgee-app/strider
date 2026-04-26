@@ -67,6 +67,23 @@ def fetch_md5_landmarks(
     )
 
 
+def read_chapters(
+    db_path: str, edition: str,
+) -> list[tuple[str, str]]:
+    """Read chapters from the database for a given edition.
+
+    Returns list of (start_time, title) tuples, ordered by start_time.
+    """
+    with closing(sqlite3.connect(db_path)) as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            "SELECT start_time, title FROM chapters "
+            "WHERE edition = ? ORDER BY start_time",
+            (edition,),
+        )
+        return cursor.fetchall()
+
+
 def read_unique_matches(
     db_path: str, edition_a: str, edition_b: str,
 ) -> list[FrameMatch]:
