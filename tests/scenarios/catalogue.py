@@ -1,15 +1,15 @@
 """The scenarios.
 
 Two editions of a film as strings of letters. A letter is one frame; the same
-letter in both editions is the same frame. What should be reported is worked out
-by comparing the two editions.
+letter in both editions is the same frame. Each scenario says outright what the
+differences between its two editions are.
 
 A letter may appear more than once. Repeated letters are frames that look
 exactly alike -- black between scenes, a fade, a held frame, a static shot.
 They are common in a real film, and nothing about them makes them a difference.
 """
 
-from tests.scenarios.editions import Scenario
+from tests.scenarios.editions import Added, Gone, Relocated, Replaced, Scenario
 
 CATALOGUE = [
 
@@ -18,6 +18,7 @@ CATALOGUE = [
         story="Nothing to report.",
         edition_a="abcde",
         edition_b="abcde",
+        expect=[],
     ),
 
     Scenario(
@@ -25,6 +26,7 @@ CATALOGUE = [
         story="X is in edition_b and nowhere in edition_a.",
         edition_a="abc",
         edition_b="aXbc",
+        expect=[Added("X")],
     ),
 
     Scenario(
@@ -32,6 +34,7 @@ CATALOGUE = [
         story="b is in edition_a and nowhere in edition_b.",
         edition_a="abc",
         edition_b="ac",
+        expect=[Gone("b")],
     ),
 
     Scenario(
@@ -39,6 +42,7 @@ CATALOGUE = [
         story="b is gone; X and Y stand where it was.",
         edition_a="abc",
         edition_b="aXYc",
+        expect=[Replaced("b", "XY")],
     ),
 
     Scenario(
@@ -46,6 +50,7 @@ CATALOGUE = [
         story="b and c are gone; X stands where they were.",
         edition_a="abcd",
         edition_b="aXd",
+        expect=[Replaced("bc", "X")],
     ),
 
     Scenario(
@@ -53,6 +58,7 @@ CATALOGUE = [
         story="X stands where b was.",
         edition_a="abc",
         edition_b="aXc",
+        expect=[Replaced("b", "X")],
     ),
 
     Scenario(
@@ -60,15 +66,16 @@ CATALOGUE = [
         story="X, Y and Z are added at three points.",
         edition_a="abcd",
         edition_b="aXbYcZd",
+        expect=[Added("X"), Added("Y"), Added("Z")],
     ),
 
     Scenario(
         name="two touching frames swapped",
-        story="b and c trade places. Either could be called the one that stayed, "
-              "so both moved.",
+        story="b and c trade places. Either could be called the one that "
+              "stayed, so both moved.",
         edition_a="abcd",
         edition_b="acbd",
-        moved="bc",
+        expect=[Relocated("b"), Relocated("c")],
     ),
 
     Scenario(
@@ -76,7 +83,7 @@ CATALOGUE = [
         story="b and d trade places across c, which does not move.",
         edition_a="abcde",
         edition_b="adcbe",
-        moved="bd",
+        expect=[Relocated("b"), Relocated("d")],
     ),
 
     Scenario(
@@ -85,7 +92,7 @@ CATALOGUE = [
               "between the two changes.",
         edition_a="abcde",
         edition_b="adbe",
-        moved="bd",
+        expect=[Relocated("b"), Relocated("d"), Gone("c")],
     ),
 
     Scenario(
@@ -93,6 +100,7 @@ CATALOGUE = [
         story="b turns up later, after c and d.",
         edition_a="abcd",
         edition_b="acdb",
+        expect=[Relocated("b")],
     ),
 
     Scenario(
@@ -100,6 +108,7 @@ CATALOGUE = [
         story="No frame of edition_a is in edition_b.",
         edition_a="abc",
         edition_b="XYZ",
+        expect=[Replaced("abc", "XYZ")],
     ),
 
     Scenario(
@@ -107,6 +116,7 @@ CATALOGUE = [
         story="X is before anything the editions share.",
         edition_a="abc",
         edition_b="Xabc",
+        expect=[Added("X")],
     ),
 
     Scenario(
@@ -114,6 +124,7 @@ CATALOGUE = [
         story="X is after anything the editions share.",
         edition_a="abc",
         edition_b="abcX",
+        expect=[Added("X")],
     ),
 
     Scenario(
@@ -121,6 +132,7 @@ CATALOGUE = [
         story="X is before anything the editions share.",
         edition_a="Xabc",
         edition_b="abc",
+        expect=[Gone("X")],
     ),
 
     Scenario(
@@ -128,6 +140,7 @@ CATALOGUE = [
         story="X is after anything the editions share.",
         edition_a="abcX",
         edition_b="abc",
+        expect=[Gone("X")],
     ),
 
     Scenario(
@@ -135,6 +148,7 @@ CATALOGUE = [
         story="Two differences held apart by one shared frame, b.",
         edition_a="abcd",
         edition_b="aXbYZd",
+        expect=[Added("X"), Replaced("c", "YZ")],
     ),
 
     Scenario(
@@ -142,6 +156,7 @@ CATALOGUE = [
         story="b runs twice in both editions.",
         edition_a="abbc",
         edition_b="abbc",
+        expect=[],
     ),
 
     Scenario(
@@ -149,13 +164,17 @@ CATALOGUE = [
         story="b appears twice in both editions, with c between.",
         edition_a="abcb",
         edition_b="abcb",
+        expect=[],
     ),
 
     Scenario(
         name="a run of identical frames grows",
-        story="b runs twice in edition_a and three times in edition_b.",
+        story="b runs twice in edition_a and three times in edition_b. Which "
+              "of the three is the extra one cannot be said, so the run is "
+              "the smallest thing there is to point at.",
         edition_a="abbc",
         edition_b="abbbc",
+        expect=[Replaced("bb", "bbb")],
     ),
 
     Scenario(
@@ -163,13 +182,15 @@ CATALOGUE = [
         story="b appears once in edition_a and twice over in edition_b.",
         edition_a="abc",
         edition_b="abbc",
+        expect=[Replaced("b", "bb")],
     ),
 
     Scenario(
         name="one of two identical frames is gone",
         story="b appears twice in edition_a, with c between, and once in "
-              "edition_b.",
+              "edition_b. The run that is gone is the one after c.",
         edition_a="abcb",
         edition_b="abc",
+        expect=[Gone("b", nth=2)],
     ),
 ]
