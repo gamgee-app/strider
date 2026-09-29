@@ -1,5 +1,10 @@
 /data/*.db
 /dist/
-/out/__pycache__/
+/out/
+/frames/
+/.venv/
+__pycache__/
 *.pyc
 .pytest_cache/
+.coverage
+.idea/
