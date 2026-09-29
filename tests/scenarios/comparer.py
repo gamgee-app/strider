@@ -25,8 +25,8 @@ EDITION_A, EDITION_B = "edition_a", "edition_b"
 
 
 def _write(path: str, a_frames: list[tuple[str, str]], b_frames: list[tuple[str, str]]) -> None:
-    """Both hashes go in, as hash_video writes them. The comparison reads only
-    hash_block_mean_0; hash_md5 is there because the frames have one."""
+    """Both hashes go in, as hash_video writes them: what the pixels are, and
+    what the frame looks like."""
     connection = sqlite3.connect(path)
     for table, frames in ((EDITION_A, a_frames), (EDITION_B, b_frames)):
         connection.execute(
@@ -39,33 +39,21 @@ def _write(path: str, a_frames: list[tuple[str, str]], b_frames: list[tuple[str,
     connection.close()
 
 
-def _frames(difference) -> tuple[int, int, int, int]:
-    """Frame numbers for a reported difference.
+def _boundaries(difference) -> tuple[int, int, int, int]:
+    """A difference as the matching frames either side of it.
 
-    compare_hashes reports the last frame before a difference and the last
-    frame of it, so the closing boundary is one earlier than the matching frame
-    that ends the difference. Adding one back gives both boundaries as the
-    matching frames either side, which is what a scenario talks about.
+    compare_hashes reports the differing frames themselves, so the frames
+    either side are one before the first and one after the last, which is what
+    a scenario talks about.
     """
-    return (
-        round(difference.a_range.start.total_seconds()),
-        round(difference.a_range.end.total_seconds()) + 1,
-        round(difference.b_range.start.total_seconds()),
-        round(difference.b_range.end.total_seconds()) + 1,
-    )
+    return (difference.a.start - 1, difference.a.start + difference.a.count,
+            difference.b.start - 1, difference.b.start + difference.b.count)
 
 
-def compare(a_frames: list[str], b_frames: list[str]) -> list[tuple[int, int, int, int]]:
+def compare(a_frames: list[str], b_frames: list[str]) -> list:
     """Every difference the comparer reports between two editions."""
     with tempfile.TemporaryDirectory() as folder:
         path = os.path.join(folder, "frames.db")
         _write(path, a_frames, b_frames)
-
-        matches = compare_hashes.read_unique_valid_matches(path, EDITION_A, EDITION_B)
-        found = []
-        for index in range(len(matches) - 1):
-            difference = compare_hashes.match(
-                path, EDITION_A, EDITION_B, matches[index + 1], matches[index])
-            if difference:
-                found.append(_frames(difference))
-        return found
+        return [_boundaries(d)
+                for d in compare_hashes.compare_editions(path, EDITION_A, EDITION_B)]

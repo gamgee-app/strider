@@ -1,7 +1,22 @@
+"""Compare two editions of a film, frame by frame.
+
+Each frame was hashed twice. hash_md5 says what its pixels are, and is equal
+only between frames that are the same frame. hash_block_mean_0 says what it
+looks like, and is equal -- or very nearly -- between two renderings of one
+picture. Two editions are separate transfers, so footage they share is
+ordinarily the same picture carried by different pixels; both hashes are
+needed to tell that apart from footage one edition does not have.
+
+Frames that repeat carry nothing on their own, so the unit that gets matched
+is a run of them: black between scenes, a fade, a held frame, a static shot.
+"""
+
 import datetime
+import itertools
 import json
 import os.path
 import sqlite3
+from collections import Counter
 from contextlib import closing
 from dataclasses import dataclass
 from datetime import timedelta
@@ -14,90 +29,285 @@ from tabulate import tabulate
 from algorithms import deserialize
 
 
-@dataclass
-class HashIndex:
+@dataclass(frozen=True)
+class Frame:
+    """One frame: what its pixels are, and what it looks like."""
     index: int
-    hash: str
+    data_hash: str
+    picture_hash: str
 
 
-def read_hashes_index(db_path: str, table_name: str, lower_index: int, upper_index: int) -> list[HashIndex]:
+@dataclass
+class Run:
+    """Frames one after another that are the same frame."""
+    start: int
+    count: int
+    data_hash: str
+    picture_hash: str
+
+    @property
+    def end(self) -> int:
+        return self.start + self.count
+
+
+@dataclass(frozen=True)
+class Frames:
+    """A stretch of frames on one side: how many, and where they start."""
+    start: int
+    count: int
+
+    def __str__(self) -> str:
+        if self.count == 0:
+            return f"nothing at {self.start}"
+        return f"{self.count} frame{'s' if self.count != 1 else ''} at {self.start}"
+
+
+@dataclass(frozen=True)
+class Difference:
+    """A place where the two editions hold different footage."""
+    a: Frames
+    b: Frames
+
+    def __str__(self) -> str:
+        return f"edition_a: {str(self.a):<22} edition_b: {self.b}"
+
+
+def read_frames(db_path: str, table_name: str) -> list[Frame]:
     with closing(sqlite3.connect(db_path)) as connection:
         cursor = connection.cursor()
         cursor.execute(f"""
-            SELECT 
+            SELECT
                 frame_index,
+                hash_md5,
                 hash_block_mean_0
             FROM
                 {table_name}
-            WHERE
-                frame_index >= {lower_index}
-                and frame_index < {upper_index}
+            ORDER BY
+                frame_index
         """)
-        rows = cursor.fetchall()
-        return [HashIndex(*row) for row in rows]
+        return [Frame(*row) for row in cursor.fetchall()]
 
 
-@dataclass
-class HashMatch:
-    a: HashIndex
-    b: HashIndex
+def runs_of(frames: list[Frame]) -> list[Run]:
+    """Frames gathered into runs of the same frame repeated."""
+    runs: list[Run] = []
+    for frame in frames:
+        if runs and runs[-1].data_hash == frame.data_hash and runs[-1].end == frame.index:
+            runs[-1].count += 1
+        else:
+            runs.append(Run(frame.index, 1, frame.data_hash, frame.picture_hash))
+    return runs
 
 
-def read_unique_valid_matches(db_path: str, table_a_name: str, table_b_name: str) -> list[HashMatch]:
-    with closing(sqlite3.connect(db_path)) as connection:
-        cursor = connection.cursor()
-        cursor.execute(f"""
-            with a_unique as
-                     (select hash_block_mean_0 as perceptual_hash
-                      from {table_a_name}
-                      group by perceptual_hash
-                      having count(1) = 1),
-                 b_unique as
-                     (select hash_block_mean_0 as perceptual_hash
-                      from {table_b_name}
-                      group by perceptual_hash
-                      having count(1) = 1),
-                 unique_matches as
-                     (select perceptual_hash
-                      from a_unique
-                      intersect
-                      select perceptual_hash
-                      from b_unique),
-                 matched_indexes as
-                     (select {table_a_name}.frame_index       as a_index,
-                             {table_a_name}.hash_block_mean_0 as a_perceptual_hash,
-                             {table_b_name}.frame_index       as b_index,
-                             {table_b_name}.hash_block_mean_0 as b_perceptual_hash
-                      from {table_a_name}
-                               join {table_b_name}
-                                    on {table_a_name}.hash_block_mean_0 = {table_b_name}.hash_block_mean_0
-                      where {table_a_name}.hash_block_mean_0 in unique_matches),
-                 invalid_orderings as
-                     (select *
-                      from (select b_index                              as curr_b_index,
-                                   LAG(b_index) over (order by a_index) as prev_b_index
-                            from matched_indexes)
-                      where curr_b_index < prev_b_index)
-            
-            select a_index, a_perceptual_hash, b_index, b_perceptual_hash
-            from matched_indexes
-            where matched_indexes.b_index not in
-                  (select curr_b_index
-                   from invalid_orderings
-                   union
-                   select prev_b_index
-                   from invalid_orderings)
-            order by a_index
-        """)
-        rows = cursor.fetchall()
-        matches = []
-        for row in rows:
-            a_index, a_perceptual_hash, b_index, b_perceptual_hash = row
-            a = HashIndex(a_index, a_perceptual_hash)
-            b = HashIndex(b_index, b_perceptual_hash)
-            matches.append(HashMatch(a, b))
-        return matches
+def hamming_distance(hash_a: str, hash_b: str) -> float:
+    array_a = deserialize(hash_a)
+    array_b = deserialize(hash_b)
+    return cv2.norm(array_a, array_b, cv2.NORM_HAMMING)
 
+
+def same_frame(a: Run, b: Run) -> bool:
+    """The same frame: the very same pixels."""
+    return a.data_hash == b.data_hash
+
+
+def same_picture(a: Run, b: Run) -> bool:
+    """The same picture, however its pixels were arrived at."""
+    return (a.picture_hash == b.picture_hash
+            or hamming_distance(a.picture_hash, b.picture_hash) <= perceptual_match_threshold)
+
+
+class Alignment:
+    """Which run of edition_a is which run of edition_b."""
+
+    def __init__(self, a_runs: list[Run], b_runs: list[Run]):
+        self.a_runs = a_runs
+        self.b_runs = b_runs
+        self.a_to_b: dict[int, int] = {}
+        self.b_to_a: dict[int, int] = {}
+
+    def link(self, a_index: int, b_index: int) -> None:
+        self.a_to_b[a_index] = b_index
+        self.b_to_a[b_index] = a_index
+
+    def a_free(self) -> list[int]:
+        return [i for i in range(len(self.a_runs)) if i not in self.a_to_b]
+
+    def b_free(self) -> list[int]:
+        return [j for j in range(len(self.b_runs)) if j not in self.b_to_a]
+
+    def pairs(self) -> list[tuple[int, int]]:
+        return sorted(self.a_to_b.items())
+
+
+def _only_once(indexes: list[int], key_of) -> dict[str, int]:
+    """The keys carried by exactly one of these runs, and which run that is."""
+    seen: dict[str, int | None] = {}
+    for index in indexes:
+        key = key_of(index)
+        seen[key] = index if key not in seen else None
+    return {key: index for key, index in seen.items() if index is not None}
+
+
+def _link_unique(alignment: Alignment, key_of) -> None:
+    """Link runs that carry a key no other unlinked run on either side carries.
+
+    Heckel's anchoring step: a run that is one of a kind in both editions can
+    only be itself, so it can be linked without looking at anything around it.
+    """
+    a_once = _only_once(alignment.a_free(), lambda i: key_of(alignment.a_runs[i]))
+    b_once = _only_once(alignment.b_free(), lambda j: key_of(alignment.b_runs[j]))
+    for key, a_index in a_once.items():
+        if key in b_once:
+            alignment.link(a_index, b_index=b_once[key])
+
+
+def _link_alike(alignment: Alignment) -> None:
+    """Link runs that look like one run on the other side and no other.
+
+    What is left once equal hashes have been used up: two renderings of one
+    picture that are a bit apart to look at as well.
+    """
+    a_free, b_free = alignment.a_free(), alignment.b_free()
+    alike = {i: [j for j in b_free if same_picture(alignment.a_runs[i], alignment.b_runs[j])]
+             for i in a_free}
+    wanted = Counter(j for candidates in alike.values() for j in candidates)
+    for a_index, candidates in alike.items():
+        if len(candidates) == 1 and wanted[candidates[0]] == 1:
+            alignment.link(a_index, candidates[0])
+
+
+def _extend_links(alignment: Alignment, matches) -> None:
+    """Carry each link out to its neighbours while they still agree.
+
+    Heckel's second step. A run that repeats is one of a kind nowhere, so it
+    can only be placed by what it sits between.
+    """
+    for a_index, b_index in alignment.pairs():
+        for step in (1, -1):
+            i, j = a_index + step, b_index + step
+            while (0 <= i < len(alignment.a_runs) and 0 <= j < len(alignment.b_runs)
+                   and i not in alignment.a_to_b and j not in alignment.b_to_a
+                   and matches(alignment.a_runs[i], alignment.b_runs[j])):
+                alignment.link(i, j)
+                i, j = i + step, j + step
+
+
+def align(a_runs: list[Run], b_runs: list[Run]) -> Alignment:
+    """Pair up the runs the two editions share.
+
+    The same frame is the strongest thing a run can be, so those are matched
+    first and a run of them is never given away to a mere rendering of the
+    same picture.
+    """
+    alignment = Alignment(a_runs, b_runs)
+
+    _link_unique(alignment, lambda run: run.data_hash)
+    _extend_links(alignment, same_frame)
+
+    _link_unique(alignment, lambda run: run.picture_hash)
+    _extend_links(alignment, same_picture)
+
+    _link_alike(alignment)
+    _extend_links(alignment, same_picture)
+
+    return alignment
+
+
+@dataclass(frozen=True)
+class _Block:
+    """Runs with nothing on the other side to answer for them."""
+    run: int
+    frames: Frames
+
+
+def _unmatched_blocks(runs: list[Run], linked: dict[int, int],
+                      lower: int, upper: int) -> list[_Block]:
+    """Footage between two anchors that the other edition does not have.
+
+    Runs that touch are one piece of footage, so they are reported together
+    rather than one difference each.
+    """
+    blocks: list[_Block] = []
+    previous = None
+    for index in range(lower, upper):
+        if index in linked:
+            continue
+        if previous == index - 1:
+            blocks[-1] = _Block(blocks[-1].run,
+                                Frames(blocks[-1].frames.start,
+                                       blocks[-1].frames.count + runs[index].count))
+        else:
+            blocks.append(_Block(index, Frames(runs[index].start, runs[index].count)))
+        previous = index
+    return blocks
+
+
+def _would_sit_at(runs: list[Run], linked: dict[int, int],
+                  other: list[Run], before: int) -> int:
+    """Where footage the other edition does not have would have sat.
+
+    Just after whatever the nearest footage before it turned into, or at the
+    very start if there is nothing before it that both editions hold.
+    """
+    for index in range(before - 1, -1, -1):
+        if index in linked:
+            return other[linked[index]].end
+    return 0
+
+
+def _difference_of(a: Run, b: Run) -> Difference | None:
+    """What to report of two runs that hold the same picture.
+
+    Nothing, if they are the same frame for the same length of time. The
+    picture being the same is not enough: a re-encoding is footage the two
+    editions do not hold identically, and so is footage held longer.
+    """
+    if same_frame(a, b) and a.count == b.count:
+        return None
+    return Difference(Frames(a.start, a.count), Frames(b.start, b.count))
+
+
+def compare_runs(a_runs: list[Run], b_runs: list[Run]) -> list[Difference]:
+    """Every difference between two editions, in the order they come."""
+    alignment = align(a_runs, b_runs)
+    anchors = alignment.pairs()
+    fences = [(-1, -1)] + anchors + [(len(a_runs), len(b_runs))]
+
+    found: list[Difference] = []
+    for left, right in zip(fences, fences[1:]):
+        found += _between(alignment, left, right)
+        if right[0] < len(a_runs):
+            difference = _difference_of(a_runs[right[0]], b_runs[right[1]])
+            if difference:
+                found.append(difference)
+    return sorted(found, key=lambda difference: difference.a.start)
+
+
+def _between(alignment: Alignment,
+             left: tuple[int, int], right: tuple[int, int]) -> list[Difference]:
+    """The differences lying between two anchors."""
+    a_blocks = _unmatched_blocks(alignment.a_runs, alignment.a_to_b, left[0] + 1, right[0])
+    b_blocks = _unmatched_blocks(alignment.b_runs, alignment.b_to_a, left[1] + 1, right[1])
+
+    found = []
+    for a_block, b_block in itertools.zip_longest(a_blocks, b_blocks):
+        a_frames = a_block.frames if a_block else Frames(
+            _would_sit_at(alignment.b_runs, alignment.b_to_a,
+                          alignment.a_runs, b_block.run), 0)
+        b_frames = b_block.frames if b_block else Frames(
+            _would_sit_at(alignment.a_runs, alignment.a_to_b,
+                          alignment.b_runs, a_block.run), 0)
+        found.append(Difference(a_frames, b_frames))
+    return found
+
+
+def compare_editions(db_path: str, table_a_name: str, table_b_name: str) -> list[Difference]:
+    """Every difference between two editions held in the one database."""
+    return compare_runs(runs_of(read_frames(db_path, table_a_name)),
+                        runs_of(read_frames(db_path, table_b_name)))
+
+
+# --- reporting ---------------------------------------------------------------
 
 def frame_to_time(frame: int) -> timedelta:
     return datetime.timedelta(seconds=frame / fps)
@@ -131,106 +341,22 @@ def grab_frame(input_file: str, identifier: str, index: int, timestamp: timedelt
         )
 
 
-def hamming_distance(hash_a: str, hash_b: str) -> float:
-    array_a = deserialize(hash_a)
-    array_b = deserialize(hash_b)
-    return cv2.norm(array_a, array_b, cv2.NORM_HAMMING)
-
-
-def count_leading(float_list: list[float], threshold: float) -> int:
-    for i, num in enumerate(float_list):
-        if num > threshold:
-            return i
-    return len(float_list)
-
-
 @dataclass
-class HashRange:
+class TimeRange:
     start: timedelta
     end: timedelta
     range: timedelta
     type: str
 
 
-@dataclass
-class HashDifference:
-    a_range: HashRange
-    b_range: HashRange
-    range_difference: timedelta
+def time_range(frames: Frames, other: Frames) -> TimeRange:
+    return TimeRange(frame_to_time(frames.start),
+                     frame_to_time(frames.start + max(0, frames.count - 1)),
+                     frame_to_time(frames.count),
+                     "new" if other.count == 0 else "different")
 
 
-def match(db_path: str,
-          table_a_name: str, table_b_name: str,
-          current_match: HashMatch, previous_match: HashMatch) -> HashDifference | None:
-    previous_lag = previous_match.b.index - previous_match.a.index
-    current_lag = current_match.b.index - current_match.a.index
-    lag_difference = current_lag - previous_lag
-
-    if lag_difference < 1:
-        return None
-
-    a_start = frame_to_time(previous_match.a.index)
-    a_end = frame_to_time(current_match.a.index - 1)
-    a_index_range = current_match.a.index - 1 - previous_match.a.index
-    a_range = frame_to_time(a_index_range)
-
-    if a_range.total_seconds() < 0:
-        # hacky, but fixes a bug, TODO fix cause
-        return None
-
-    b_start = frame_to_time(previous_match.b.index)
-    b_end = frame_to_time(current_match.b.index - 1)
-    b_index_range = current_match.b.index - 1 - previous_match.b.index
-    b_range = frame_to_time(b_index_range)
-
-    if b_range.total_seconds() < 0:
-        # hacky, but fixes a bug, TODO fix cause
-        return None
-
-    a_hashes = read_hashes_index(db_path, table_a_name, previous_match.a.index + 1, current_match.a.index)
-    b_hashes = read_hashes_index(db_path, table_b_name, previous_match.b.index + 1, current_match.b.index)
-
-    # check if we only have frames added to b, and those frames are visually similar to its surrounding frames
-    if a_index_range == 0 and b_index_range > 0 and b_index_range < extended_similarity_threshold:
-        b_hashes_compared_to_previous = [hamming_distance(previous_match.b.hash, b.hash) for b in b_hashes]
-        b_hashes_compared_to_current = [hamming_distance(current_match.b.hash, b.hash) for b in b_hashes]
-        if min(max(b_hashes_compared_to_previous), max(b_hashes_compared_to_current)) <= perceptual_match_threshold:
-            return None
-
-    # check if we only have frames added to a, and those frames are visually similar to its surrounding frames
-    if b_index_range == 0 and a_index_range > 0 and a_index_range < extended_similarity_threshold:
-        a_hashes_compared_to_previous = [hamming_distance(previous_match.a.hash, a.hash) for a in a_hashes]
-        a_hashes_compared_to_current = [hamming_distance(current_match.a.hash, a.hash) for a in a_hashes]
-        if min(max(a_hashes_compared_to_previous), max(a_hashes_compared_to_current)) <= perceptual_match_threshold:
-            return None
-
-    a_start_hashes = [a.hash for a in a_hashes[:maximum_inter_match_search]]
-    a_end_hashes = [a.hash for a in a_hashes[:-1 - maximum_inter_match_search:-1]]
-    b_start_hashes = [b.hash for b in b_hashes[:maximum_inter_match_search]]
-    b_end_hashes = [b.hash for b in b_hashes[:-1 - maximum_inter_match_search:-1]]
-
-    start_distances = [hamming_distance(a, b) for a, b in zip(a_start_hashes, b_start_hashes)]
-    end_distances = [hamming_distance(a, b) for a, b in zip(a_end_hashes, b_end_hashes)]
-
-    start_matches = count_leading(start_distances, perceptual_match_threshold)
-    end_matches = count_leading(end_distances, perceptual_match_threshold)
-
-    if start_matches > 0 or end_matches > 0:
-        new_previous_a_match = a_hashes[start_matches - 1]
-        new_previous_b_match = b_hashes[start_matches - 1]
-        new_current_a_match = a_hashes[0 - end_matches]
-        new_current_b_match = b_hashes[0 - end_matches]
-        new_previous_match = previous_match if start_matches == 0 else HashMatch(new_previous_a_match,
-                                                                                 new_previous_b_match)
-        new_current_match = current_match if end_matches == 0 else HashMatch(new_current_a_match, new_current_b_match)
-        return match(db_path, table_a_name, table_b_name, new_current_match, new_previous_match)
-
-    a_hash_range = HashRange(a_start, a_end, a_range, "new" if b_range == timedelta(seconds=0) else "different")
-    b_hash_range = HashRange(b_start, b_end, b_range, "new" if a_range == timedelta(seconds=0) else "different")
-    return HashDifference(a_hash_range, b_hash_range, abs(b_range - a_range))
-
-
-def get_differences_dict(hash_range: HashRange):
+def get_differences_dict(hash_range: TimeRange):
     return {
         "start_time": str(hash_range.start),
         "end_time": str(hash_range.end),
@@ -241,8 +367,6 @@ def get_differences_dict(hash_range: HashRange):
 fps = 23.976216
 output_dir = "out"
 perceptual_match_threshold = 5 # when comparing perceptual hashes, anything below this hamming distance will be considered a match
-extended_similarity_threshold = 12 # how many frames to ignore between matches, if they are similar to the matched frames
-maximum_inter_match_search = 24 # how many frames to calculate hamming distance for in a batch
 
 
 def main():
@@ -261,27 +385,22 @@ def main():
     grab_frames = True
     video_padding_seconds = 5
 
-    matches = read_unique_valid_matches(db_path, table_a_name, table_b_name)
-
-    table = []
     print()
-    with Bar('Matching', max=len(matches)) as bar:
-        for index in range(len(matches) - 1):
-            matched = match(db_path, table_a_name, table_b_name, matches[index + 1], matches[index])
-            if matched: table.append(matched)
-            bar.next()
+    differences = compare_editions(db_path, table_a_name, table_b_name)
 
-    def hash_difference_sort_key(difference: HashDifference) -> timedelta:
-        return max(difference.a_range.range, difference.b_range.range)
+    table = [(time_range(d.a, d.b), time_range(d.b, d.a)) for d in differences]
 
-    sorted_table = sorted(table, key=hash_difference_sort_key)
+    def sort_key(row: tuple[TimeRange, TimeRange]) -> timedelta:
+        return max(row[0].range, row[1].range)
+
+    sorted_table = sorted(table, key=sort_key)
 
     tabulated = tabulate(
         [(
-            x.a_range.start, x.a_range.end, x.a_range.type,
-            x.b_range.start, x.b_range.end, x.b_range.type,
-            x.a_range.range, x.b_range.range, x.range_difference
-        ) for x in sorted_table],
+            a.start, a.end, a.type,
+            b.start, b.end, b.type,
+            a.range, b.range, abs(b.range - a.range)
+        ) for a, b in sorted_table],
         headers=["A Start", "A End", "A Type", "B Start", "B End", "B Type", "A Range", "B Range", "Range Difference"],
         tablefmt="github")
 
@@ -291,42 +410,25 @@ def main():
     print(tabulated)
 
     if print_json:
-        a_differences = [
-            get_differences_dict(a_range)
-            for a_range in [x.a_range for x in table]
-            if a_range.range > timedelta(seconds=0)
-        ]
-        print(json.dumps(a_differences))
-
-        b_differences = [
-            get_differences_dict(b_range)
-            for b_range in [x.b_range for x in table]
-            if b_range.range > timedelta(seconds=0)
-        ]
-        print(json.dumps(b_differences))
+        print(json.dumps([get_differences_dict(a) for a, b in table if a.range > timedelta(seconds=0)]))
+        print(json.dumps([get_differences_dict(b) for a, b in table if b.range > timedelta(seconds=0)]))
 
     if trim_videos or grab_frames:
         print()
         with Bar('Cutting', max=len(sorted_table)) as bar:
             video_padding = timedelta(seconds=video_padding_seconds)
-            for (index, row) in enumerate(sorted_table):
-
-                a_start_time = row.a_range.start
-                a_end_time = row.a_range.end
-                a_range = row.a_range.range
-                b_start_time = row.b_range.start
-                b_end_time = row.b_range.end
+            for (index, (a, b)) in enumerate(sorted_table):
 
                 if trim_videos:
-                    trim_video(movie_a_filename, label_a, index, a_start_time - video_padding, a_start_time)
-                    trim_video(movie_a_filename, label_a, index, a_end_time - a_range, a_end_time + video_padding)
-                    trim_video(movie_b_filename, label_b, index, b_start_time - video_padding, b_end_time + video_padding)
+                    trim_video(movie_a_filename, label_a, index, a.start - video_padding, a.start)
+                    trim_video(movie_a_filename, label_a, index, a.end - a.range, a.end + video_padding)
+                    trim_video(movie_b_filename, label_b, index, b.start - video_padding, b.end + video_padding)
 
                 if grab_frames:
-                    grab_frame(movie_a_filename, label_a, index, a_start_time)
-                    grab_frame(movie_b_filename, label_b, index, b_start_time)
-                    grab_frame(movie_a_filename, label_a, index, a_end_time)
-                    grab_frame(movie_b_filename, label_b, index, b_end_time)
+                    grab_frame(movie_a_filename, label_a, index, a.start)
+                    grab_frame(movie_b_filename, label_b, index, b.start)
+                    grab_frame(movie_a_filename, label_a, index, a.end)
+                    grab_frame(movie_b_filename, label_b, index, b.end)
 
                 bar.next()
 
