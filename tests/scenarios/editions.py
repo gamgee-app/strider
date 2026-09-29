@@ -132,14 +132,14 @@ class Moved:
 class Added:
     """Footage the second edition has and the first does not."""
     letters: str
-    nth: int = 1
+    nth: int = 0
 
 
 @dataclass(frozen=True)
 class Removed:
     """Footage the first edition has and the second does not."""
     letters: str
-    nth: int = 1
+    nth: int = 0
 
 
 @dataclass(frozen=True)
@@ -152,8 +152,8 @@ class Replaced:
     """
     a: str
     b: str
-    a_nth: int = 1
-    b_nth: int = 1
+    a_nth: int = 0
+    b_nth: int = 0
 
 
 @dataclass(frozen=True)
@@ -166,8 +166,8 @@ class Reencoded:
     """
     a: str
     b: str
-    a_nth: int = 1
-    b_nth: int = 1
+    a_nth: int = 0
+    b_nth: int = 0
 
 
 @dataclass(frozen=True)
@@ -175,8 +175,8 @@ class Retimed:
     """One picture on both sides, lasting a different number of frames."""
     a: str
     b: str
-    a_nth: int = 1
-    b_nth: int = 1
+    a_nth: int = 0
+    b_nth: int = 0
 
 
 @dataclass(frozen=True)
@@ -189,7 +189,7 @@ class Relocated:
     going and another arriving.
     """
     letters: str
-    nth: int = 1
+    nth: int = 0
     becomes: str = ""
 
 
@@ -257,9 +257,17 @@ def accounts_for_every_frame(scenario, answer) -> list[str]:
     complaints: list[str] = []
     reported = {"edition_a": [], "edition_b": []}
     relocated = {"edition_a": set(), "edition_b": set()}
+    lengths = {"edition_a": len(tokens(scenario.edition_a)),
+               "edition_b": len(tokens(scenario.edition_b))}
 
     for item in answer:
         if isinstance(item, Moved):
+            for side, at in (("edition_a", item.at), ("edition_b", item.to)):
+                if at + item.frames > lengths[side]:
+                    complaints.append(
+                        f"{item.frames} frame(s) at edition_a {item.at} are said to "
+                        f"appear at edition_b {item.to}, which runs off the end of "
+                        f"{side}, which has {lengths[side]}")
             relocated["edition_a"] |= set(range(item.at, item.at + item.frames))
             relocated["edition_b"] |= set(range(item.to, item.to + item.frames))
         else:
@@ -337,22 +345,28 @@ class Scenario:
                 )
 
     def _at(self, edition: str, letters: str, nth: int, where: str) -> int:
-        """Where a run of letters sits, insisting it is somewhere definite."""
+        """Where a run of letters sits, insisting it is somewhere definite.
+
+        An nth of nought is nobody having said which, which will do only where
+        there is nothing to choose between. Saying nth=1 is saying which, so it
+        names the first of several where leaving it out would not.
+        """
         frames, wanted = tokens(edition), tokens(letters)
         found = [i for i in range(len(frames) - len(wanted) + 1)
                  if frames[i:i + len(wanted)] == wanted]
         if not found:
             raise ValueError(
                 f"{self.name!r}: {letters!r} is not in {where} ({edition!r}).")
+        if nth == 0:
+            if len(found) > 1 and self._ambiguous(wanted, found):
+                raise ValueError(
+                    f"{self.name!r}: {letters!r} appears {len(found)} times in "
+                    f"{where} ({edition!r}), so say which with nth=.")
+            nth = 1
         if nth > len(found):
             raise ValueError(
                 f"{self.name!r}: {where} has {len(found)} run(s) of {letters!r}, "
                 f"so there is no {nth}.")
-        del frames
-        if len(found) > 1 and nth == 1 and self._ambiguous(tokens(letters), found):
-            raise ValueError(
-                f"{self.name!r}: {letters!r} appears {len(found)} times in "
-                f"{where} ({edition!r}), so say which with nth=.")
         return found[nth - 1]
 
     @staticmethod
