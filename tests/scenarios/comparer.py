@@ -24,13 +24,17 @@ compare_hashes.fps = 1.0
 EDITION_A, EDITION_B = "edition_a", "edition_b"
 
 
-def _write(path: str, a_frames: list[str], b_frames: list[str]) -> None:
+def _write(path: str, a_frames: list[tuple[str, str]], b_frames: list[tuple[str, str]]) -> None:
+    """Both hashes go in, as hash_video writes them. The comparison reads only
+    hash_block_mean_0; hash_md5 is there because the frames have one."""
     connection = sqlite3.connect(path)
     for table, frames in ((EDITION_A, a_frames), (EDITION_B, b_frames)):
         connection.execute(
-            f"CREATE TABLE {table} (frame_index INTEGER, hash_block_mean_0 TEXT)")
+            f"CREATE TABLE {table} "
+            f"(frame_index INTEGER, hash_md5 TEXT, hash_block_mean_0 TEXT)")
         connection.executemany(
-            f"INSERT INTO {table} VALUES (?, ?)", list(enumerate(frames)))
+            f"INSERT INTO {table} VALUES (?, ?, ?)",
+            [(i, md5, perceptual) for i, (md5, perceptual) in enumerate(frames)])
     connection.commit()
     connection.close()
 

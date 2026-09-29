@@ -1,196 +1,142 @@
 """The scenarios.
 
-Two editions of a film as strings of letters. A letter is one frame; the same
-letter in both editions is the same frame. Each scenario says outright what the
-differences between its two editions are.
+Each names one property of comparing two editions of a film, and holds the
+cases that exercise it. An edition is a string of letters and a letter is one
+frame, so a case is two strings and what should be reported between them.
+
+The same token is the same frame. Two tokens sharing a letter are two
+renderings of one picture: b and B are that picture encoded twice, so their
+pixels differ while the picture does not, and b' is a rendering a bit apart to
+look at as well. Frames of the same footage across two transfers of a film were
+measured nought to ten bits apart, most of them nought -- so a difference in
+the pixels with none in the picture is the ordinary case between two editions,
+not a curiosity.
 
 A letter may appear more than once. Repeated letters are frames that look
 exactly alike -- black between scenes, a fade, a held frame, a static shot.
-They are common in a real film, and nothing about them makes them a difference.
+
+The first case of a scenario is the smallest that shows the property. Every
+case after it says in its note what it adds.
 """
 
-from tests.scenarios.editions import Added, Gone, Relocated, Replaced, Scenario
+from tests.scenarios.editions import (
+    Added, Case, Reencoded, Relocated, Removed, Replaced, Retimed, Scenario,
+)
 
 CATALOGUE = [
 
     Scenario(
         name="identical editions",
-        story="Nothing to report.",
-        edition_a="abcde",
-        edition_b="abcde",
-        expect=[],
+        story="Two editions holding the same frames. There is nothing to report, "
+              "however many frames they hold.",
+        cases=[
+            Case("a", "a", [], "one frame"),
+            Case("ab", "ab", [], "two frames"),
+            Case("abc", "abc", [], "three frames"),
+        ],
     ),
 
     Scenario(
-        name="footage only edition_b has",
-        story="X is in edition_b and nowhere in edition_a.",
-        edition_a="abc",
-        edition_b="aXbc",
-        expect=[Added("X")],
+        name="frames are added",
+        story="Footage in the second edition that the first does not have.",
+        cases=[
+            Case("ab", "axb", [Added("x")], "between two frames"),
+            Case("ab", "xab", [Added("x")], "before everything shared"),
+            Case("ab", "abx", [Added("x")], "after everything shared"),
+            Case("abc", "axbyc", [Added("x"), Added("y")], "two of them, separately"),
+        ],
     ),
 
     Scenario(
-        name="footage only edition_a has",
-        story="b is in edition_a and nowhere in edition_b.",
-        edition_a="abc",
-        edition_b="ac",
-        expect=[Gone("b")],
+        name="frames are removed",
+        story="Footage in the first edition that the second does not have.",
+        cases=[
+            Case("axb", "ab", [Removed("x")], "between two frames"),
+            Case("xab", "ab", [Removed("x")], "before everything shared"),
+            Case("abx", "ab", [Removed("x")], "after everything shared"),
+            Case("axbyc", "abc", [Removed("x"), Removed("y")], "two of them, separately"),
+        ],
     ),
 
     Scenario(
-        name="footage replaced by more",
-        story="b is gone; X and Y stand where it was.",
-        edition_a="abc",
-        edition_b="aXYc",
-        expect=[Replaced("b", "XY")],
+        name="frames are replaced",
+        story="Footage standing where other footage was.",
+        cases=[
+            Case("axb", "ayb", [Replaced("x", "y")], "by as many frames"),
+            Case("axb", "ayzb", [Replaced("x", "yz")], "by more frames"),
+            Case("axyb", "azb", [Replaced("xy", "z")], "by fewer frames"),
+            Case("xa", "ya", [Replaced("x", "y")], "before everything shared"),
+            Case("ax", "ay", [Replaced("x", "y")], "after everything shared"),
+            Case("a", "x", [Replaced("a", "x")], "the editions share no frame at all"),
+        ],
     ),
 
     Scenario(
-        name="footage replaced by less",
-        story="b and c are gone; X stands where they were.",
-        edition_a="abcd",
-        edition_b="aXd",
-        expect=[Replaced("bc", "X")],
+        name="frames are moved",
+        story="Footage in both editions, in a different place in each.",
+        cases=[
+            Case("abc", "acb", [Relocated("b"), Relocated("c")],
+                 "two touching frames trade places"),
+            Case("abcd", "acdb", [Relocated("b")], "one frame, to later in the film"),
+            Case("abc", "cab", [Relocated("c")], "one frame, to the very start"),
+            Case("abcde", "adcbe", [Relocated("b"), Relocated("d")],
+                 "two frames trade places across one that stays"),
+            Case("abcdef", "adefbc", [Relocated("bc")], "a run of two frames"),
+        ],
     ),
 
     Scenario(
-        name="footage replaced by the same amount",
-        story="X stands where b was.",
-        edition_a="abc",
-        edition_b="aXc",
-        expect=[Replaced("b", "X")],
+        name="frames that look exactly alike",
+        story="Frames indistinguishable from one another -- black between "
+              "scenes, a fade, a held frame, a static shot.",
+        cases=[
+            Case("abbc", "abbc", [], "a run of them, unchanged"),
+            Case("abcb", "abcb", [], "two of them apart, unchanged"),
+            Case("abc", "abbc", [Retimed("b", "bb")], "one frame becomes two"),
+            Case("abbc", "abc", [Retimed("bb", "b")], "two frames become one"),
+            Case("abcb", "abc", [Removed("b", nth=2)], "one of two apart is removed"),
+        ],
     ),
 
     Scenario(
-        name="several separate additions",
-        story="X, Y and Z are added at three points.",
-        edition_a="abcd",
-        edition_b="aXbYcZd",
-        expect=[Added("X"), Added("Y"), Added("Z")],
+        name="renderings of one picture",
+        story="One picture encoded more than once. The pixels differ; the "
+              "picture need not. Two editions of a film are separate transfers, "
+              "so this is the ordinary state of the footage they share, and it "
+              "has to hold alongside every other kind of difference rather than "
+              "only on its own.",
+        cases=[
+            Case("ab", "aB", [Reencoded("b", "B")], "one frame re-encoded"),
+            Case("ab", "AB", [Reencoded("a", "A"), Reencoded("b", "B")],
+                 "every frame re-encoded"),
+            Case("ab", "ab'", [Reencoded("b", "b'")], "re-encoded and a bit apart to look at"),
+            Case("ab", "ab'b", [Added("b'")], "a second rendering beside the one it copies"),
+            Case("ab", "AxB", [Reencoded("a", "A"), Added("x"), Reencoded("b", "B")],
+                 "every frame re-encoded, and a frame added"),
+            Case("axb", "AB", [Reencoded("a", "A"), Removed("x"), Reencoded("b", "B")],
+                 "every frame re-encoded, and a frame removed"),
+            Case("axb", "AyB", [Reencoded("a", "A"), Replaced("x", "y"), Reencoded("b", "B")],
+                 "every frame re-encoded, and a frame replaced"),
+            Case("abc", "Acb", [Reencoded("a", "A"), Relocated("b"), Relocated("c")],
+                 "two frames trade places, and one that stays is re-encoded"),
+            Case("abcd", "acdB", [Relocated("b", becomes="B")],
+                 "a frame moves and is re-encoded on the way"),
+            Case("abbc", "aBBc", [Reencoded("bb", "BB")],
+                 "frames that look exactly alike, re-encoded"),
+            Case("abc", "Ab'c", [Reencoded("a", "A"), Reencoded("b", "b'")],
+                 "one frame re-encoded, its neighbour a bit apart as well"),
+        ],
     ),
 
     Scenario(
-        name="two touching frames swapped",
-        story="b and c trade places. Either could be called the one that "
-              "stayed, so both moved.",
-        edition_a="abcd",
-        edition_b="acbd",
-        expect=[Relocated("b"), Relocated("c")],
-    ),
-
-    Scenario(
-        name="two separated frames swapped",
-        story="b and d trade places across c, which does not move.",
-        edition_a="abcde",
-        edition_b="adcbe",
-        expect=[Relocated("b"), Relocated("d")],
-    ),
-
-    Scenario(
-        name="footage dropped beside footage moved",
-        story="c is gone and b and d trade places, with nothing unchanged "
-              "between the two changes.",
-        edition_a="abcde",
-        edition_b="adbe",
-        expect=[Relocated("b"), Relocated("d"), Gone("c")],
-    ),
-
-    Scenario(
-        name="one piece of footage relocated",
-        story="b turns up later, after c and d.",
-        edition_a="abcd",
-        edition_b="acdb",
-        expect=[Relocated("b")],
-    ),
-
-    Scenario(
-        name="the editions share nothing",
-        story="No frame of edition_a is in edition_b.",
-        edition_a="abc",
-        edition_b="XYZ",
-        expect=[Replaced("abc", "XYZ")],
-    ),
-
-    Scenario(
-        name="an addition at the very start",
-        story="X is before anything the editions share.",
-        edition_a="abc",
-        edition_b="Xabc",
-        expect=[Added("X")],
-    ),
-
-    Scenario(
-        name="an addition at the very end",
-        story="X is after anything the editions share.",
-        edition_a="abc",
-        edition_b="abcX",
-        expect=[Added("X")],
-    ),
-
-    Scenario(
-        name="footage only edition_a has, at the very start",
-        story="X is before anything the editions share.",
-        edition_a="Xabc",
-        edition_b="abc",
-        expect=[Gone("X")],
-    ),
-
-    Scenario(
-        name="footage only edition_a has, at the very end",
-        story="X is after anything the editions share.",
-        edition_a="abcX",
-        edition_b="abc",
-        expect=[Gone("X")],
-    ),
-
-    Scenario(
-        name="back-to-back differences",
-        story="Two differences held apart by one shared frame, b.",
-        edition_a="abcd",
-        edition_b="aXbYZd",
-        expect=[Added("X"), Replaced("c", "YZ")],
-    ),
-
-    Scenario(
-        name="identical frames in a row",
-        story="b runs twice in both editions.",
-        edition_a="abbc",
-        edition_b="abbc",
-        expect=[],
-    ),
-
-    Scenario(
-        name="identical frames apart",
-        story="b appears twice in both editions, with c between.",
-        edition_a="abcb",
-        edition_b="abcb",
-        expect=[],
-    ),
-
-    Scenario(
-        name="a run of identical frames grows",
-        story="b runs twice in edition_a and three times in edition_b. Which "
-              "of the three is the extra one cannot be said, so the run is "
-              "the smallest thing there is to point at.",
-        edition_a="abbc",
-        edition_b="abbbc",
-        expect=[Replaced("bb", "bbb")],
-    ),
-
-    Scenario(
-        name="a frame becomes two identical frames",
-        story="b appears once in edition_a and twice over in edition_b.",
-        edition_a="abc",
-        edition_b="abbc",
-        expect=[Replaced("b", "bb")],
-    ),
-
-    Scenario(
-        name="one of two identical frames is gone",
-        story="b appears twice in edition_a, with c between, and once in "
-              "edition_b. The run that is gone is the one after c.",
-        edition_a="abcb",
-        edition_b="abc",
-        expect=[Gone("b", nth=2)],
+        name="more than one difference at once",
+        story="Differences that have to stay apart rather than merging into one.",
+        cases=[
+            Case("abcd", "axbd", [Added("x"), Removed("c")], "an addition and a removal"),
+            Case("abcd", "axbyzd", [Added("x"), Replaced("c", "yz")],
+                 "two differences, one shared frame apart"),
+            Case("abcde", "adbe", [Relocated("b"), Relocated("d"), Removed("c")],
+                 "a removal touching a swap"),
+        ],
     ),
 ]

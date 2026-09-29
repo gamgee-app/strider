@@ -11,9 +11,12 @@ import pytest
 
 from tests.scenarios.catalogue import CATALOGUE
 from tests.scenarios.comparer import compare
-from tests.scenarios.editions import accounts_for_every_frame, describe, satisfies
+from tests.scenarios.editions import (
+    accounts_for_every_frame, cases_of, describe, satisfies,
+)
 
-CASES = [pytest.param(scenario, id=scenario.name) for scenario in CATALOGUE]
+CASES = [pytest.param(scenario, id=scenario.name)
+         for _, _, scenario in cases_of(CATALOGUE)]
 
 
 @pytest.mark.parametrize("scenario", CASES)
@@ -61,11 +64,11 @@ def test_the_expected_answer_accounts_for_every_frame(scenario):
 
 
 def test_scenario_names_are_unique():
-    names = [s.name for s in CATALOGUE]
+    names = [scenario.name for _, _, scenario in cases_of(CATALOGUE)]
     assert len(names) == len(set(names)), "two scenarios share a name"
 
 
 def test_every_scenario_states_a_truth_it_can_work_out():
     """Every scenario must yield a truth, whether derived or stated."""
-    for scenario in CATALOGUE:
+    for _, _, scenario in cases_of(CATALOGUE):
         scenario.expected()
