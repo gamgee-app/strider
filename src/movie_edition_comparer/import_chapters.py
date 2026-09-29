@@ -1,22 +1,9 @@
 import argparse
-import os
 import sqlite3
 import xml.etree.ElementTree as ET
 from contextlib import closing
 
-from progress.bar import Bar
-
-
-def create_table(db_path: str, table_name: str):
-    db_dir = os.path.dirname(db_path)
-    os.makedirs(db_dir, exist_ok=True)
-    with closing(sqlite3.connect(db_path)) as connection:
-        connection.execute(f"""
-            CREATE TABLE IF NOT EXISTS {table_name} (
-                start_time TEXT PRIMARY KEY,
-                title TEXT
-            )
-        """)
+from movie_edition_comparer.db import create_database, write_chapters
 
 
 def read_chapters(chapters) -> list[tuple[str, str]]:
@@ -40,18 +27,6 @@ def read_chapters(chapters) -> list[tuple[str, str]]:
         yield time_start, title
 
 
-def save_chapters_to_table(chapters: list[tuple[str, str]], db_path: str, table_name: str):
-    with (closing(sqlite3.connect(db_path)) as connection,
-          Bar('Inserting', max=len(chapters)) as bar):
-        for chapter in chapters:
-            connection.execute(f"""
-                INSERT INTO {table_name} (start_time, title)
-                VALUES (?, ?)
-            """, chapter)
-            bar.next()
-        connection.commit()
-
-
 def main():
     parser = argparse.ArgumentParser(
         prog='Import Chapters',
@@ -59,13 +34,16 @@ def main():
     )
 
     parser.add_argument('chapters', help="Path to the chapters file")
-    parser.add_argument('table', help="Name of the table to save data to")
-    parser.add_argument('--db', default="data/frame_hashes.db", help="Path to database file")
+    parser.add_argument('--edition', required=True, help="Name of the edition, e.g. theatrical")
+    parser.add_argument('--db', required=True, help="Path to the film's database, e.g. data/two_towers.db")
     args = parser.parse_args()
 
-    create_table(args.db, args.table)
+    create_database(args.db)
     chapters = list(read_chapters(args.chapters))
-    save_chapters_to_table(chapters, args.db, args.table)
+    with closing(sqlite3.connect(args.db)) as connection:
+        write_chapters(connection, args.edition, chapters)
+        connection.commit()
+    print(f"Imported {len(chapters)} chapters")
 
 
 if __name__ == "__main__":

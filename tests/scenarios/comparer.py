@@ -8,10 +8,11 @@ stand-in for either.
 import os
 import sqlite3
 import tempfile
+from contextlib import closing
 
 from movie_edition_comparer import compare_hashes
-
-from tests.scenarios.editions import Moved  # noqa: E402
+from movie_edition_comparer.db import create_database, write_frames
+from tests.scenarios.editions import Moved
 
 # One frame per second, so a timestamp in seconds is a frame number.
 compare_hashes.fps = 1.0
@@ -22,16 +23,12 @@ EDITION_A, EDITION_B = "edition_a", "edition_b"
 def _write(path: str, a_frames: list[tuple[str, str]], b_frames: list[tuple[str, str]]) -> None:
     """Both hashes go in, as hash_video writes them: what the pixels are, and
     what the frame looks like."""
-    connection = sqlite3.connect(path)
-    for table, frames in ((EDITION_A, a_frames), (EDITION_B, b_frames)):
-        connection.execute(
-            f"CREATE TABLE {table} "
-            f"(frame_index INTEGER, hash_md5 TEXT, hash_block_mean_0 TEXT)")
-        connection.executemany(
-            f"INSERT INTO {table} VALUES (?, ?, ?)",
-            [(i, md5, perceptual) for i, (md5, perceptual) in enumerate(frames)])
-    connection.commit()
-    connection.close()
+    create_database(path)
+    with closing(sqlite3.connect(path)) as connection:
+        for edition, frames in ((EDITION_A, a_frames), (EDITION_B, b_frames)):
+            write_frames(connection, edition,
+                         [(i, md5, perceptual) for i, (md5, perceptual) in enumerate(frames)])
+        connection.commit()
 
 
 def _reported(item):

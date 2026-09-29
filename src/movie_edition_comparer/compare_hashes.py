@@ -93,19 +93,21 @@ class Move:
                 f"appear at {self.b_start} in edition_b")
 
 
-def read_frames(db_path: str, table_name: str) -> list[Frame]:
+def read_frames(db_path: str, edition: str) -> list[Frame]:
     with closing(sqlite3.connect(db_path)) as connection:
         cursor = connection.cursor()
-        cursor.execute(f"""
+        cursor.execute("""
             SELECT
                 frame_index,
                 hash_md5,
                 hash_block_mean_0
             FROM
-                {table_name}
+                frame_hashes
+            WHERE
+                edition = ?
             ORDER BY
                 frame_index
-        """)
+        """, (edition,))
         return [Frame(*row) for row in cursor.fetchall()]
 
 
@@ -532,11 +534,11 @@ def _between(alignment: Alignment,
     return found
 
 
-def compare_editions(db_path: str, table_a_name: str,
-                     table_b_name: str) -> list[Difference | Move]:
-    """Everything to report between two editions held in the one database."""
-    return compare_runs(runs_of(read_frames(db_path, table_a_name)),
-                        runs_of(read_frames(db_path, table_b_name)))
+def compare_editions(db_path: str, edition_a: str,
+                     edition_b: str) -> list[Difference | Move]:
+    """Everything to report between two editions of the one film."""
+    return compare_runs(runs_of(read_frames(db_path, edition_a)),
+                        runs_of(read_frames(db_path, edition_b)))
 
 
 # --- reporting ---------------------------------------------------------------
@@ -602,14 +604,14 @@ perceptual_match_threshold = 5 # when comparing perceptual hashes, anything belo
 
 
 def main():
-    db_path = "data/frame_hashes.db"
+    db_path = "data/two_towers.db"
 
     label_a = "theatrical"
-    table_a_name = "two_towers_theatrical"
+    edition_a = "theatrical"
     movie_a_filename = "C:\\Users\\obroo\\Lord of the Rings\\The Lord of the Rings The Two Towers (2002) Theatrical Remux-2160p HDR.mkv"
 
     label_b = "extended"
-    table_b_name = "two_towers_extended"
+    edition_b = "extended"
     movie_b_filename = "C:\\Users\\obroo\\Lord of the Rings\\The Lord of the Rings The Two Towers (2002) Extended Remux-2160p HDR.mkv"
 
     print_json = False
@@ -618,7 +620,7 @@ def main():
     video_padding_seconds = 5
 
     print()
-    reported = compare_editions(db_path, table_a_name, table_b_name)
+    reported = compare_editions(db_path, edition_a, edition_b)
 
     moves = [item for item in reported if isinstance(item, Move)]
     table = [(time_range(item.a, item.b), time_range(item.b, item.a))
