@@ -125,6 +125,8 @@ CATALOGUE = [
             Case("ab", "AB", [Reencoded("a", "A"), Reencoded("b", "B")],
                  "every frame re-encoded"),
             Case("ab", "ab'", [Reencoded("b", "b'")], "re-encoded and a bit apart to look at"),
+            Case("ab", "a'b'", [Reencoded("a", "a'"), Reencoded("b", "b'")],
+                 "every frame a bit apart, with no neighbour to place either by"),
             Case("ab", "ab'b", [Added("b'")], "a second rendering beside the one it copies"),
             Case("ab", "AxB", [Reencoded("a", "A"), Added("x"), Reencoded("b", "B")],
                  "every frame re-encoded, and a frame added"),
