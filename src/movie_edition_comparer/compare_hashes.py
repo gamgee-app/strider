@@ -17,7 +17,7 @@ import itertools
 import json
 import os.path
 import sqlite3
-from collections import Counter
+from collections import Counter, defaultdict
 from contextlib import closing
 from dataclasses import dataclass
 from datetime import timedelta
@@ -179,15 +179,38 @@ def _link_unique(alignment: Alignment, key_of) -> None:
             alignment.link(a_index, b_index=b_once[key])
 
 
+def _pieces(picture_hash: str) -> list[str]:
+    """The hash cut into more pieces than a match is allowed to differ by bits.
+
+    Two hashes close enough to be one picture have a piece in common, since
+    there are more pieces than bits they may differ by. Looking only at runs
+    sharing a piece finds every match without reading every pair.
+    """
+    size = -(-len(picture_hash) // (perceptual_match_threshold + 1))
+    return [f"{place}:{picture_hash[place:place + size]}"
+            for place in range(0, len(picture_hash), size)]
+
+
 def _link_alike(alignment: Alignment) -> None:
     """Link runs that look like one run on the other side and no other.
 
     What is left once equal hashes have been used up: two renderings of one
     picture that are a bit apart to look at as well.
     """
-    a_free, b_free = alignment.a_free(), alignment.b_free()
-    alike = {i: [j for j in b_free if same_picture(alignment.a_runs[i], alignment.b_runs[j])]
-             for i in a_free}
+    sharing = defaultdict(list)
+    for b_index in alignment.b_free():
+        for piece in _pieces(alignment.b_runs[b_index].picture_hash):
+            sharing[piece].append(b_index)
+
+    alike = {}
+    for a_index in alignment.a_free():
+        nearby = {b_index
+                  for piece in _pieces(alignment.a_runs[a_index].picture_hash)
+                  for b_index in sharing.get(piece, ())}
+        alike[a_index] = sorted(
+            b_index for b_index in nearby
+            if same_picture(alignment.a_runs[a_index], alignment.b_runs[b_index]))
+
     wanted = Counter(j for candidates in alike.values() for j in candidates)
     for a_index, candidates in alike.items():
         if len(candidates) == 1 and wanted[candidates[0]] == 1:
