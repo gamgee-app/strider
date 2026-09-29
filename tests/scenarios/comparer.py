@@ -7,16 +7,9 @@ stand-in for either.
 
 import os
 import sqlite3
-import sys
 import tempfile
 
-# compare_hashes imports algorithms directly, so its own directory has to be
-# importable rather than the package around it.
-sys.path.insert(0, os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-    "src", "movie_edition_comparer"))
-
-import compare_hashes  # noqa: E402
+from movie_edition_comparer import compare_hashes
 
 from tests.scenarios.editions import Moved  # noqa: E402
 
