@@ -19,16 +19,12 @@ import os.path
 import sqlite3
 from collections import Counter, defaultdict
 from contextlib import closing
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import timedelta
 
-import cv2
 import ffmpeg
 from progress.bar import Bar
 from tabulate import tabulate
-
-from movie_edition_comparer.algorithms import deserialize
-
 
 @dataclass(frozen=True)
 class Frame:
@@ -45,6 +41,12 @@ class Run:
     count: int
     data_hash: str
     picture_hash: str
+    # The picture hash as a number, so that how far two pictures are apart
+    # is one exclusive-or and a count of the bits left standing.
+    picture_bits: int = field(init=False, repr=False, compare=False)
+
+    def __post_init__(self):
+        self.picture_bits = int(self.picture_hash, 16)
 
     @property
     def end(self) -> int:
@@ -117,10 +119,8 @@ def runs_of(frames: list[Frame]) -> list[Run]:
     return runs
 
 
-def hamming_distance(hash_a: str, hash_b: str) -> float:
-    array_a = deserialize(hash_a)
-    array_b = deserialize(hash_b)
-    return cv2.norm(array_a, array_b, cv2.NORM_HAMMING)
+def bits_apart(a: Run, b: Run) -> int:
+    return (a.picture_bits ^ b.picture_bits).bit_count()
 
 
 def same_frame(a: Run, b: Run) -> bool:
@@ -130,8 +130,7 @@ def same_frame(a: Run, b: Run) -> bool:
 
 def same_picture(a: Run, b: Run) -> bool:
     """The same picture, however its pixels were arrived at."""
-    return (a.picture_hash == b.picture_hash
-            or hamming_distance(a.picture_hash, b.picture_hash) <= perceptual_match_threshold)
+    return bits_apart(a, b) <= perceptual_match_threshold
 
 
 class Alignment:
@@ -191,30 +190,55 @@ def _pieces(picture_hash: str) -> list[str]:
             for place in range(0, len(picture_hash), size)]
 
 
+def _lookalikes(run: Run, others: list[Run], sharing: dict[str, list[int]],
+                at_most: int) -> list[int]:
+    """Which of the others look like this run, up to as many as matter.
+
+    Only runs sharing a piece of the hash are looked at, and looking stops
+    once at_most have been found, since past that the answer is the same:
+    too many.
+    """
+    found: list[int] = []
+    for piece in _pieces(run.picture_hash):
+        for index in sharing.get(piece, ()):
+            if index not in found and same_picture(run, others[index]):
+                found.append(index)
+                if len(found) == at_most:
+                    return found
+    return found
+
+
+def _sharing(indexes: list[int], runs: list[Run]) -> dict[str, list[int]]:
+    """Which of these runs carry each piece of hash."""
+    sharing = defaultdict(list)
+    for index in indexes:
+        for piece in _pieces(runs[index].picture_hash):
+            sharing[piece].append(index)
+    return sharing
+
+
 def _link_alike(alignment: Alignment) -> None:
     """Link runs that look like one run on the other side and no other.
 
     What is left once equal hashes have been used up: two renderings of one
-    picture that are a bit apart to look at as well.
+    picture that are a bit apart to look at as well. A run that looks like
+    two is not placed by looks, so once two are found there is no need to
+    go on finding them -- which matters, since a dark frame looks like
+    every other dark frame.
     """
-    sharing = defaultdict(list)
-    for b_index in alignment.b_free():
-        for piece in _pieces(alignment.b_runs[b_index].picture_hash):
-            sharing[piece].append(b_index)
+    a_free, b_free = alignment.a_free(), alignment.b_free()
+    b_sharing = _sharing(b_free, alignment.b_runs)
 
-    alike = {}
-    for a_index in alignment.a_free():
-        nearby = {b_index
-                  for piece in _pieces(alignment.a_runs[a_index].picture_hash)
-                  for b_index in sharing.get(piece, ())}
-        alike[a_index] = sorted(
-            b_index for b_index in nearby
-            if same_picture(alignment.a_runs[a_index], alignment.b_runs[b_index]))
+    only = {}
+    for a_index in a_free:
+        alike = _lookalikes(alignment.a_runs[a_index], alignment.b_runs, b_sharing, at_most=2)
+        if len(alike) == 1:
+            only[a_index] = alike[0]
 
-    wanted = Counter(j for candidates in alike.values() for j in candidates)
-    for a_index, candidates in alike.items():
-        if len(candidates) == 1 and wanted[candidates[0]] == 1:
-            alignment.link(a_index, candidates[0])
+    a_sharing = _sharing(a_free, alignment.a_runs)
+    for a_index, b_index in only.items():
+        if _lookalikes(alignment.b_runs[b_index], alignment.a_runs, a_sharing, at_most=2) == [a_index]:
+            alignment.link(a_index, b_index)
 
 
 def _extend_links(alignment: Alignment, matches) -> None:
