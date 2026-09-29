@@ -148,6 +148,20 @@ CATALOGUE = [
     ),
 
     Scenario(
+        name="footage moves and is retimed",
+        story="Footage in both editions, in a different place in each, and "
+              "lasting a different number of frames when it gets there. What "
+              "moved is the footage both editions hold; the frames one of "
+              "them holds over and above that are a difference beside it.",
+        cases=[
+            Case("abcd", "acdbb", [Relocated("b"), Added("b", nth=2)],
+                 "one frame moves and becomes two"),
+            Case("abbcd", "acdb", [Relocated("b"), Removed("b", nth=2)],
+                 "two frames move and become one"),
+        ],
+    ),
+
+    Scenario(
         name="more than one difference at once",
         story="Differences that have to stay apart rather than merging into one.",
         cases=[

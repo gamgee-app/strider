@@ -306,20 +306,40 @@ def _moved_runs(alignment: Alignment) -> set[int]:
     return {pairs[k][0] for k in set(range(len(pairs))) - set(staying)}
 
 
-def _moves(alignment: Alignment, moved: set[int]) -> list[Move]:
-    """Footage that moved, with runs that travelled together reported as one."""
+def _moves(alignment: Alignment, moved: set[int]) -> list[Difference | Move]:
+    """Footage that moved, with runs that travelled together reported as one.
+
+    Footage that does not last as long once it gets there has moved only as
+    far as both editions hold it. The frames one edition has over and above
+    that are a difference standing beside the move, since a move says one
+    length and there are two.
+    """
     moves: list[Move] = []
+    retimed: list[Difference] = []
     previous = None
     for a_index in sorted(moved):
         b_index = alignment.a_to_b[a_index]
         a_run, b_run = alignment.a_runs[a_index], alignment.b_runs[b_index]
-        if previous == (a_index - 1, b_index - 1):
-            moves[-1] = Move(moves[-1].count + a_run.count,
+        travelled = min(a_run.count, b_run.count)
+        alike = a_run.count == b_run.count
+
+        if alike and previous == (a_index - 1, b_index - 1):
+            moves[-1] = Move(moves[-1].count + travelled,
                              moves[-1].a_start, moves[-1].b_start)
         else:
-            moves.append(Move(a_run.count, a_run.start, b_run.start))
-        previous = (a_index, b_index)
-    return moves
+            moves.append(Move(travelled, a_run.start, b_run.start))
+
+        if a_run.count > travelled:
+            retimed.append(Difference(
+                Frames(a_run.start + travelled, a_run.count - travelled),
+                Frames(b_run.end, 0)))
+        elif b_run.count > travelled:
+            retimed.append(Difference(
+                Frames(a_run.end, 0),
+                Frames(b_run.start + travelled, b_run.count - travelled)))
+
+        previous = (a_index, b_index) if alike else None
+    return moves + retimed
 
 
 @dataclass(frozen=True)
