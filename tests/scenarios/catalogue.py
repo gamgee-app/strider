@@ -102,14 +102,16 @@ CATALOGUE = [
         story="Frames indistinguishable from one another -- black between "
               "scenes, a fade, a held frame, a static shot.",
         cases=[
-            Case("abbc", "abbc", [], "a run of them, unchanged"),
-            Case("abcb", "abcb", [], "two of them apart, unchanged"),
+            Case("abbc", "abbc", [], "a run of the frame, unchanged"),
+            Case("abcb", "abcb", [], "two of the frame apart, unchanged"),
             Case("abc", "abbc", [Retimed("b", "bb")], "one frame becomes two"),
             Case("abbc", "abc", [Retimed("bb", "b")], "two frames become one"),
-            Case("abcb", "abc", [Removed("b", nth=2)], "one of two apart is removed"),
-            Case("abc", "abcb", [Added("b", nth=2)], "a second one apart is added"),
+            Case("abcb", "abc", [Removed("b", nth=2)], "one of two frames apart is removed"),
+            Case("abc", "abcb", [Added("b", nth=2)], "a second frame is added, apart"),
+            Case("a", "aba", [Added("ba")],
+                 "a second frame is added, apart, with no neighbour to place it by"),
             Case("abbc", "acbb", [Relocated("bb"), Relocated("c")],
-                 "a run of them moves, and the frame it traded places with"),
+                 "a run of the frame moves, and the frame it traded places with"),
         ],
     ),
 
