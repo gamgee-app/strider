@@ -1,0 +1,6 @@
+outs:
+- md5: 80b964865a3daa18ada592aa04ccff44
+  size: 523046912
+  isexec: true
+  hash: md5
+  path: fellowship.db
