@@ -45,24 +45,28 @@ def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers
     cap.release()
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        prog='Hash Video',
-        description='Calculates the hashes for each frame of a video, and saves the results to a database'
-    )
-
+def configure_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('video', help="Path to the video file")
     parser.add_argument('--edition', required=True, help="Name of the edition, e.g. theatrical")
     parser.add_argument('--db', required=True, help="Path to the film's database, e.g. data/two_towers.db")
     parser.add_argument('--threads', default=4, type=int, help="Number of threads to use")
-    args = parser.parse_args()
 
+
+def run(args: argparse.Namespace) -> None:
     start_time = datetime.now()
 
     create_database(args.db)
     hash_video_frames_to_db(args.video, args.db, args.edition, args.threads)
 
     print(f"Took {datetime.now() - start_time}")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog='strider hash',
+        description='Hash every frame of an edition into the film\'s database')
+    configure_parser(parser)
+    run(parser.parse_args())
 
 
 if __name__ == "__main__":
