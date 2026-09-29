@@ -63,6 +63,32 @@ def test_the_expected_answer_accounts_for_every_frame(scenario):
     ])
 
 
+@pytest.mark.parametrize("scenario", CASES)
+def test_the_report_accounts_for_every_frame(scenario):
+    """The same second opinion, turned on what the comparer actually said.
+
+    Whatever is reported has to add up against the editions as well: footage
+    the two editions do not hold the same way reported exactly once, footage
+    they do hold the same way not reported at all, nothing reported as having
+    moved and as a difference both, and no move landing off the end of an
+    edition.
+    """
+    reported = describe(compare(*scenario.frames()))
+    complaints = accounts_for_every_frame(scenario, reported)
+    assert not complaints, "\n".join([
+        "",
+        f"Scenario: {scenario.name}",
+        f"  edition_a: {scenario.edition_a}",
+        f"  edition_b: {scenario.edition_b}",
+        "",
+        "  the comparer reports:",
+        *([f"      {d}" for d in reported] or ["      nothing"]),
+        "",
+        "  but the editions say:",
+        *[f"      {c}" for c in complaints],
+    ])
+
+
 def test_scenario_names_are_unique():
     names = [scenario.name for _, _, scenario in cases_of(CATALOGUE)]
     assert len(names) == len(set(names)), "two scenarios share a name"

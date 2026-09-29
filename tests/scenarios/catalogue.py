@@ -72,6 +72,18 @@ CATALOGUE = [
     ),
 
     Scenario(
+        name="editions with nothing in common",
+        story="Two editions holding no footage in common, including where one "
+              "of them holds no footage at all. One difference covering "
+              "whatever each edition has, not one for every frame.",
+        cases=[
+            Case("abc", "xyz", [Replaced("abc", "xyz")], "neither edition's footage is the other's"),
+            Case("", "abc", [Added("abc")], "the first edition is empty"),
+            Case("abc", "", [Removed("abc")], "the second edition is empty"),
+        ],
+    ),
+
+    Scenario(
         name="frames are moved",
         story="Footage in both editions, in a different place in each.",
         cases=[
@@ -95,6 +107,9 @@ CATALOGUE = [
             Case("abc", "abbc", [Retimed("b", "bb")], "one frame becomes two"),
             Case("abbc", "abc", [Retimed("bb", "b")], "two frames become one"),
             Case("abcb", "abc", [Removed("b", nth=2)], "one of two apart is removed"),
+            Case("abc", "abcb", [Added("b", nth=2)], "a second one apart is added"),
+            Case("abbc", "acbb", [Relocated("bb"), Relocated("c")],
+                 "a run of them moves, and the frame it traded places with"),
         ],
     ),
 
@@ -125,6 +140,24 @@ CATALOGUE = [
                  "frames that look exactly alike, re-encoded"),
             Case("abc", "Ab'c", [Reencoded("a", "A"), Reencoded("b", "b'")],
                  "one frame re-encoded, its neighbour a bit apart as well"),
+            Case("ab", "ab'b''", [Reencoded("b", "b'"), Added("b''")],
+                 "two renderings, with nothing to choose between them but where they sit"),
+            Case("abcb", "abcB", [Reencoded("b", "B", a_nth=2)],
+                 "one of two apart is re-encoded"),
+        ],
+    ),
+
+    Scenario(
+        name="footage moves and is retimed",
+        story="Footage in both editions, in a different place in each, and "
+              "lasting a different number of frames when it gets there. What "
+              "moved is the footage both editions hold; the frames one of "
+              "them holds over and above that are a difference beside it.",
+        cases=[
+            Case("abcd", "acdbb", [Relocated("b"), Added("b", nth=2)],
+                 "one frame moves and becomes two"),
+            Case("abbcd", "acdb", [Relocated("b"), Removed("b", nth=2)],
+                 "two frames move and become one"),
         ],
     ),
 
@@ -137,6 +170,9 @@ CATALOGUE = [
                  "two differences, one shared frame apart"),
             Case("abcde", "adbe", [Relocated("b"), Relocated("d"), Removed("c")],
                  "a removal touching a swap"),
+            Case("axxbye", "aeb",
+                 [Removed("xx"), Relocated("b"), Removed("y"), Relocated("e")],
+                 "two removals with footage that moved standing between them"),
         ],
     ),
 ]
