@@ -257,6 +257,49 @@ def _extend_links(alignment: Alignment, matches) -> None:
                 i, j = i + step, j + step
 
 
+def _link_between(alignment: Alignment, moved: set[int]) -> None:
+    """Pair what is left between one anchor and the next, first with first.
+
+    A frame that looks like more than one run on the other side is not
+    placed by looks. It is placed by where it sits: among the runs standing
+    between the same two frames that stayed put, taken in order, it is the
+    first that looks like it and stands after whatever was paired last --
+    since nothing else can tell two black frames apart. What is placed by
+    where it sits cannot then be said to have moved, so this comes after
+    the moves are known and cannot make any.
+    """
+    anchors = [(i, j) for i, j in alignment.pairs() if i not in moved]
+    fences = [(-1, -1)] + anchors + [(len(alignment.a_runs), len(alignment.b_runs))]
+    for (a_left, b_left), (a_right, b_right) in zip(fences, fences[1:]):
+        b_between = [j for j in range(b_left + 1, b_right) if j not in alignment.b_to_a]
+        if not b_between:
+            continue
+        b_sharing = _sharing(b_between, alignment.b_runs)
+        after = b_left
+        for i in range(a_left + 1, a_right):
+            if i in alignment.a_to_b:
+                continue
+            j = _first_lookalike_after(alignment.a_runs[i], alignment.b_runs, b_sharing, after)
+            if j is not None:
+                alignment.link(i, j)
+                after = j
+
+
+def _first_lookalike_after(run: Run, others: list[Run], sharing: dict[str, list[int]],
+                           after: int) -> int | None:
+    """The first of the others past a place that looks like this run."""
+    first = None
+    for piece in _pieces(run.picture_hash):
+        indexes = sharing.get(piece, ())
+        for index in indexes[bisect.bisect_right(indexes, after):]:
+            if first is not None and index >= first:
+                break
+            if same_picture(run, others[index]):
+                first = index
+                break
+    return first
+
+
 def align(a_runs: list[Run], b_runs: list[Run]) -> Alignment:
     """Pair up the runs the two editions share.
 
@@ -428,6 +471,8 @@ def compare_runs(a_runs: list[Run], b_runs: list[Run]) -> list[Difference | Move
     """Everything to report between two editions, in the order it comes."""
     alignment = align(a_runs, b_runs)
     moved = _moved_runs(alignment)
+    _link_between(alignment, moved)
+    _extend_links(alignment, same_picture)
     anchors = [(i, j) for i, j in alignment.pairs() if i not in moved]
     fences = [(-1, -1)] + anchors + [(len(a_runs), len(b_runs))]
 
