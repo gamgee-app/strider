@@ -268,13 +268,6 @@ def _rising_lengths(values: list[int]) -> list[int]:
     return lengths
 
 
-def _stays_in_order(pairs: list[tuple[int, int]], staying: set[int], which: int) -> bool:
-    """Whether a link can join the ones that stay without crossing any of them."""
-    before = max((pairs[k][1] for k in staying if k < which), default=-1)
-    after = min((pairs[k][1] for k in staying if k > which), default=float("inf"))
-    return before < pairs[which][1] < after
-
-
 def _moved_runs(alignment: Alignment) -> set[int]:
     """Which runs of edition_a turn up somewhere else in edition_b.
 
@@ -294,17 +287,23 @@ def _moved_runs(alignment: Alignment) -> set[int]:
 
     could_stay = [up + down - 1 == longest for up, down in zip(rising, falling)]
     contested = Counter(rising[k] for k in range(len(pairs)) if could_stay[k])
-    staying = {k for k in range(len(pairs)) if could_stay[k] and contested[rising[k]] == 1}
+    staying = [k for k in range(len(pairs)) if could_stay[k] and contested[rising[k]] == 1]
 
-    # footage in the same place in both editions has not moved anywhere
+    # Footage sitting at the same frame in both editions has not gone anywhere.
+    # The links that stay rise together, so each of these joins them wherever
+    # it does not cross the ones either side of it.
     for which, (a_index, b_index) in enumerate(pairs):
-        if which in staying:
+        if alignment.a_runs[a_index].start != alignment.b_runs[b_index].start:
             continue
-        if (alignment.a_runs[a_index].start == alignment.b_runs[b_index].start
-                and _stays_in_order(pairs, staying, which)):
-            staying.add(which)
+        place = bisect.bisect_left(staying, which)
+        if place < len(staying) and staying[place] == which:
+            continue
+        before = pairs[staying[place - 1]][1] if place else -1
+        after = pairs[staying[place]][1] if place < len(staying) else float("inf")
+        if before < b_index < after:
+            staying.insert(place, which)
 
-    return {pairs[k][0] for k in range(len(pairs)) if k not in staying}
+    return {pairs[k][0] for k in set(range(len(pairs))) - set(staying)}
 
 
 def _moves(alignment: Alignment, moved: set[int]) -> list[Move]:
