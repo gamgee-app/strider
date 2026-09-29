@@ -193,15 +193,19 @@ class Relocated:
     becomes: str = ""
 
 
-def describe(reported) -> list[Difference]:
+def describe(reported) -> list:
     """Turn (a_start, a_end, b_start, b_end) tuples into Differences.
 
     A comparer reports the matching frames either side of a difference, so the
-    differing frames are the ones strictly between them.
+    differing frames are the ones strictly between them. Footage a comparer
+    says has moved arrives as a Moved, which says where it went rather than
+    which frames it sits between, and passes through as it is.
     """
     return [
-        Difference(Region(a0 + 1, max(0, a1 - a0 - 1)), Region(b0 + 1, max(0, b1 - b0 - 1)))
-        for a0, a1, b0, b1 in reported
+        item if isinstance(item, Moved) else
+        Difference(Region(item[0] + 1, max(0, item[1] - item[0] - 1)),
+                   Region(item[2] + 1, max(0, item[3] - item[2] - 1)))
+        for item in reported
     ]
 
 

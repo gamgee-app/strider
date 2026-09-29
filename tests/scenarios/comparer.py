@@ -18,6 +18,8 @@ sys.path.insert(0, os.path.join(
 
 import compare_hashes  # noqa: E402
 
+from tests.scenarios.editions import Moved  # noqa: E402
+
 # One frame per second, so a timestamp in seconds is a frame number.
 compare_hashes.fps = 1.0
 
@@ -39,6 +41,13 @@ def _write(path: str, a_frames: list[tuple[str, str]], b_frames: list[tuple[str,
     connection.close()
 
 
+def _reported(item):
+    """One thing the comparer reported, as a scenario talks about it."""
+    if isinstance(item, compare_hashes.Move):
+        return Moved(frames=item.count, at=item.a_start, to=item.b_start)
+    return _boundaries(item)
+
+
 def _boundaries(difference) -> tuple[int, int, int, int]:
     """A difference as the matching frames either side of it.
 
@@ -55,5 +64,5 @@ def compare(a_frames: list[str], b_frames: list[str]) -> list:
     with tempfile.TemporaryDirectory() as folder:
         path = os.path.join(folder, "frames.db")
         _write(path, a_frames, b_frames)
-        return [_boundaries(d)
-                for d in compare_hashes.compare_editions(path, EDITION_A, EDITION_B)]
+        return [_reported(item)
+                for item in compare_hashes.compare_editions(path, EDITION_A, EDITION_B)]

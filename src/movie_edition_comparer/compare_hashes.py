@@ -11,6 +11,7 @@ Frames that repeat carry nothing on their own, so the unit that gets matched
 is a run of them: black between scenes, a fade, a held frame, a static shot.
 """
 
+import bisect
 import datetime
 import itertools
 import json
@@ -70,6 +71,23 @@ class Difference:
 
     def __str__(self) -> str:
         return f"edition_a: {str(self.a):<22} edition_b: {self.b}"
+
+
+@dataclass(frozen=True)
+class Move:
+    """Footage in both editions, in a different place in each.
+
+    Says more than a difference at each of the two places would: it is the
+    same footage relocated, not two unrelated stretches that disagree.
+    """
+    count: int
+    a_start: int
+    b_start: int
+
+    def __str__(self) -> str:
+        plural = "s" if self.count != 1 else ""
+        return (f"{self.count} frame{plural} at {self.a_start} in edition_a "
+                f"appear at {self.b_start} in edition_b")
 
 
 def read_frames(db_path: str, table_name: str) -> list[Frame]:
@@ -213,6 +231,75 @@ def align(a_runs: list[Run], b_runs: list[Run]) -> Alignment:
     return alignment
 
 
+def _rising_lengths(values: list[int]) -> list[int]:
+    """For each place, the longest rising run of values ending there."""
+    lengths: list[int] = []
+    tails: list[int] = []
+    for value in values:
+        place = bisect.bisect_left(tails, value)
+        if place == len(tails):
+            tails.append(value)
+        else:
+            tails[place] = value
+        lengths.append(place + 1)
+    return lengths
+
+
+def _stays_in_order(pairs: list[tuple[int, int]], staying: set[int], which: int) -> bool:
+    """Whether a link can join the ones that stay without crossing any of them."""
+    before = max((pairs[k][1] for k in staying if k < which), default=-1)
+    after = min((pairs[k][1] for k in staying if k > which), default=float("inf"))
+    return before < pairs[which][1] < after
+
+
+def _moved_runs(alignment: Alignment) -> set[int]:
+    """Which runs of edition_a turn up somewhere else in edition_b.
+
+    The footage that stays put is the links that rise together, and a link
+    only counts as staying if every longest rising run of links holds it.
+    Where two pieces of footage have swapped there is no saying which of them
+    is the one that stayed, so both have moved.
+    """
+    pairs = alignment.pairs()
+    if not pairs:
+        return set()
+
+    b_indexes = [j for _, j in pairs]
+    rising = _rising_lengths(b_indexes)
+    falling = list(reversed(_rising_lengths([-j for j in reversed(b_indexes)])))
+    longest = max(up + down - 1 for up, down in zip(rising, falling))
+
+    could_stay = [up + down - 1 == longest for up, down in zip(rising, falling)]
+    contested = Counter(rising[k] for k in range(len(pairs)) if could_stay[k])
+    staying = {k for k in range(len(pairs)) if could_stay[k] and contested[rising[k]] == 1}
+
+    # footage in the same place in both editions has not moved anywhere
+    for which, (a_index, b_index) in enumerate(pairs):
+        if which in staying:
+            continue
+        if (alignment.a_runs[a_index].start == alignment.b_runs[b_index].start
+                and _stays_in_order(pairs, staying, which)):
+            staying.add(which)
+
+    return {pairs[k][0] for k in range(len(pairs)) if k not in staying}
+
+
+def _moves(alignment: Alignment, moved: set[int]) -> list[Move]:
+    """Footage that moved, with runs that travelled together reported as one."""
+    moves: list[Move] = []
+    previous = None
+    for a_index in sorted(moved):
+        b_index = alignment.a_to_b[a_index]
+        a_run, b_run = alignment.a_runs[a_index], alignment.b_runs[b_index]
+        if previous == (a_index - 1, b_index - 1):
+            moves[-1] = Move(moves[-1].count + a_run.count,
+                             moves[-1].a_start, moves[-1].b_start)
+        else:
+            moves.append(Move(a_run.count, a_run.start, b_run.start))
+        previous = (a_index, b_index)
+    return moves
+
+
 @dataclass(frozen=True)
 class _Block:
     """Runs with nothing on the other side to answer for them."""
@@ -267,20 +354,26 @@ def _difference_of(a: Run, b: Run) -> Difference | None:
     return Difference(Frames(a.start, a.count), Frames(b.start, b.count))
 
 
-def compare_runs(a_runs: list[Run], b_runs: list[Run]) -> list[Difference]:
-    """Every difference between two editions, in the order they come."""
+def _at(item: Difference | Move) -> int:
+    return item.a_start if isinstance(item, Move) else item.a.start
+
+
+def compare_runs(a_runs: list[Run], b_runs: list[Run]) -> list[Difference | Move]:
+    """Everything to report between two editions, in the order it comes."""
     alignment = align(a_runs, b_runs)
-    anchors = alignment.pairs()
+    moved = _moved_runs(alignment)
+    anchors = [(i, j) for i, j in alignment.pairs() if i not in moved]
     fences = [(-1, -1)] + anchors + [(len(a_runs), len(b_runs))]
 
-    found: list[Difference] = []
+    found: list[Difference | Move] = []
     for left, right in zip(fences, fences[1:]):
         found += _between(alignment, left, right)
         if right[0] < len(a_runs):
             difference = _difference_of(a_runs[right[0]], b_runs[right[1]])
             if difference:
                 found.append(difference)
-    return sorted(found, key=lambda difference: difference.a.start)
+    found += _moves(alignment, moved)
+    return sorted(found, key=_at)
 
 
 def _between(alignment: Alignment,
@@ -301,8 +394,9 @@ def _between(alignment: Alignment,
     return found
 
 
-def compare_editions(db_path: str, table_a_name: str, table_b_name: str) -> list[Difference]:
-    """Every difference between two editions held in the one database."""
+def compare_editions(db_path: str, table_a_name: str,
+                     table_b_name: str) -> list[Difference | Move]:
+    """Everything to report between two editions held in the one database."""
     return compare_runs(runs_of(read_frames(db_path, table_a_name)),
                         runs_of(read_frames(db_path, table_b_name)))
 
@@ -386,9 +480,11 @@ def main():
     video_padding_seconds = 5
 
     print()
-    differences = compare_editions(db_path, table_a_name, table_b_name)
+    reported = compare_editions(db_path, table_a_name, table_b_name)
 
-    table = [(time_range(d.a, d.b), time_range(d.b, d.a)) for d in differences]
+    moves = [item for item in reported if isinstance(item, Move)]
+    table = [(time_range(item.a, item.b), time_range(item.b, item.a))
+             for item in reported if isinstance(item, Difference)]
 
     def sort_key(row: tuple[TimeRange, TimeRange]) -> timedelta:
         return max(row[0].range, row[1].range)
@@ -408,6 +504,14 @@ def main():
     print(f'Count ({len(sorted_table)}):')
     print()
     print(tabulated)
+
+    if moves:
+        print()
+        print(f'Moved ({len(moves)}):')
+        print()
+        for move in moves:
+            print(f"  {frame_to_time(move.a_start)} -> {frame_to_time(move.b_start)}"
+                  f"  ({frame_to_time(move.count)})")
 
     if print_json:
         print(json.dumps([get_differences_dict(a) for a, b in table if a.range > timedelta(seconds=0)]))
