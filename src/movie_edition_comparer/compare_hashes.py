@@ -27,7 +27,7 @@ import ffmpeg
 from progress.bar import Bar
 from tabulate import tabulate
 
-from algorithms import deserialize
+from movie_edition_comparer.algorithms import deserialize
 
 
 @dataclass(frozen=True)
