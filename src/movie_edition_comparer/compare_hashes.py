@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 from datetime import timedelta
 
 import ffmpeg
+import numpy as np
 from progress.bar import Bar
 from tabulate import tabulate
 
@@ -141,6 +142,7 @@ class Alignment:
         self.b_runs = b_runs
         self.a_to_b: dict[int, int] = {}
         self.b_to_a: dict[int, int] = {}
+        self.masks = _piece_masks(a_runs + b_runs)
 
     def link(self, a_index: int, b_index: int) -> None:
         self.a_to_b[a_index] = b_index
@@ -178,20 +180,42 @@ def _link_unique(alignment: Alignment, key_of) -> None:
             alignment.link(a_index, b_index=b_once[key])
 
 
-def _pieces(picture_hash: str) -> list[str]:
-    """The hash cut into more pieces than a match is allowed to differ by bits.
+# The block mean hash is 256 bits, however it is written.
+HASH_BITS = 256
+
+
+def _piece_masks(runs: list[Run]) -> list[int]:
+    """The bits of the picture hash that vary across the film, cut into more
+    pieces than a match is allowed to differ by bits.
 
     Two hashes close enough to be one picture have a piece in common, since
     there are more pieces than bits they may differ by. Looking only at runs
     sharing a piece finds every match without reading every pair.
+
+    Only the bits that vary are cut up. The rows above and below a
+    letterboxed picture hash the same on every frame, so a piece holding
+    them is shared by every frame and finds nothing; and two hashes a few
+    bits apart are as few apart on the bits that vary, so leaving the rest
+    out loses no match.
     """
-    size = -(-len(picture_hash) // (perceptual_match_threshold + 1))
-    return [f"{place}:{picture_hash[place:place + size]}"
-            for place in range(0, len(picture_hash), size)]
+    hashes = np.frombuffer(b"".join(bytes.fromhex(run.picture_hash) for run in runs),
+                           dtype=np.uint8).reshape(len(runs), HASH_BITS // 8)
+    set_in = np.unpackbits(hashes, axis=1).sum(axis=0)
+    # unpackbits gives the first byte's high bit first; as a number, that is bit 255.
+    varying = sorted(HASH_BITS - 1 - place for place, count in enumerate(set_in)
+               if 0.02 * len(runs) < count < 0.98 * len(runs))
+    count = perceptual_match_threshold + 1
+    size = -(-len(varying) // count)
+    return [sum(1 << bit for bit in varying[piece * size:(piece + 1) * size])
+            for piece in range(count)]
+
+
+def _pieces(run: Run, masks: list[int]) -> list[str]:
+    return [f"{piece}:{run.picture_bits & mask:x}" for piece, mask in enumerate(masks)]
 
 
 def _lookalikes(run: Run, others: list[Run], sharing: dict[str, list[int]],
-                at_most: int) -> list[int]:
+                masks: list[int], at_most: int) -> list[int]:
     """Which of the others look like this run, up to as many as matter.
 
     Only runs sharing a piece of the hash are looked at, and looking stops
@@ -199,7 +223,7 @@ def _lookalikes(run: Run, others: list[Run], sharing: dict[str, list[int]],
     too many.
     """
     found: list[int] = []
-    for piece in _pieces(run.picture_hash):
+    for piece in _pieces(run, masks):
         for index in sharing.get(piece, ()):
             if index not in found and same_picture(run, others[index]):
                 found.append(index)
@@ -208,11 +232,11 @@ def _lookalikes(run: Run, others: list[Run], sharing: dict[str, list[int]],
     return found
 
 
-def _sharing(indexes: list[int], runs: list[Run]) -> dict[str, list[int]]:
+def _sharing(indexes: list[int], runs: list[Run], masks: list[int]) -> dict[str, list[int]]:
     """Which of these runs carry each piece of hash."""
     sharing = defaultdict(list)
     for index in indexes:
-        for piece in _pieces(runs[index].picture_hash):
+        for piece in _pieces(runs[index], masks):
             sharing[piece].append(index)
     return sharing
 
@@ -227,17 +251,19 @@ def _link_alike(alignment: Alignment) -> None:
     every other dark frame.
     """
     a_free, b_free = alignment.a_free(), alignment.b_free()
-    b_sharing = _sharing(b_free, alignment.b_runs)
+    b_sharing = _sharing(b_free, alignment.b_runs, alignment.masks)
 
     only = {}
     for a_index in a_free:
-        alike = _lookalikes(alignment.a_runs[a_index], alignment.b_runs, b_sharing, at_most=2)
+        alike = _lookalikes(alignment.a_runs[a_index], alignment.b_runs, b_sharing,
+                            alignment.masks, at_most=2)
         if len(alike) == 1:
             only[a_index] = alike[0]
 
-    a_sharing = _sharing(a_free, alignment.a_runs)
+    a_sharing = _sharing(a_free, alignment.a_runs, alignment.masks)
     for a_index, b_index in only.items():
-        if _lookalikes(alignment.b_runs[b_index], alignment.a_runs, a_sharing, at_most=2) == [a_index]:
+        if _lookalikes(alignment.b_runs[b_index], alignment.a_runs, a_sharing,
+                       alignment.masks, at_most=2) == [a_index]:
             alignment.link(a_index, b_index)
 
 
@@ -274,22 +300,23 @@ def _link_between(alignment: Alignment, moved: set[int]) -> None:
         b_between = [j for j in range(b_left + 1, b_right) if j not in alignment.b_to_a]
         if not b_between:
             continue
-        b_sharing = _sharing(b_between, alignment.b_runs)
+        b_sharing = _sharing(b_between, alignment.b_runs, alignment.masks)
         after = b_left
         for i in range(a_left + 1, a_right):
             if i in alignment.a_to_b:
                 continue
-            j = _first_lookalike_after(alignment.a_runs[i], alignment.b_runs, b_sharing, after)
+            j = _first_lookalike_after(alignment.a_runs[i], alignment.b_runs, b_sharing,
+                                       alignment.masks, after)
             if j is not None:
                 alignment.link(i, j)
                 after = j
 
 
 def _first_lookalike_after(run: Run, others: list[Run], sharing: dict[str, list[int]],
-                           after: int) -> int | None:
+                           masks: list[int], after: int) -> int | None:
     """The first of the others past a place that looks like this run."""
     first = None
-    for piece in _pieces(run.picture_hash):
+    for piece in _pieces(run, masks):
         indexes = sharing.get(piece, ())
         for index in indexes[bisect.bisect_right(indexes, after):]:
             if first is not None and index >= first:
