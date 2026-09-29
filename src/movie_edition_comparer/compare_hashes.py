@@ -11,6 +11,7 @@ Frames that repeat carry nothing on their own, so the unit that gets matched
 is a run of them: black between scenes, a fade, a held frame, a static shot.
 """
 
+import argparse
 import bisect
 import datetime
 import itertools
@@ -26,6 +27,10 @@ import ffmpeg
 import numpy as np
 from progress.bar import Bar
 from tabulate import tabulate
+
+# Picture hashes this many bits apart or fewer are the same picture.
+perceptual_match_threshold = 5
+
 
 @dataclass(frozen=True)
 class Frame:
@@ -543,6 +548,9 @@ def compare_editions(db_path: str, edition_a: str,
 
 # --- reporting ---------------------------------------------------------------
 
+fps = 23.976216
+
+
 def frame_to_time(frame: int) -> timedelta:
     return datetime.timedelta(seconds=frame / fps)
 
@@ -551,7 +559,8 @@ def get_filename_time(time: timedelta) -> str:
     return str(time).replace(":", ".")
 
 
-def trim_video(input_file: str, identifier: str, index: int, start: timedelta, end: timedelta) -> str:
+def trim_video(input_file: str, identifier: str, index: int,
+               start: timedelta, end: timedelta, output_dir: str) -> str:
     _, input_file_extension = os.path.splitext(input_file)
     filename = f"{output_dir}/{index}-{get_filename_time(start)}-{get_filename_time(end)}-{identifier}{input_file_extension}"
     if not os.path.isfile(filename):
@@ -564,7 +573,8 @@ def trim_video(input_file: str, identifier: str, index: int, start: timedelta, e
     return filename
 
 
-def grab_frame(input_file: str, identifier: str, index: int, timestamp: timedelta):
+def grab_frame(input_file: str, identifier: str, index: int,
+               timestamp: timedelta, output_dir: str) -> None:
     filename = f"{output_dir}/{index}-{get_filename_time(timestamp)}-{identifier}.png"
     if not os.path.isfile(filename):
         (
@@ -598,29 +608,39 @@ def get_differences_dict(hash_range: TimeRange):
     }
 
 
-fps = 23.976216
-output_dir = "out"
-perceptual_match_threshold = 5 # when comparing perceptual hashes, anything below this hamming distance will be considered a match
+def configure_parser(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--db", required=True,
+                        help="Path to the film's database, e.g. data/two_towers.db")
+    parser.add_argument("--edition-a", required=True,
+                        help="Name of the first edition, as it was hashed")
+    parser.add_argument("--edition-b", required=True,
+                        help="Name of the second edition, as it was hashed")
+    parser.add_argument("--label-a", default=None,
+                        help="What to call the first edition in output filenames (default: its name)")
+    parser.add_argument("--label-b", default=None,
+                        help="What to call the second edition in output filenames (default: its name)")
+    parser.add_argument("--movie-a", default=None,
+                        help="Path to the first edition's video, to cut clips and frames from")
+    parser.add_argument("--movie-b", default=None,
+                        help="Path to the second edition's video, to cut clips and frames from")
+    parser.add_argument("--output-dir", default="out",
+                        help="Where to put clips and frames (default: out)")
+    parser.add_argument("--padding", type=float, default=5,
+                        help="Seconds of footage to keep either side of a clip (default: 5)")
+    parser.add_argument("--json", action="store_true",
+                        help="Print the differences as JSON as well")
+    parser.add_argument("--no-trim", action="store_true",
+                        help="Do not cut clips, even when both videos are given")
+    parser.add_argument("--no-frames", action="store_true",
+                        help="Do not grab frames, even when both videos are given")
 
 
-def main():
-    db_path = "data/two_towers.db"
-
-    label_a = "theatrical"
-    edition_a = "theatrical"
-    movie_a_filename = "C:\\Users\\obroo\\Lord of the Rings\\The Lord of the Rings The Two Towers (2002) Theatrical Remux-2160p HDR.mkv"
-
-    label_b = "extended"
-    edition_b = "extended"
-    movie_b_filename = "C:\\Users\\obroo\\Lord of the Rings\\The Lord of the Rings The Two Towers (2002) Extended Remux-2160p HDR.mkv"
-
-    print_json = False
-    trim_videos = True
-    grab_frames = True
-    video_padding_seconds = 5
+def run(args: argparse.Namespace) -> None:
+    label_a = args.label_a or args.edition_a
+    label_b = args.label_b or args.edition_b
 
     print()
-    reported = compare_editions(db_path, edition_a, edition_b)
+    reported = compare_editions(args.db, args.edition_a, args.edition_b)
 
     moves = [item for item in reported if isinstance(item, Move)]
     table = [(time_range(item.a, item.b), time_range(item.b, item.a))
@@ -653,28 +673,41 @@ def main():
             print(f"  {frame_to_time(move.a_start)} -> {frame_to_time(move.b_start)}"
                   f"  ({frame_to_time(move.count)})")
 
-    if print_json:
+    if args.json:
         print(json.dumps([get_differences_dict(a) for a, b in table if a.range > timedelta(seconds=0)]))
         print(json.dumps([get_differences_dict(b) for a, b in table if b.range > timedelta(seconds=0)]))
 
+    have_videos = args.movie_a and args.movie_b
+    trim_videos = have_videos and not args.no_trim
+    grab_frames = have_videos and not args.no_frames
+
     if trim_videos or grab_frames:
+        os.makedirs(args.output_dir, exist_ok=True)
         print()
         with Bar('Cutting', max=len(sorted_table)) as bar:
-            video_padding = timedelta(seconds=video_padding_seconds)
+            video_padding = timedelta(seconds=args.padding)
             for (index, (a, b)) in enumerate(sorted_table):
 
                 if trim_videos:
-                    trim_video(movie_a_filename, label_a, index, a.start - video_padding, a.start)
-                    trim_video(movie_a_filename, label_a, index, a.end - a.range, a.end + video_padding)
-                    trim_video(movie_b_filename, label_b, index, b.start - video_padding, b.end + video_padding)
+                    trim_video(args.movie_a, label_a, index, a.start - video_padding, a.start, args.output_dir)
+                    trim_video(args.movie_a, label_a, index, a.end - a.range, a.end + video_padding, args.output_dir)
+                    trim_video(args.movie_b, label_b, index, b.start - video_padding, b.end + video_padding, args.output_dir)
 
                 if grab_frames:
-                    grab_frame(movie_a_filename, label_a, index, a.start)
-                    grab_frame(movie_b_filename, label_b, index, b.start)
-                    grab_frame(movie_a_filename, label_a, index, a.end)
-                    grab_frame(movie_b_filename, label_b, index, b.end)
+                    grab_frame(args.movie_a, label_a, index, a.start, args.output_dir)
+                    grab_frame(args.movie_b, label_b, index, b.start, args.output_dir)
+                    grab_frame(args.movie_a, label_a, index, a.end, args.output_dir)
+                    grab_frame(args.movie_b, label_b, index, b.end, args.output_dir)
 
                 bar.next()
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog="strider compare",
+        description="Report where two hashed editions of a film differ")
+    configure_parser(parser)
+    run(parser.parse_args())
 
 
 if __name__ == "__main__":
