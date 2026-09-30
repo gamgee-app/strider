@@ -64,6 +64,10 @@ class Frames:
     start: int
     count: int
 
+    @property
+    def end(self) -> int:
+        return self.start + self.count
+
     def __str__(self) -> str:
         if self.count == 0:
             return f"nothing at {self.start}"
@@ -510,14 +514,37 @@ def compare_runs(a_runs: list[Run], b_runs: list[Run]) -> list[Difference | Move
     fences = [(-1, -1)] + anchors + [(len(a_runs), len(b_runs))]
 
     found: list[Difference | Move] = []
+    re_encoding = None  # the last thing found, if it is one and nothing has come since
     for left, right in zip(fences, fences[1:]):
-        found += _between(alignment, left, right)
+        between = _between(alignment, left, right)
+        found += between
         if right[0] < len(a_runs):
             difference = _difference_of(a_runs[right[0]], b_runs[right[1]])
+            if difference and re_encoding and not between and _touching(re_encoding, difference):
+                found[-1] = re_encoding = _joined(re_encoding, difference)
+                continue
             if difference:
                 found.append(difference)
+            re_encoding = difference if difference and difference.a.count == difference.b.count else None
     found += _moves(alignment, moved)
     return sorted(found, key=_at)
+
+
+def _touching(before: Difference, after: Difference) -> bool:
+    """Two re-encodings with nothing between them on either side.
+
+    A transfer re-encodes every frame, so re-encoded frames come in
+    stretches, and a stretch is one difference rather than one for each
+    frame of it. Only re-encodings join: a frame held for longer is its own
+    difference, since a stretch has one length and that has two.
+    """
+    return (after.a.count == after.b.count
+            and before.a.end == after.a.start and before.b.end == after.b.start)
+
+
+def _joined(before: Difference, after: Difference) -> Difference:
+    return Difference(Frames(before.a.start, before.a.count + after.a.count),
+                      Frames(before.b.start, before.b.count + after.b.count))
 
 
 def _between(alignment: Alignment,
