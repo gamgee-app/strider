@@ -3,8 +3,12 @@
 import sqlite3
 from contextlib import closing
 
+import pytest
+
 from movie_edition_comparer.compare_hashes import Frame, read_frames
-from movie_edition_comparer.db import create_database, write_chapters, write_frames
+from movie_edition_comparer.db import (
+    create_database, landmarks_near, write_chapters, write_frames,
+)
 
 
 def _database(tmp_path) -> str:
@@ -46,3 +50,37 @@ def test_creating_the_database_again_keeps_what_is_in_it(tmp_path):
         assert connection.execute(
             "SELECT edition, start_time, title FROM chapters").fetchall() == [
             ("extended", "00:00:00.000", "Prologue")]
+
+
+class TestLandmarksNear:
+    """Frames about a place that can be told apart by their pixels."""
+
+    @pytest.fixture
+    def film(self, tmp_path) -> str:
+        path = str(tmp_path / "film.db")
+        create_database(path)
+        with closing(sqlite3.connect(path)) as connection:
+            write_frames(connection, "theatrical",
+                         [(i, "black", "p") for i in range(10)]
+                         + [(i, f"m{i}", "p") for i in range(10, 20)]
+                         + [(i, "grey", "p") for i in range(20, 25)]
+                         + [(i, f"m{i}", "p") for i in range(25, 35)])
+            connection.commit()
+        return path
+
+    def test_are_told_apart_by_their_pixels(self, film):
+        landmarks = landmarks_near(film, "theatrical", 15)
+        assert len(landmarks) == 5
+        assert len({md5 for _, md5 in landmarks}) == 5
+
+    def test_are_the_nearest_such_frames_in_frame_order(self, film):
+        landmarks = landmarks_near(film, "theatrical", 15)
+        assert [index for index, _ in landmarks] == [13, 14, 15, 16, 17]
+
+    def test_look_further_when_the_frames_about_the_place_repeat(self, film):
+        assert len({md5 for _, md5 in landmarks_near(film, "theatrical", 5)}) == 5
+        assert len({md5 for _, md5 in landmarks_near(film, "theatrical", 22)}) == 5
+
+    def test_are_as_many_as_there_are_when_that_is_fewer(self, film):
+        assert len(landmarks_near(film, "theatrical", 10, how_many=50)) == 22
+        assert landmarks_near(film, "nowhere", 10) == []
