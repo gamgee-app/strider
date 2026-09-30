@@ -144,3 +144,62 @@ class TestResuming:
 def test_chapter_times_are_written_as_matroska_writes_them():
     assert hash_video._timestamp(0) == "00:00:00.000000000"
     assert hash_video._timestamp(3725.5) == "01:02:05.500000000"
+
+
+class PowerCut(Exception):
+    """The machine went away in the middle of a read."""
+
+
+class CutsOut(Capture):
+    """A video whose decoding stops at a frame: with a crash, or with the
+    file simply ending there while claiming to be longer."""
+
+    def __init__(self, values: list[int], at: int, crash: bool, drift: int = 0):
+        super().__init__(values, drift)
+        self.at, self.crash = at, crash
+
+    def read(self):
+        if self.position >= self.at:
+            if self.crash:
+                raise PowerCut()
+            self.position += 1
+            return False, None
+        return super().read()
+
+
+FILM = list(range(1000, 13000))  # twelve thousand frames, more than one batch
+
+
+class TestBatches:
+    """Frames are written every ten thousand, so that an interrupted run
+    keeps what it had, and the next picks up at a real resume point: past
+    the first margin, with the seek to place."""
+
+    def hash_video_with(self, cap, path, monkeypatch):
+        monkeypatch.setattr(hash_video.cv2, "VideoCapture", lambda _: cap)
+        hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=4)
+
+    def test_a_crash_keeps_every_batch_committed_before_it(self, tmp_path, monkeypatch):
+        path = hashed(FILM, 0, tmp_path)
+        with pytest.raises(PowerCut):
+            self.hash_video_with(CutsOut(FILM, at=10_500, crash=True), path, monkeypatch)
+        assert [f.index for f in read_frames(path, "theatrical")] == list(range(10_000)), \
+            "one whole batch committed; the frames of the unfinished one lost"
+
+        cap = Capture(FILM, drift=3)
+        self.hash_video_with(cap, path, monkeypatch)
+        frames = read_frames(path, "theatrical")
+        assert [f.index for f in frames] == list(range(12_000))
+        assert [f.data_hash for f in frames] == [hash_md5(frame(v)) for v in FILM]
+        assert cap.reads < 2_200, "read the film again rather than picking up at 10,000"
+
+    def test_a_film_that_ends_early_keeps_what_was_read(self, tmp_path, monkeypatch):
+        path = hashed(FILM, 0, tmp_path)
+        self.hash_video_with(CutsOut(FILM, at=10_500, crash=False), path, monkeypatch)
+        assert [f.index for f in read_frames(path, "theatrical")] == list(range(10_500)), \
+            "the batch that was under way when the film ended is committed too"
+
+        self.hash_video_with(Capture(FILM, drift=-2), path, monkeypatch)
+        frames = read_frames(path, "theatrical")
+        assert [f.index for f in frames] == list(range(12_000))
+        assert [f.data_hash for f in frames] == [hash_md5(frame(v)) for v in FILM]
