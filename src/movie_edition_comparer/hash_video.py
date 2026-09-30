@@ -108,10 +108,10 @@ def _seek_to(cap, target: int, db_path: str, edition: str) -> None:
                      for index, md5 in landmarks_near(db_path, edition, target - 1)
                      if index < target]
         if seek_error(md5s, ask, recovered) == error:
-            print(f"Picked up at frame {target} (the seek landed {error:+d} frames off)")
+            print(f"Picked up at frame {target} (the seek landed {error:+d} frames off)", flush=True)
             return
 
-    print(f"Could not place frame {target} by seeking; reading from the start")
+    print(f"Could not place frame {target} by seeking; reading from the start", flush=True)
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
     for _ in range(target):
         cap.read()
@@ -143,8 +143,13 @@ def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers
         return
 
     if resume_from:
-        print(f"Resuming from frame {resume_from} of {frame_count}")
+        print(f"Resuming from frame {resume_from} of {frame_count}", flush=True)
         _seek_to(cap, resume_from, db_path, edition)
+
+    # Each hash is one frame's work on one thread; the pool is the parallelism.
+    # Left to itself OpenCV spreads each call over every core, and the threads
+    # spend more time meeting than hashing.
+    cv2.setNumThreads(1)
 
     with (closing(sqlite3.connect(db_path)) as connection,
           ThreadPoolExecutor(max_workers=workers) as executor):
