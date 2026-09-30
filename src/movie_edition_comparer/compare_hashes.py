@@ -76,12 +76,20 @@ class Frames:
 
 @dataclass(frozen=True)
 class Difference:
-    """A place where the two editions hold different footage."""
+    """A place where the two editions hold different footage, and how.
+
+    added       edition_b has footage edition_a does not
+    removed     edition_a has footage edition_b does not
+    replaced    each has footage there, and it is not the same picture
+    reencoded   the same picture for the same length, carried by other frames
+    retimed     the same picture, held for a different length
+    """
     a: Frames
     b: Frames
+    kind: str
 
     def __str__(self) -> str:
-        return f"edition_a: {str(self.a):<22} edition_b: {self.b}"
+        return f"{self.kind:<10} edition_a: {str(self.a):<22} edition_b: {self.b}"
 
 
 @dataclass(frozen=True)
@@ -436,11 +444,11 @@ def _moves(alignment: Alignment, moved: set[int]) -> list[Difference | Move]:
         if a_run.count > travelled:
             retimed.append(Difference(
                 Frames(a_run.start + travelled, a_run.count - travelled),
-                Frames(b_run.end, 0)))
+                Frames(b_run.end, 0), "removed"))
         elif b_run.count > travelled:
             retimed.append(Difference(
                 Frames(a_run.end, 0),
-                Frames(b_run.start + travelled, b_run.count - travelled)))
+                Frames(b_run.start + travelled, b_run.count - travelled), "added"))
 
         previous = (a_index, b_index) if alike else None
     return moves + retimed
@@ -497,7 +505,8 @@ def _difference_of(a: Run, b: Run) -> Difference | None:
     """
     if same_frame(a, b) and a.count == b.count:
         return None
-    return Difference(Frames(a.start, a.count), Frames(b.start, b.count))
+    return Difference(Frames(a.start, a.count), Frames(b.start, b.count),
+                      "reencoded" if a.count == b.count else "retimed")
 
 
 def _at(item: Difference | Move) -> int:
@@ -525,7 +534,7 @@ def compare_runs(a_runs: list[Run], b_runs: list[Run]) -> list[Difference | Move
                 continue
             if difference:
                 found.append(difference)
-            re_encoding = difference if difference and difference.a.count == difference.b.count else None
+            re_encoding = difference if difference and difference.kind == "reencoded" else None
     found += _moves(alignment, moved)
     return sorted(found, key=_at)
 
@@ -538,13 +547,13 @@ def _touching(before: Difference, after: Difference) -> bool:
     frame of it. Only re-encodings join: a frame held for longer is its own
     difference, since a stretch has one length and that has two.
     """
-    return (after.a.count == after.b.count
+    return (after.kind == "reencoded"
             and before.a.end == after.a.start and before.b.end == after.b.start)
 
 
 def _joined(before: Difference, after: Difference) -> Difference:
     return Difference(Frames(before.a.start, before.a.count + after.a.count),
-                      Frames(before.b.start, before.b.count + after.b.count))
+                      Frames(before.b.start, before.b.count + after.b.count), "reencoded")
 
 
 def _between(alignment: Alignment,
@@ -561,7 +570,8 @@ def _between(alignment: Alignment,
         b_frames = b_block.frames if b_block else Frames(
             _would_sit_at(alignment.a_runs, alignment.a_to_b,
                           alignment.b_runs, a_block.run), 0)
-        found.append(Difference(a_frames, b_frames))
+        found.append(Difference(a_frames, b_frames,
+                                "replaced" if a_block and b_block else "removed" if a_block else "added"))
     return found
 
 
@@ -611,8 +621,7 @@ class Row:
     def of(cls, item: Difference | Move) -> "Row":
         if isinstance(item, Move):
             return cls("moved", Frames(item.a_start, item.count), Frames(item.b_start, item.count))
-        kind = "added" if item.a.count == 0 else "removed" if item.b.count == 0 else "differs"
-        return cls(kind, item.a, item.b)
+        return cls(item.kind, item.a, item.b)
 
     @property
     def size(self) -> int:
@@ -681,7 +690,8 @@ def run(args: argparse.Namespace) -> None:
 
     kinds = Counter(row.kind for row in rows)
     print(f"Count ({len(rows)}): " + ", ".join(
-        f"{kinds[kind]} {kind}" for kind in ("added", "removed", "differs", "moved") if kinds[kind]))
+        f"{kinds[kind]} {kind}"
+        for kind in ("added", "removed", "replaced", "reencoded", "retimed", "moved") if kinds[kind]))
     print()
     print(tabulate([row.cells() for row in rows], headers=HEADERS, tablefmt="github",
                    colalign=("left", "right", "right", "right", "right", "right", "right")))
