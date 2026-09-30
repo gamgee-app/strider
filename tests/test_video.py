@@ -74,16 +74,20 @@ class TestExtractFrames:
 
 
 class TestClipCommand:
-    def test_trims_to_exactly_the_frames_counted_from_where_it_seeks(self):
+    def test_seeks_half_a_frame_before_a_whole_frame_and_counts_from_it(self):
+        """Ten seconds before frame 2400 is frame 2160; the seek goes to
+        2159.5 frames in, so 2160 is the first frame ffmpeg gives out
+        however its time was rounded, and the trim counts from there."""
         command = clip_command("film.mkv", start=2400, count=48, output="clip.mp4", fps=24)
-        assert command[command.index("-ss") + 1] == "90.000000"
+        assert command[command.index("-ss") + 1] == f"{2159.5 / 24:.6f}"
         assert "trim=start_frame=240:end_frame=288" in command[command.index("-vf") + 1]
-        assert "atrim=start=10.000000:duration=2.000000" in command[command.index("-af") + 1]
+        assert f"atrim=start={240.5 / 24:.6f}:duration=2.000000" in command[command.index("-af") + 1]
 
     def test_seeks_no_earlier_than_the_start(self):
         command = clip_command("film.mkv", start=24, count=24, output="clip.mp4", fps=24)
         assert command[command.index("-ss") + 1] == "0.000000"
         assert "trim=start_frame=24:end_frame=48" in command[command.index("-vf") + 1]
+        assert "atrim=start=1.000000:" in command[command.index("-af") + 1]
 
 
 def test_cutting_takes_the_frames_either_side_and_at_each_end(tmp_path, monkeypatch):

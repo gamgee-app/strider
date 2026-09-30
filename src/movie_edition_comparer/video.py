@@ -134,10 +134,16 @@ def clip_command(video: str, start: int, count: int, output: str, fps: float) ->
 
     Seeks to some seconds before the first frame so the decoder has a
     keyframe to start from, then trims to the frames wanted counting from
-    where the seek landed, and takes the same stretch of sound.
+    the first frame delivered, and takes the same stretch of sound.
+
+    Seeking is exact in time, not in frames: ffmpeg decodes from the
+    keyframe before the time asked for and gives out the first frame at or
+    after it. So the seek goes half a frame before a whole frame, and that
+    frame is the first delivered whatever the container rounded its time
+    to, and the trim counts from it.
     """
-    seek_time = max(0.0, start / fps - 10)
-    seek_frame = int(seek_time * fps)
+    seek_frame = max(0, start - round(10 * fps))
+    seek_time = max(0.0, (seek_frame - 0.5) / fps)
     first, last = start - seek_frame, start - seek_frame + count
     sound_from = start / fps - seek_time
     return [

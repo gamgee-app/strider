@@ -547,7 +547,10 @@ def compare_editions(db_path: str, edition_a: str,
 
 # --- reporting ---------------------------------------------------------------
 
-fps = 23.976216
+# Film on Blu-ray runs at 24000/1001 frames a second, exactly. Written out
+# as a decimal it was 23.976216, eight parts in a million fast, which over a
+# three-hour film puts a time worked out from a frame index two frames late.
+fps = 24000 / 1001
 
 
 def frame_to_time(frame: int) -> timedelta:
