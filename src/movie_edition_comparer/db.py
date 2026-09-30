@@ -8,28 +8,41 @@ import os
 import sqlite3
 from contextlib import closing
 
+from movie_edition_comparer.algorithms import PICTURE_HASHES
+
+
+# The picture hashes, as columns, in the order write_frames takes them. The
+# first is the one the comparison goes by, and the only one a frame must have.
+PICTURE_COLUMNS = [f"hash_{name}" for name in PICTURE_HASHES]
+
 
 def create_database(db_path: str) -> None:
     db_dir = os.path.dirname(db_path)
     if db_dir:
         os.makedirs(db_dir, exist_ok=True)
     with closing(sqlite3.connect(db_path)) as connection:
-        connection.execute("""
+        connection.execute(f"""
             CREATE TABLE IF NOT EXISTS frame_hashes (
                 edition TEXT NOT NULL,
                 frame_index INTEGER NOT NULL,
                 hash_md5 TEXT NOT NULL,
-                hash_block_mean_0 TEXT NOT NULL,
+                {PICTURE_COLUMNS[0]} TEXT NOT NULL,
+                {", ".join(f"{column} TEXT" for column in PICTURE_COLUMNS[1:])},
                 PRIMARY KEY (edition, frame_index)
             )
         """)
+        # A database from before a hash was added gets its column, empty.
+        present = {row[1] for row in connection.execute("PRAGMA table_info(frame_hashes)")}
+        for column in PICTURE_COLUMNS:
+            if column not in present:
+                connection.execute(f"ALTER TABLE frame_hashes ADD COLUMN {column} TEXT")
         connection.execute("""
             CREATE INDEX IF NOT EXISTS idx_frame_hashes_hash_md5
             ON frame_hashes (edition, hash_md5)
         """)
-        connection.execute("""
-            CREATE INDEX IF NOT EXISTS idx_frame_hashes_hash_block_mean_0
-            ON frame_hashes (edition, hash_block_mean_0)
+        connection.execute(f"""
+            CREATE INDEX IF NOT EXISTS idx_frame_hashes_{PICTURE_COLUMNS[0]}
+            ON frame_hashes (edition, {PICTURE_COLUMNS[0]})
         """)
         connection.execute("""
             CREATE TABLE IF NOT EXISTS chapters (
@@ -42,12 +55,14 @@ def create_database(db_path: str) -> None:
 
 
 def write_frames(connection: sqlite3.Connection, edition: str,
-                 frames: list[tuple[int, str, str]]) -> None:
-    """Frames of one edition, each as (frame_index, hash_md5, hash_block_mean_0)."""
+                 frames: list[tuple]) -> None:
+    """Frames of one edition, each as (frame_index, hash_md5, then the
+    picture hashes in the order of PICTURE_COLUMNS, as many as there are)."""
+    width = 2 + len(PICTURE_COLUMNS)
     connection.executemany(
-        "INSERT INTO frame_hashes (edition, frame_index, hash_md5, hash_block_mean_0) "
-        "VALUES (?, ?, ?, ?)",
-        [(edition, *frame) for frame in frames])
+        f"INSERT INTO frame_hashes (edition, frame_index, hash_md5, {', '.join(PICTURE_COLUMNS)}) "
+        f"VALUES ({', '.join('?' * (width + 1))})",
+        [(edition, *frame, *([None] * (width - len(frame)))) for frame in frames])
 
 
 def write_chapters(connection: sqlite3.Connection, edition: str,

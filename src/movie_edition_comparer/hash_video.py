@@ -18,7 +18,7 @@ import cv2
 from numpy import ndarray
 from progress.bar import Bar
 
-from movie_edition_comparer.algorithms import hash_block_mean_0, hash_md5
+from movie_edition_comparer.algorithms import PICTURE_HASHES, hash_md5
 from movie_edition_comparer.db import (
     create_database, landmarks_near, last_frame_hashed, write_chapters, write_frames,
 )
@@ -30,8 +30,11 @@ BATCH_SIZE = 10_000
 MAX_SEEK_ERROR = 5
 
 
-def hash_frame(index: int, frame: ndarray) -> tuple[int, str, str]:
-    return index, hash_md5(frame), hash_block_mean_0(frame)
+def hash_frame(index: int, frame: ndarray, hashes: dict = PICTURE_HASHES) -> tuple:
+    """The frame's index, its pixel hash, and the picture hashes asked for,
+    in the order the database keeps them; one not asked for is left empty."""
+    return (index, hash_md5(frame),
+            *(hashing(frame) if name in hashes else None for name, hashing in PICTURE_HASHES.items()))
 
 
 # --- chapters ----------------------------------------------------------------
@@ -125,7 +128,8 @@ def _read_hashing(cap, count: int) -> list[str | None]:
 
 # --- hashing -----------------------------------------------------------------
 
-def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers: int) -> None:
+def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers: int,
+                            hashes: dict = PICTURE_HASHES) -> None:
     with closing(sqlite3.connect(db_path)) as connection:
         last = last_frame_hashed(connection, edition)
     resume_from = 0 if last is None else last + 1
@@ -152,7 +156,7 @@ def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers
                 if not ret:
                     break
 
-                futures.append(executor.submit(hash_frame, frame_index, frame))
+                futures.append(executor.submit(hash_frame, frame_index, frame, hashes))
                 if len(futures) == BATCH_SIZE:
                     _commit(connection, edition, futures)
                     futures = []
@@ -177,6 +181,9 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--db', required=True, help="Path to the film's database, e.g. data/two_towers.db")
     parser.add_argument('--threads', default=os.cpu_count() or 4, type=int,
                         help="Number of threads to hash on (default: every core)")
+    parser.add_argument('--hashes', default=",".join(PICTURE_HASHES), metavar="NAMES",
+                        help="Which picture hashes to compute, comma-separated, of "
+                             + ", ".join(PICTURE_HASHES) + " (default: all)")
 
 
 def run(args: argparse.Namespace) -> None:
@@ -191,7 +198,10 @@ def run(args: argparse.Namespace) -> None:
             connection.commit()
         print(f"{len(chapters)} chapters")
 
-    hash_video_frames_to_db(args.video, args.db, args.edition, args.threads)
+    wanted = {name: PICTURE_HASHES[name] for name in args.hashes.split(",")}
+    if "block_mean_0" not in wanted:
+        raise SystemExit("block_mean_0 is the hash the comparison goes by; every frame must have it")
+    hash_video_frames_to_db(args.video, args.db, args.edition, args.threads, wanted)
 
     print(f"Took {datetime.now() - start_time}")
 

@@ -11,6 +11,10 @@ from movie_edition_comparer.algorithms import hash_md5
 from movie_edition_comparer.compare_hashes import read_frames
 from movie_edition_comparer.db import create_database, write_frames
 from movie_edition_comparer.hash_video import _seek_to, hash_frame, seek_error
+from movie_edition_comparer.algorithms import PICTURE_HASHES
+
+# The one hash the comparison goes by; the others take a while on thousands of frames.
+ONE = {"block_mean_0": PICTURE_HASHES["block_mean_0"]}
 from tests.capture import Capture, frame
 
 def hashed(values: list[int], upto: int, tmp_path) -> str:
@@ -18,7 +22,7 @@ def hashed(values: list[int], upto: int, tmp_path) -> str:
     path = str(tmp_path / "film.db")
     create_database(path)
     with closing(sqlite3.connect(path)) as connection:
-        write_frames(connection, "theatrical", [hash_frame(i, frame(v)) for i, v in enumerate(values[:upto])])
+        write_frames(connection, "theatrical", [hash_frame(i, frame(v), ONE) for i, v in enumerate(values[:upto])])
         connection.commit()
     return path
 
@@ -73,7 +77,7 @@ class TestSeekTo:
 class TestResuming:
     def hash_video_with(self, cap, path, monkeypatch):
         monkeypatch.setattr(hash_video.cv2, "VideoCapture", lambda _: cap)
-        hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=2)
+        hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=2, hashes=ONE)
 
     def test_hashes_every_frame_of_a_fresh_edition(self, tmp_path, monkeypatch):
         path = hashed(DISTINCT, 0, tmp_path)
@@ -135,7 +139,7 @@ class TestBatches:
 
     def hash_video_with(self, cap, path, monkeypatch):
         monkeypatch.setattr(hash_video.cv2, "VideoCapture", lambda _: cap)
-        hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=4)
+        hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=4, hashes=ONE)
 
     def test_a_crash_keeps_every_batch_committed_before_it(self, tmp_path, monkeypatch):
         path = hashed(FILM, 0, tmp_path)

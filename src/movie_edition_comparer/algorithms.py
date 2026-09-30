@@ -1,8 +1,10 @@
-"""The two hashes a frame is given.
+"""The hashes a frame is given.
 
 hash_md5 is of the pixels, and is equal only between frames that are the
-same frame. hash_block_mean_0 is of the picture, and is equal -- or a few
-bits apart -- between two renderings of one picture.
+same frame. The rest are of the picture, and are equal -- or a few bits
+apart -- between two renderings of one picture. block_mean_0 is the one the
+comparison goes by unless told otherwise; the others are kept so that they
+can be measured against it on real films.
 """
 
 import hashlib
@@ -18,6 +20,16 @@ def hash_md5(frame: ndarray) -> str:
 
 def hash_block_mean_0(frame: ndarray) -> str:
     return serialize(cv2.img_hash.blockMeanHash(frame, mode=0))
+
+
+PICTURE_HASHES = {
+    "block_mean_0": hash_block_mean_0,                                        # 256 bits
+    "block_mean_1": lambda frame: serialize(cv2.img_hash.blockMeanHash(frame, mode=1)),  # 968
+    "average": lambda frame: serialize(cv2.img_hash.averageHash(frame)),      # 64
+    "phash": lambda frame: serialize(cv2.img_hash.pHash(frame)),              # 64
+    "marr_hildreth": lambda frame: serialize(cv2.img_hash.marrHildrethHash(frame)),  # 576
+    "radial_variance": lambda frame: serialize(cv2.img_hash.radialVarianceHash(frame)),  # 320
+}
 
 
 def serialize(uint8_array: ndarray) -> str:
