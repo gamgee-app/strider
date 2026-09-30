@@ -42,19 +42,17 @@ def tokens(edition: str) -> list[str]:
         A and a     one picture, encoded twice -- the pixels differ, the
                     picture does not
         a and a'    the same, and a bit apart to look at as well
+        A' and a'   that rendering a bit apart, encoded twice: they look
+                    exactly alike, and their pixels differ
 
-    A prime only goes on a lower case letter, so that there is one way to
-    write a frame a bit away rather than two.
+    So a' is a bit away from a, and A' is a' encoded again -- the same bits
+    away from a as a', which is what makes it A' and not a''.
     """
     frames: list[str] = []
     for character in edition:
         if character == "'":
             if not frames:
                 raise ValueError(f"{edition!r} starts with a prime, which follows nothing")
-            if frames[-1].rstrip("'").isupper():
-                raise ValueError(
-                    f"{edition!r} primes {frames[-1]!r}. A frame that differs to "
-                    f"the eye differs in its pixels too, so write it lower case.")
             frames[-1] += "'"
         else:
             frames.append(character)
@@ -75,12 +73,13 @@ def frame_hash(frame: str) -> str:
     """What the frame looks like.
 
     Two renderings of one picture look the same, however far apart their
-    pixels are; each prime moves them one bit apart.
+    pixels are; each prime moves them one bit apart, the same bit for a'
+    and A', which are the one rendering encoded twice.
     """
     raw = bytearray(hashlib.sha256(f"picture:{picture(frame)}".encode()).digest()[:HASH_BYTES])
     steps = frame.count("'")
     if steps:
-        chooser = hashlib.sha256(f"step:{frame}".encode()).digest()
+        chooser = hashlib.sha256(f"step:{frame.lower()}".encode()).digest()
         order = sorted(range(HASH_BYTES * 8), key=lambda bit: chooser[bit % 32] ^ bit)
         for bit in order[:steps * RESEMBLES_WITHIN]:
             raw[bit // 8] ^= 1 << (bit % 8)
@@ -334,14 +333,18 @@ class Scenario:
         """A primed frame is named after another frame, which has to exist.
 
         b' means "not b, but looks like b". If no b appears in either edition
-        there is nothing for it to look like, and the name says nothing.
+        there is nothing for it to look like, and the name says nothing. B'
+        means "b', encoded again", so it is b' that has to be there.
         """
         present = set(tokens(self.edition_a)) | set(tokens(self.edition_b))
         for frame in sorted(present):
             base = frame.rstrip("'")
-            if base != frame and base not in present and base.upper() not in present:
+            if base == frame:
+                continue
+            referents = [frame.lower()] if base.isupper() else [base, base.upper()]
+            if not any(referent in present for referent in referents):
                 raise ValueError(
-                    f"{self.name!r}: {frame!r} is named after {base!r}, which is "
+                    f"{self.name!r}: {frame!r} is named after {referents[0]!r}, which is "
                     f"in neither edition. A frame can only be said to look like "
                     f"a frame that is there."
                 )
