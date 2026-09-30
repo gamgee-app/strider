@@ -16,17 +16,16 @@ import bisect
 import datetime
 import itertools
 import json
-import os.path
 import sqlite3
 from collections import Counter, defaultdict
 from contextlib import closing
 from dataclasses import dataclass, field
 from datetime import timedelta
 
-import ffmpeg
 import numpy as np
-from progress.bar import Bar
 from tabulate import tabulate
+
+from movie_edition_comparer.video import Source, cut_differences
 
 # Picture hashes this many bits apart or fewer are the same picture.
 perceptual_match_threshold = 5
@@ -548,41 +547,14 @@ def compare_editions(db_path: str, edition_a: str,
 
 # --- reporting ---------------------------------------------------------------
 
-fps = 23.976216
+# Film on Blu-ray runs at 24000/1001 frames a second, exactly. Written out
+# as a decimal it was 23.976216, eight parts in a million fast, which over a
+# three-hour film puts a time worked out from a frame index two frames late.
+fps = 24000 / 1001
 
 
 def frame_to_time(frame: int) -> timedelta:
     return datetime.timedelta(seconds=frame / fps)
-
-
-def get_filename_time(time: timedelta) -> str:
-    return str(time).replace(":", ".")
-
-
-def trim_video(input_file: str, identifier: str, index: int,
-               start: timedelta, end: timedelta, output_dir: str) -> str:
-    _, input_file_extension = os.path.splitext(input_file)
-    filename = f"{output_dir}/{index}-{get_filename_time(start)}-{get_filename_time(end)}-{identifier}{input_file_extension}"
-    if not os.path.isfile(filename):
-        (
-            ffmpeg
-            .input(input_file)
-            .output(filename, ss=start, to=end, c="copy")
-            .run(quiet=True)
-        )
-    return filename
-
-
-def grab_frame(input_file: str, identifier: str, index: int,
-               timestamp: timedelta, output_dir: str) -> None:
-    filename = f"{output_dir}/{index}-{get_filename_time(timestamp)}-{identifier}.png"
-    if not os.path.isfile(filename):
-        (
-            ffmpeg
-            .input(input_file, ss=timestamp)
-            .output(filename, vframes=1)
-            .run(quiet=True)
-        )
 
 
 @dataclass
@@ -630,9 +602,11 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--json", action="store_true",
                         help="Print the differences as JSON as well")
     parser.add_argument("--no-trim", action="store_true",
-                        help="Do not cut clips, even when both videos are given")
+                        help="Do not copy out the stretches of video, even when both videos are given")
     parser.add_argument("--no-frames", action="store_true",
-                        help="Do not grab frames, even when both videos are given")
+                        help="Do not extract frames, even when both videos are given")
+    parser.add_argument("--clips", action="store_true",
+                        help="Cut a clip of exactly the frames of each difference, re-encoded at 720p (slow)")
 
 
 def run(args: argparse.Namespace) -> None:
@@ -677,29 +651,19 @@ def run(args: argparse.Namespace) -> None:
         print(json.dumps([get_differences_dict(a) for a, b in table if a.range > timedelta(seconds=0)]))
         print(json.dumps([get_differences_dict(b) for a, b in table if b.range > timedelta(seconds=0)]))
 
-    have_videos = args.movie_a and args.movie_b
-    trim_videos = have_videos and not args.no_trim
-    grab_frames = have_videos and not args.no_frames
-
-    if trim_videos or grab_frames:
-        os.makedirs(args.output_dir, exist_ok=True)
+    if args.movie_a and args.movie_b:
+        pairs = ([(item.a, item.b) for item in sorted(
+                     (item for item in reported if isinstance(item, Difference)),
+                     key=lambda item: max(item.a.count, item.b.count))]
+                 + [(Frames(move.a_start, move.count), Frames(move.b_start, move.count))
+                    for move in moves])
         print()
-        with Bar('Cutting', max=len(sorted_table)) as bar:
-            video_padding = timedelta(seconds=args.padding)
-            for (index, (a, b)) in enumerate(sorted_table):
-
-                if trim_videos:
-                    trim_video(args.movie_a, label_a, index, a.start - video_padding, a.start, args.output_dir)
-                    trim_video(args.movie_a, label_a, index, a.end - a.range, a.end + video_padding, args.output_dir)
-                    trim_video(args.movie_b, label_b, index, b.start - video_padding, b.end + video_padding, args.output_dir)
-
-                if grab_frames:
-                    grab_frame(args.movie_a, label_a, index, a.start, args.output_dir)
-                    grab_frame(args.movie_b, label_b, index, b.start, args.output_dir)
-                    grab_frame(args.movie_a, label_a, index, a.end, args.output_dir)
-                    grab_frame(args.movie_b, label_b, index, b.end, args.output_dir)
-
-                bar.next()
+        cut_differences(
+            pairs,
+            Source(args.movie_a, label_a, args.edition_a),
+            Source(args.movie_b, label_b, args.edition_b),
+            args.db, args.output_dir, args.padding, fps,
+            trim=not args.no_trim, frames=not args.no_frames, clips=args.clips)
 
 
 def main():
