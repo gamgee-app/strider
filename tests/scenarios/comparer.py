@@ -14,9 +14,6 @@ from movie_edition_comparer import compare_hashes
 from movie_edition_comparer.db import create_database, write_frames
 from tests.scenarios.editions import Moved
 
-# One frame per second, so a timestamp in seconds is a frame number.
-compare_hashes.fps = 1.0
-
 EDITION_A, EDITION_B = "edition_a", "edition_b"
 
 
