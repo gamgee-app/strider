@@ -19,6 +19,7 @@ edition is hashed before it is averaged.
 """
 
 import argparse
+import multiprocessing
 import os
 import sqlite3
 from concurrent.futures import ProcessPoolExecutor
@@ -247,7 +248,10 @@ def average_video_frames_to_db(video_path: str, db_path: str, edition: str, read
 
     shares = share(missing, readers)
     print(f"{sum(b - a for a, b in missing)} frames to average, shared between {len(shares)} readers", flush=True)
-    with ProcessPoolExecutor(max_workers=len(shares)) as pool:
+    # Readers start afresh rather than as copies of this process: a copy made
+    # after OpenCV has read a video can inherit a lock one of its threads held,
+    # and wait on it for ever.
+    with ProcessPoolExecutor(max_workers=len(shares), mp_context=multiprocessing.get_context("spawn")) as pool:
         decoder_threads = max(1, (os.cpu_count() or 4) // len(shares))
         done = sum(pool.map(_reader, [(video_path, stretches, db_path, edition, letterbox, decoder_threads)
                                       for stretches in shares]))
