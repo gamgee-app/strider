@@ -1,8 +1,8 @@
-"""The strider command: hash each edition of a film, then compare two of them."""
+"""The strider command: hash each edition of a film, average its pictures, then compare two of them."""
 
 import argparse
 
-from movie_edition_comparer import compare_hashes, hash_video
+from movie_edition_comparer import average_video, compare_hashes, hash_video
 
 
 def main():
@@ -15,6 +15,11 @@ def main():
         "hash", help="Hash every frame of an edition into the film's database")
     hash_video.configure_parser(hash_parser)
     hash_parser.set_defaults(run=hash_video.run)
+
+    average_parser = commands.add_parser(
+        "average", help="Keep the block averages of every frame's picture, bars cut away")
+    average_video.configure_parser(average_parser)
+    average_parser.set_defaults(run=average_video.run)
 
     compare_parser = commands.add_parser(
         "compare", help="Report where two hashed editions differ")

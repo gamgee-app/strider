@@ -114,3 +114,58 @@ def landmarks_near(db_path: str, edition: str, centre: int,
                         return sorted(landmarks)
             window *= 2
         return sorted(landmarks)
+
+
+# --- pictures ----------------------------------------------------------------
+
+def create_pictures_table(connection: sqlite3.Connection) -> None:
+    """Each frame's picture: where its black bars were cut, and its block averages.
+
+    The bars are kept both as counted and as cut, since a dark picture counts
+    as more bar than it has and is cut as its neighbours were. The block
+    averages are those of the picture between the bars cut, 16 by 16 blocks
+    of it in grey, each kept as the sum of the block's 256 pixels so that no
+    rounding is done: divide by 256 for the average.
+    """
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS frame_pictures (
+            edition TEXT NOT NULL,
+            frame_index INTEGER NOT NULL,
+            top INTEGER NOT NULL,
+            bottom INTEGER NOT NULL,
+            left INTEGER NOT NULL,
+            right INTEGER NOT NULL,
+            top_counted INTEGER NOT NULL,
+            bottom_counted INTEGER NOT NULL,
+            left_counted INTEGER NOT NULL,
+            right_counted INTEGER NOT NULL,
+            block_averages BLOB NOT NULL,
+            PRIMARY KEY (edition, frame_index)
+        )
+    """)
+
+
+def write_pictures(connection: sqlite3.Connection, edition: str, pictures: list[tuple]) -> None:
+    """Pictures of one edition, each as (frame_index, the bars cut as top,
+    bottom, left, right, the bars counted likewise, block averages)."""
+    connection.executemany(
+        "INSERT OR REPLACE INTO frame_pictures VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [(edition, *picture) for picture in pictures])
+
+
+def pictures_missing(connection: sqlite3.Connection, edition: str, frame_count: int) -> list[tuple[int, int]]:
+    """The stretches of frames, as (start, end), that have no picture yet."""
+    have = [row[0] for row in connection.execute(
+        "SELECT frame_index FROM frame_pictures WHERE edition = ? ORDER BY frame_index", (edition,))]
+    missing, start = [], 0
+    for index in have + [frame_count]:
+        if index > start:
+            missing.append((start, min(index, frame_count)))
+        start = max(start, index + 1)
+    return [(a, b) for a, b in missing if a < b]
+
+
+def frame_count_hashed(connection: sqlite3.Connection, edition: str) -> int:
+    """How many frames of this edition are hashed."""
+    return connection.execute(
+        "SELECT COUNT(*) FROM frame_hashes WHERE edition = ?", (edition,)).fetchone()[0]
