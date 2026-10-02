@@ -41,8 +41,13 @@ CANDIDATES = 8
 # How many directions the coarse search measures in.
 DIRECTIONS = 32
 
-# Rows of the coarse search done at once; bounds the memory it takes.
-CHUNK = 2048
+# How many runs each side the coarse search measures against each other at
+# once. It holds one block of that many distances, so these bound the memory
+# it takes however long the two editions are: a film's runs number hundreds
+# of thousands, and measuring every one against every other at once would
+# take hundreds of gigabytes.
+QUERY_CHUNK = 512
+BASE_CHUNK = 16_384
 
 
 @dataclass
@@ -76,6 +81,27 @@ class Alignment(compare_hashes.Alignment):
         self.b_to_a: dict[int, int] = {}
 
 
+class Pictures:
+    """What each run looks like: its first frame's block averages.
+
+    The edition's averages are kept as they were read, one row to a frame,
+    and a run's picture is taken from them as it is asked for. A film's runs
+    are nearly as many as its frames, so holding a second copy of them, one
+    row to a run, would be hundreds of megabytes for nothing.
+    """
+
+    def __init__(self, averages: ndarray, runs: list[Run]):
+        self.averages = averages
+        self.starts = np.fromiter((run.start for run in runs), dtype=np.int64, count=len(runs))
+        self.flat = flat(averages)[self.starts]
+
+    def __getitem__(self, runs):
+        return self.averages[self.starts[runs]]
+
+    def __len__(self) -> int:
+        return len(self.starts)
+
+
 # --- finding the nearest picture -----------------------------------------------
 
 def _directions(a: ndarray, b: ndarray) -> tuple[ndarray, ndarray]:
@@ -90,8 +116,12 @@ def _directions(a: ndarray, b: ndarray) -> tuple[ndarray, ndarray]:
 
 def nearest_two(queries: ndarray, base: ndarray, mean: ndarray, directions: ndarray) -> tuple[ndarray, ndarray, ndarray]:
     """For each query, its nearest picture in base, how far that is, and how
-    far the next nearest is -- measured in full among the candidates the
-    coarse search finds."""
+    far the next nearest is.
+
+    The coarse search works a block of queries against a block of base at a
+    time, keeping the best CANDIDATES it has seen for each query so far, and
+    those candidates are then measured in full.
+    """
     best = np.full(len(queries), -1)
     first = np.full(len(queries), np.inf, dtype=np.float32)
     second = np.full(len(queries), np.inf, dtype=np.float32)
@@ -101,31 +131,45 @@ def nearest_two(queries: ndarray, base: ndarray, mean: ndarray, directions: ndar
     x = ((base - mean) @ directions).astype(np.float32)
     x_norms = (x * x).sum(axis=1)
     k = min(CANDIDATES, len(base))
-    for s in range(0, len(q), CHUNK):
-        rows = q[s:s + CHUNK]
-        coarse = x_norms[None, :] - 2 * rows @ x.T
-        candidates = np.argpartition(coarse, k - 1, axis=1)[:, :k]
-        full = apart(queries[s:s + CHUNK, None, :], base[candidates])
+
+    for s in range(0, len(q), QUERY_CHUNK):
+        rows, taken = q[s:s + QUERY_CHUNK], slice(s, min(s + QUERY_CHUNK, len(q)))
+        held_where = np.zeros((len(rows), 0), dtype=np.int64)
+        held_far = np.zeros((len(rows), 0), dtype=np.float32)
+        for b in range(0, len(x), BASE_CHUNK):
+            block = x[b:b + BASE_CHUNK]
+            coarse = x_norms[None, b:b + BASE_CHUNK] - 2 * rows @ block.T
+            keep = min(k, len(block))
+            where = np.argpartition(coarse, keep - 1, axis=1)[:, :keep]
+            held_where = np.concatenate([held_where, where + b], axis=1)
+            held_far = np.concatenate([held_far, np.take_along_axis(coarse, where, axis=1)], axis=1)
+            if held_where.shape[1] > k:
+                keep = np.argpartition(held_far, k - 1, axis=1)[:, :k]
+                held_where = np.take_along_axis(held_where, keep, axis=1)
+                held_far = np.take_along_axis(held_far, keep, axis=1)
+
+        full = apart(queries[taken][:, None, :], base[held_where])
         order = np.argsort(full, axis=1)
-        picked = np.take_along_axis(candidates, order, axis=1)
+        picked = np.take_along_axis(held_where, order, axis=1)
         full = np.take_along_axis(full, order, axis=1)
-        best[s:s + CHUNK] = picked[:, 0]
-        first[s:s + CHUNK] = full[:, 0]
-        if k > 1:
-            second[s:s + CHUNK] = full[:, 1]
+        best[taken] = picked[:, 0]
+        first[taken] = full[:, 0]
+        if full.shape[1] > 1:
+            second[taken] = full[:, 1]
     return best, first, second
 
 
-def _link_alike(alignment: Alignment, a_pictures: ndarray, b_pictures: ndarray) -> None:
+def _link_alike(alignment: Alignment, a_pictures: Pictures, b_pictures: Pictures) -> None:
     """Link runs whose nearest picture is each other, close and clearly closest."""
-    a_lit, b_lit = ~flat(a_pictures), ~flat(b_pictures)
-    a_free = np.array([i for i in alignment.a_free() if a_lit[i]], dtype=int)
-    b_free = np.array([j for j in alignment.b_free() if b_lit[j]], dtype=int)
+    a_free = np.array([i for i in alignment.a_free() if not a_pictures.flat[i]], dtype=int)
+    b_free = np.array([j for j in alignment.b_free() if not b_pictures.flat[j]], dtype=int)
     if not len(a_free) or not len(b_free):
         return
-    mean, directions = _directions(a_pictures[a_free], b_pictures[b_free])
-    a_best, a_first, a_second = nearest_two(a_pictures[a_free], b_pictures[b_free], mean, directions)
-    b_best, b_first, b_second = nearest_two(b_pictures[b_free], a_pictures[a_free], mean, directions)
+    a_looks, b_looks = a_pictures[a_free], b_pictures[b_free]
+    mean, directions = _directions(a_looks, b_looks)
+    a_best, a_first, a_second = nearest_two(a_looks, b_looks, mean, directions)
+    b_best, b_first, b_second = nearest_two(b_looks, a_looks, mean, directions)
+    del a_looks, b_looks
     for k, i in enumerate(a_free):
         m = a_best[k]
         if a_first[k] > SAME_PICTURE or a_first[k] >= CLOSER * a_second[k]:
@@ -137,7 +181,7 @@ def _link_alike(alignment: Alignment, a_pictures: ndarray, b_pictures: ndarray) 
 
 # --- placing by order ----------------------------------------------------------
 
-def _crossed_by_noise(alignment: Alignment, moved: set[int], a_pictures: ndarray, b_pictures: ndarray) -> list[int]:
+def _crossed_by_noise(alignment: Alignment, moved: set[int], a_pictures: Pictures, b_pictures: Pictures) -> list[int]:
     """Links that cross only because a still shot's frames all look alike: a
     single frame each side, not the same frame, alike to the frame beside its
     partner, landing a few frames from where the links around it point."""
@@ -157,7 +201,7 @@ def _crossed_by_noise(alignment: Alignment, moved: set[int], a_pictures: ndarray
     return noise
 
 
-def _link_between(alignment: Alignment, moved: set[int], a_pictures: ndarray, b_pictures: ndarray) -> None:
+def _link_between(alignment: Alignment, moved: set[int], a_pictures: Pictures, b_pictures: Pictures) -> None:
     """Pair what is left between one anchor and the next, first with first.
 
     Of the runs between the same two anchors, a run is paired with the first
@@ -188,8 +232,7 @@ def _link_between(alignment: Alignment, moved: set[int], a_pictures: ndarray, b_
 
 def compare_runs(a_runs: list[Run], b_runs: list[Run], a_averages: ndarray, b_averages: ndarray) -> list[Difference | Move]:
     """Everything to report between two editions, by their block averages."""
-    a_pictures = a_averages[[run.start for run in a_runs]]
-    b_pictures = b_averages[[run.start for run in b_runs]]
+    a_pictures, b_pictures = Pictures(a_averages, a_runs), Pictures(b_averages, b_runs)
     def same_picture(a, b):
         return apart(a_averages[a.start], b_averages[b.start]) <= SAME_PICTURE
 

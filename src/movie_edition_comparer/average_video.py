@@ -16,6 +16,11 @@ Reading a 4K film takes hours, so the frames are shared out between reader
 processes, and a run picks up whatever frames are still missing. Readers
 seek to their frames by the pixel hashes already in the database, so an
 edition is hashed before it is averaged.
+
+A reader holds about a gigabyte: a 4K decoder keeps the frames that a later
+frame may be built from, and at this size those are 50 megabytes each. So
+readers are counted in gigabytes of memory as much as in cores, and there
+are few of them by default.
 """
 
 import argparse
@@ -264,8 +269,10 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('video', help="Path to the video file")
     parser.add_argument('--edition', required=True, help="Name of the edition, e.g. theatrical")
     parser.add_argument('--db', required=True, help="Path to the film's database, e.g. data/two_towers.db")
-    parser.add_argument('--readers', default=max(1, (os.cpu_count() or 4) // 4), type=int,
-                        help="Number of processes reading the video at once (default: a quarter of the cores)")
+    parser.add_argument('--readers', default=max(1, (os.cpu_count() or 4) // 8), type=int,
+                        help="Number of processes reading the video at once. Each holds about a gigabyte "
+                             "for the decoder, so this is bounded by memory as much as by cores "
+                             "(default: an eighth of the cores)")
 
 
 def run(args: argparse.Namespace) -> None:
