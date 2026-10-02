@@ -19,9 +19,14 @@ like is only ever read from their block averages:
   5. Every link is checked as compare_hashes.check_by_averages checks the
      hash comparer's.
 
-The nearest pictures are found among every run on the other side: first by
-the averages' 32 most telling directions, which finds a few candidates for
-each, then by the averages in full.
+Finding a run's nearest picture never means measuring it against every run
+on the other side. A link is only made to a picture within SAME_PICTURE that
+is clearly nearer than the next, by CLOSER, so nothing further than
+SAME_PICTURE / CLOSER away can change what is linked -- and pictures that
+near are near along every direction too. So the pictures are laid on a grid
+over the directions they differ in most, with cells as wide as that reach,
+and each is measured only against those in its own cell and the cells beside
+it: every pair within reach is found, and no other is measured in full.
 """
 
 from dataclasses import dataclass
@@ -35,19 +40,18 @@ from movie_edition_comparer.compare_hashes import (
     Difference, Move, _extend_links, _link_unique, _moved_runs, check_by_averages, differences_of, same_frame,
 )
 
-# How many candidates the coarse search keeps for each run, to be measured in full.
-CANDIDATES = 8
-
-# How many directions the coarse search measures in.
+# How many directions pictures are measured along before they are measured in
+# full: two pictures are no further apart along these than they are in full,
+# so a pair too far apart along them is too far apart.
 DIRECTIONS = 32
 
-# How many runs each side the coarse search measures against each other at
-# once. It holds one block of that many distances, so these bound the memory
-# it takes however long the two editions are: a film's runs number hundreds
-# of thousands, and measuring every one against every other at once would
-# take hundreds of gigabytes.
-QUERY_CHUNK = 512
-BASE_CHUNK = 16_384
+# How many of those directions the grid is laid over. More cells to look in
+# against fewer pictures in each: on The Two Towers, four leaves 200 pictures
+# to measure for each, against 260,000 with no grid.
+GRID = 4
+
+# Candidate pairs measured at once; bounds the memory the search takes.
+CHUNK = 500_000
 
 
 @dataclass
@@ -114,48 +118,88 @@ def _directions(a: ndarray, b: ndarray) -> tuple[ndarray, ndarray]:
     return mean, vt[:DIRECTIONS].T
 
 
-def nearest_two(queries: ndarray, base: ndarray, mean: ndarray, directions: ndarray) -> tuple[ndarray, ndarray, ndarray]:
-    """For each query, its nearest picture in base, how far that is, and how
-    far the next nearest is.
+_SPAN = 1 << 12                     # grid cells along one direction, centred on the mean picture
 
-    The coarse search works a block of queries against a block of base at a
-    time, keeping the best CANDIDATES it has seen for each query so far, and
-    those candidates are then measured in full.
+
+def _cells(projected: ndarray, width: float) -> ndarray:
+    """The grid cell each picture falls in, as one number."""
+    k = np.floor(projected / width).astype(np.int64) + _SPAN // 2
+    if (k < 0).any() or (k >= _SPAN).any():
+        raise ValueError("a picture lies further from the rest than the grid reaches")
+    return (k * (_SPAN ** np.arange(projected.shape[1]))).sum(axis=1)
+
+
+def within(a_looks: ndarray, b_looks: ndarray, reach: float) -> tuple[ndarray, ndarray, ndarray]:
+    """Every pair of an a picture and a b picture no more than reach apart, as
+    (a index, b index, how far apart), and no others.
+
+    reach is in grey levels, root mean square over the blocks, as apart
+    measures. Pictures are laid on a grid over their GRID most telling
+    directions, in cells as wide as reach is in plain distance, and a picture
+    is measured only against those in its cell and the cells beside it; along
+    the way a pair is dropped as soon as it is too far apart along the first
+    eight directions, or the first DIRECTIONS, since two pictures are never
+    further apart along some directions than in full.
     """
-    best = np.full(len(queries), -1)
-    first = np.full(len(queries), np.inf, dtype=np.float32)
-    second = np.full(len(queries), np.inf, dtype=np.float32)
-    if not len(queries) or not len(base):
-        return best, first, second
-    q = ((queries - mean) @ directions).astype(np.float32)
-    x = ((base - mean) @ directions).astype(np.float32)
-    x_norms = (x * x).sum(axis=1)
-    k = min(CANDIDATES, len(base))
+    empty = (np.zeros(0, np.int64), np.zeros(0, np.int64), np.zeros(0, np.float32))
+    if not len(a_looks) or not len(b_looks):
+        return empty
+    mean, directions = _directions(a_looks, b_looks)
+    pa = ((a_looks - mean) @ directions).astype(np.float32)
+    pb = ((b_looks - mean) @ directions).astype(np.float32)
+    plain = reach * np.sqrt(a_looks.shape[1])            # root mean square to plain distance
+    grid = min(GRID, pa.shape[1])
+    ka, kb = _cells(pa[:, :grid], plain), _cells(pb[:, :grid], plain)
+    oa, ob = np.argsort(ka, kind="stable"), np.argsort(kb, kind="stable")
+    ua, sa, ca = np.unique(ka[oa], return_index=True, return_counts=True)
+    ub, sb, cb = np.unique(kb[ob], return_index=True, return_counts=True)
 
-    for s in range(0, len(q), QUERY_CHUNK):
-        rows, taken = q[s:s + QUERY_CHUNK], slice(s, min(s + QUERY_CHUNK, len(q)))
-        held_where = np.zeros((len(rows), 0), dtype=np.int64)
-        held_far = np.zeros((len(rows), 0), dtype=np.float32)
-        for b in range(0, len(x), BASE_CHUNK):
-            block = x[b:b + BASE_CHUNK]
-            coarse = x_norms[None, b:b + BASE_CHUNK] - 2 * rows @ block.T
-            keep = min(k, len(block))
-            where = np.argpartition(coarse, keep - 1, axis=1)[:, :keep]
-            held_where = np.concatenate([held_where, where + b], axis=1)
-            held_far = np.concatenate([held_far, np.take_along_axis(coarse, where, axis=1)], axis=1)
-            if held_where.shape[1] > k:
-                keep = np.argpartition(held_far, k - 1, axis=1)[:, :k]
-                held_where = np.take_along_axis(held_where, keep, axis=1)
-                held_far = np.take_along_axis(held_far, keep, axis=1)
+    # the cells beside each a cell that hold b pictures
+    steps = np.array(np.meshgrid(*[[-1, 0, 1]] * grid, indexing="ij")).reshape(grid, -1).T
+    parts = []
+    for step in (steps * (_SPAN ** np.arange(grid))).sum(axis=1):
+        at = np.minimum(np.searchsorted(ub, ua + step), len(ub) - 1)
+        hit = ub[at] == ua + step
+        parts.append((sa[hit], ca[hit], sb[at[hit]], cb[at[hit]]))
+    qs, qc, bs, bc = (np.concatenate(x) for x in zip(*parts))
+    sizes = qc * bc
+    ends = np.cumsum(sizes)
 
-        full = apart(queries[taken][:, None, :], base[held_where])
-        order = np.argsort(full, axis=1)
-        picked = np.take_along_axis(held_where, order, axis=1)
-        full = np.take_along_axis(full, order, axis=1)
-        best[taken] = picked[:, 0]
-        first[taken] = full[:, 0]
-        if full.shape[1] > 1:
-            second[taken] = full[:, 1]
+    found, limit8, limit = [], plain * plain, plain * plain
+    start = 0
+    while start < len(sizes):
+        stop = max(start + 1, int(np.searchsorted(ends, ends[start] - sizes[start] + CHUNK, side="right")))
+        n = sizes[start:stop]
+        cell = np.repeat(np.arange(start, stop), n)
+        nth = np.arange(n.sum()) - np.repeat(np.cumsum(n) - n, n)
+        i = oa[qs[cell] + nth // bc[cell]]
+        j = ob[bs[cell] + nth % bc[cell]]
+        keep = ((pa[i, :8] - pb[j, :8]) ** 2).sum(axis=1) <= limit8
+        i, j = i[keep], j[keep]
+        keep = ((pa[i] - pb[j]) ** 2).sum(axis=1) <= limit
+        i, j = i[keep], j[keep]
+        d = apart(a_looks[i], b_looks[j])
+        keep = d <= reach
+        found.append((i[keep], j[keep], d[keep].astype(np.float32)))
+        start = stop
+    return tuple(np.concatenate(x) for x in zip(*found)) if found else empty
+
+
+def best_two(owner: ndarray, other: ndarray, far: ndarray, n: int) -> tuple[ndarray, ndarray, ndarray]:
+    """For each of n pictures, from pairs it is in: its nearest, how far that
+    is, and how far the next nearest is -- infinitely far where there is none."""
+    best = np.full(n, -1)
+    first = np.full(n, np.inf, dtype=np.float32)
+    second = np.full(n, np.inf, dtype=np.float32)
+    if len(owner):
+        o = np.lexsort((far, owner))
+        owner, other, far = owner[o], other[o], far[o]
+        head = np.r_[0, np.flatnonzero(np.diff(owner)) + 1]
+        best[owner[head]], first[owner[head]] = other[head], far[head]
+        nxt = head + 1
+        ok = nxt < len(owner)
+        ok[ok] = owner[nxt[ok]] == owner[head[ok]]
+        second[owner[head[ok]]] = far[nxt[ok]]
     return best, first, second
 
 
@@ -165,11 +209,11 @@ def _link_alike(alignment: Alignment, a_pictures: Pictures, b_pictures: Pictures
     b_free = np.array([j for j in alignment.b_free() if not b_pictures.flat[j]], dtype=int)
     if not len(a_free) or not len(b_free):
         return
-    a_looks, b_looks = a_pictures[a_free], b_pictures[b_free]
-    mean, directions = _directions(a_looks, b_looks)
-    a_best, a_first, a_second = nearest_two(a_looks, b_looks, mean, directions)
-    b_best, b_first, b_second = nearest_two(b_looks, a_looks, mean, directions)
-    del a_looks, b_looks
+    # Nothing further than this can be linked or stop a link being made: a
+    # link needs its nearest within SAME_PICTURE and nearer by CLOSER than the next.
+    i, j, far = within(a_pictures[a_free], b_pictures[b_free], SAME_PICTURE / CLOSER)
+    a_best, a_first, a_second = best_two(i, j, far, len(a_free))
+    b_best, b_first, b_second = best_two(j, i, far, len(b_free))
     for k, i in enumerate(a_free):
         m = a_best[k]
         if a_first[k] > SAME_PICTURE or a_first[k] >= CLOSER * a_second[k]:
