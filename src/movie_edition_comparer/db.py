@@ -44,6 +44,7 @@ def create_database(db_path: str) -> None:
             CREATE INDEX IF NOT EXISTS idx_frame_hashes_{PICTURE_COLUMNS[0]}
             ON frame_hashes (edition, {PICTURE_COLUMNS[0]})
         """)
+        create_pictures_table(connection)
         connection.execute("""
             CREATE TABLE IF NOT EXISTS chapters (
                 edition TEXT NOT NULL,

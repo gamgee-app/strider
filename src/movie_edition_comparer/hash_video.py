@@ -3,6 +3,9 @@
 Hashing a film takes hours, so it picks up where it left off: the frames
 already in the database are not read again. Seeking a video is not exact,
 so where it left off is found by the frames around it rather than trusted.
+
+Each frame's picture is measured as it is hashed: its black bars found and
+cut, and its block averages kept, so that the film is read once for both.
 """
 
 import argparse
@@ -20,8 +23,9 @@ from progress.bar import Bar
 
 from movie_edition_comparer.algorithms import PICTURE_HASHES, hash_md5
 from movie_edition_comparer.db import (
-    create_database, landmarks_near, last_frame_hashed, write_chapters, write_frames,
+    create_database, landmarks_near, last_frame_hashed, write_chapters, write_frames, write_pictures,
 )
+from movie_edition_comparer.pictures import Letterbox, letterbox_of, picture_row
 
 # Frames hashed between one commit and the next.
 BATCH_SIZE = 10_000
@@ -35,6 +39,11 @@ def hash_frame(index: int, frame: ndarray, hashes: dict = PICTURE_HASHES) -> tup
     in the order the database keeps them; one not asked for is left empty."""
     return (index, hash_md5(frame),
             *(hashing(frame) if name in hashes else None for name, hashing in PICTURE_HASHES.items()))
+
+
+def measure_frame(index: int, frame: ndarray, hashes: dict, letterbox: Letterbox | None) -> tuple:
+    """A frame's hashes, and its picture when a letterbox is given to find it by."""
+    return hash_frame(index, frame, hashes), (picture_row(index, frame, letterbox) if letterbox else None)
 
 
 # --- chapters ----------------------------------------------------------------
@@ -129,10 +138,26 @@ def _read_hashing(cap, count: int) -> list[str | None]:
 # --- hashing -----------------------------------------------------------------
 
 def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers: int,
-                            hashes: dict = PICTURE_HASHES) -> None:
+                            hashes: dict = PICTURE_HASHES, averages: bool = True) -> None:
     with closing(sqlite3.connect(db_path)) as connection:
         last = last_frame_hashed(connection, edition)
+        pictured = connection.execute(
+            "SELECT COUNT(*) FROM frame_pictures WHERE edition = ?", (edition,)).fetchone()[0]
     resume_from = 0 if last is None else last + 1
+
+    # The film's own letterbox, found from frames sampled through it, on a
+    # capture of its own so that the one hashing is not moved.
+    letterbox = None
+    if averages:
+        sampler = cv2.VideoCapture(video_path)
+        letterbox = letterbox_of(sampler)
+        sampler.release()
+        if letterbox:
+            print(f"The film's letterbox is {letterbox.default[0]} rows at the top and "
+                  f"{letterbox.default[1]} at the bottom", flush=True)
+        if resume_from and pictured < resume_from:
+            print(f"{resume_from - pictured} frames already hashed have no block averages; "
+                  f"strider average fills them in", flush=True)
 
     cap = cv2.VideoCapture(video_path)
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -161,7 +186,7 @@ def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers
                 if not ret:
                     break
 
-                futures.append(executor.submit(hash_frame, frame_index, frame, hashes))
+                futures.append(executor.submit(measure_frame, frame_index, frame, hashes, letterbox))
                 if len(futures) == BATCH_SIZE:
                     _commit(connection, edition, futures)
                     futures = []
@@ -174,7 +199,9 @@ def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers
 
 
 def _commit(connection: sqlite3.Connection, edition: str, futures) -> None:
-    write_frames(connection, edition, [future.result() for future in futures])
+    measured = [future.result() for future in futures]
+    write_frames(connection, edition, [hashed for hashed, _ in measured])
+    write_pictures(connection, edition, [picture for _, picture in measured if picture])
     connection.commit()
 
 
@@ -186,6 +213,9 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--db', required=True, help="Path to the film's database, e.g. data/two_towers.db")
     parser.add_argument('--threads', default=os.cpu_count() or 4, type=int,
                         help="Number of threads to hash on (default: every core)")
+    parser.add_argument('--no-averages', action='store_true',
+                        help="Do not find each frame's picture between its bars and keep its block averages "
+                             "(strider average can add them later, reading the film again)")
     parser.add_argument('--hashes', default=",".join(PICTURE_HASHES), metavar="NAMES",
                         help="Which picture hashes to compute, comma-separated, of "
                              + ", ".join(PICTURE_HASHES) + " (default: all)")
@@ -206,7 +236,7 @@ def run(args: argparse.Namespace) -> None:
     wanted = {name: PICTURE_HASHES[name] for name in args.hashes.split(",")}
     if "block_mean_0" not in wanted:
         raise SystemExit("block_mean_0 is the hash the comparison goes by; every frame must have it")
-    hash_video_frames_to_db(args.video, args.db, args.edition, args.threads, wanted)
+    hash_video_frames_to_db(args.video, args.db, args.edition, args.threads, wanted, averages=not args.no_averages)
 
     print(f"Took {datetime.now() - start_time}")
 

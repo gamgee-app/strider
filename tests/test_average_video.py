@@ -8,9 +8,8 @@ import numpy as np
 import pytest
 
 from movie_edition_comparer.algorithms import hash_md5
-from movie_edition_comparer.average_video import (
-    Letterbox, average_stretches, averages_of, bars_counted, block_averages, share,
-)
+from movie_edition_comparer.average_video import average_stretches, share
+from movie_edition_comparer.pictures import Letterbox, averages_of, bars_counted, block_averages
 from movie_edition_comparer.db import create_database, create_pictures_table, pictures_missing, write_frames
 
 W, H = 384, 216                # a 4K frame at a tenth of the size
@@ -37,21 +36,24 @@ class TestCut:
     letterbox = Letterbox(W, H, *FILM)
 
     def test_a_count_near_the_films_bars_is_cut_at_them(self):
-        assert self.letterbox.cut((31, 25, 0, 0), (0, 0, 0, 0)) == (28, 28, 0, 0)
+        assert self.letterbox.cut((31, 25, 0, 0)) == (28, 28, 0, 0)
 
     def test_a_frame_in_16_9_is_cut_at_nothing(self):
-        assert self.letterbox.cut((0, 0, 0, 0), (28, 28, 0, 0)) == (0, 0, 0, 0)
+        assert self.letterbox.cut((0, 0, 0, 0)) == (0, 0, 0, 0)
 
-    def test_a_count_near_nothing_standard_keeps_the_last_cut(self):
-        assert self.letterbox.cut((60, 60, 0, 0), (28, 28, 0, 0)) == (28, 28, 0, 0)
+    def test_a_count_near_nothing_standard_is_cut_at_the_films_letterbox(self):
+        assert self.letterbox.cut((60, 60, 0, 0)) == (28, 28, 0, 0)
+
+    def test_a_black_frame_is_cut_at_the_films_letterbox(self):
+        assert self.letterbox.cut((H, 0, W, 0)) == (28, 28, 0, 0)
 
     def test_columns_are_cut_where_both_sides_agree_on_a_pillarbox(self):
         pillar = round((W - H * 4 / 3) / 2)
-        assert self.letterbox.cut((0, 0, pillar + 1, pillar - 1), (28, 28, 0, 0)) == (0, 0, pillar, pillar)
+        assert self.letterbox.cut((0, 0, pillar + 1, pillar - 1)) == (0, 0, pillar, pillar)
 
     def test_columns_are_not_cut_where_the_sides_disagree(self):
         pillar = round((W - H * 4 / 3) / 2)
-        assert self.letterbox.cut((28, 28, pillar, 3), (28, 28, 0, 0)) == (28, 28, 0, 0)
+        assert self.letterbox.cut((28, 28, pillar, 3)) == (28, 28, 0, 0)
 
 
 class TestBlockAverages:
