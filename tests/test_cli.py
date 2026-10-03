@@ -1,6 +1,7 @@
 """The strider command drives the comparer from the command line alone."""
 
 import hashlib
+import json
 import sqlite3
 from contextlib import closing
 
@@ -32,9 +33,30 @@ def test_compare_reports_from_the_database_named(tmp_path, monkeypatch, capsys):
         "--edition-a", "theatrical", "--edition-b", "extended", "--json"])
     cli.main()
     out = capsys.readouterr().out
-    assert "Count (1):" in out
-    assert '[]' in out.splitlines()[-2]
-    assert '"type": "new"' in out.splitlines()[-1]
+    assert "Count (1): 1 added" in out
+    assert json.loads(out.splitlines()[-1]) == [
+        {"type": "added",
+         "a": {"start": 2, "count": 0, "time": "0:00:00.08"},
+         "b": {"start": 2, "count": 1, "time": "0:00:00.08"}}]
+
+
+def test_compare_reports_footage_that_moved_as_a_row(tmp_path, monkeypatch, capsys):
+    path = str(tmp_path / "film.db")
+    create_database(path)
+    with closing(sqlite3.connect(path)) as connection:
+        write_frames(connection, "theatrical", _frames("abcd"))
+        write_frames(connection, "extended", _frames("acdb"))
+        connection.commit()
+    monkeypatch.setattr("sys.argv", [
+        "strider", "compare", "--db", path, "--edition-a", "theatrical", "--edition-b", "extended", "--json"])
+    cli.main()
+    out = capsys.readouterr().out
+    assert "Count (1): 1 moved" in out
+    assert "| moved  |" in out
+    assert json.loads(out.splitlines()[-1]) == [
+        {"type": "moved",
+         "a": {"start": 1, "count": 1, "time": "0:00:00.04"},
+         "b": {"start": 3, "count": 1, "time": "0:00:00.13"}}]
 
 
 def test_compare_needs_both_editions(tmp_path, monkeypatch, capsys):

@@ -64,6 +64,10 @@ class Frames:
     start: int
     count: int
 
+    @property
+    def end(self) -> int:
+        return self.start + self.count
+
     def __str__(self) -> str:
         if self.count == 0:
             return f"nothing at {self.start}"
@@ -510,14 +514,37 @@ def compare_runs(a_runs: list[Run], b_runs: list[Run]) -> list[Difference | Move
     fences = [(-1, -1)] + anchors + [(len(a_runs), len(b_runs))]
 
     found: list[Difference | Move] = []
+    re_encoding = None  # the last thing found, if it is one and nothing has come since
     for left, right in zip(fences, fences[1:]):
-        found += _between(alignment, left, right)
+        between = _between(alignment, left, right)
+        found += between
         if right[0] < len(a_runs):
             difference = _difference_of(a_runs[right[0]], b_runs[right[1]])
+            if difference and re_encoding and not between and _touching(re_encoding, difference):
+                found[-1] = re_encoding = _joined(re_encoding, difference)
+                continue
             if difference:
                 found.append(difference)
+            re_encoding = difference if difference and difference.a.count == difference.b.count else None
     found += _moves(alignment, moved)
     return sorted(found, key=_at)
+
+
+def _touching(before: Difference, after: Difference) -> bool:
+    """Two re-encodings with nothing between them on either side.
+
+    A transfer re-encodes every frame, so re-encoded frames come in
+    stretches, and a stretch is one difference rather than one for each
+    frame of it. Only re-encodings join: a frame held for longer is its own
+    difference, since a stretch has one length and that has two.
+    """
+    return (after.a.count == after.b.count
+            and before.a.end == after.a.start and before.b.end == after.b.start)
+
+
+def _joined(before: Difference, after: Difference) -> Difference:
+    return Difference(Frames(before.a.start, before.a.count + after.a.count),
+                      Frames(before.b.start, before.b.count + after.b.count))
 
 
 def _between(alignment: Alignment,
@@ -557,27 +584,62 @@ def frame_to_time(frame: int) -> timedelta:
     return datetime.timedelta(seconds=frame / fps)
 
 
-@dataclass
-class TimeRange:
-    start: timedelta
-    end: timedelta
-    range: timedelta
-    type: str
+def clock(frame: int) -> str:
+    """A frame's place in the film, as h:mm:ss.ss."""
+    seconds = frame / fps
+    return f"{int(seconds // 3600)}:{int(seconds % 3600 // 60):02d}:{seconds % 60:05.2f}"
 
 
-def time_range(frames: Frames, other: Frames) -> TimeRange:
-    return TimeRange(frame_to_time(frames.start),
-                     frame_to_time(frames.start + max(0, frames.count - 1)),
-                     frame_to_time(frames.count),
-                     "new" if other.count == 0 else "different")
+def length(count: int) -> str:
+    """A number of frames, and how long they last."""
+    seconds = count / fps
+    return f"{count} ({int(seconds // 60)}:{seconds % 60:05.2f})" if count else "0"
 
 
-def get_differences_dict(hash_range: TimeRange):
-    return {
-        "start_time": str(hash_range.start),
-        "end_time": str(hash_range.end),
-        "type": hash_range.type
-    }
+@dataclass(frozen=True)
+class Row:
+    """One thing reported, as the table and the JSON say it.
+
+    Both sides are given by frame and by time, since the database and the
+    frames cut from the video go by the one and a person goes by the other.
+    """
+    kind: str
+    a: Frames
+    b: Frames
+
+    @classmethod
+    def of(cls, item: Difference | Move) -> "Row":
+        if isinstance(item, Move):
+            return cls("moved", Frames(item.a_start, item.count), Frames(item.b_start, item.count))
+        kind = "added" if item.a.count == 0 else "removed" if item.b.count == 0 else "differs"
+        return cls(kind, item.a, item.b)
+
+    @property
+    def size(self) -> int:
+        return max(self.a.count, self.b.count)
+
+    @staticmethod
+    def span(frames: Frames) -> str:
+        return f"{frames.start}–{frames.end - 1}" if frames.count else "—"
+
+    def cells(self) -> tuple:
+        return (self.kind,
+                self.span(self.a), clock(self.a.start),
+                self.span(self.b), clock(self.b.start),
+                length(self.a.count), length(self.b.count))
+
+    def record(self) -> dict:
+        side = lambda frames: {"start": frames.start, "count": frames.count, "time": clock(frames.start)}
+        return {"type": self.kind, "a": side(self.a), "b": side(self.b)}
+
+
+HEADERS = ["Type", "A frames", "A at", "B frames", "B at", "A length", "B length"]
+
+
+def report(reported: list[Difference | Move]) -> list[Row]:
+    """Everything reported as rows, smallest first, so what matters most is
+    last on the screen."""
+    return sorted((Row.of(item) for item in reported), key=lambda row: row.size)
 
 
 def configure_parser(parser: argparse.ArgumentParser) -> None:
@@ -600,7 +662,7 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--padding", type=float, default=5,
                         help="Seconds of footage to keep either side of a clip (default: 5)")
     parser.add_argument("--json", action="store_true",
-                        help="Print the differences as JSON as well")
+                        help="Print what was reported as JSON as well, one record per row")
     parser.add_argument("--no-trim", action="store_true",
                         help="Do not copy out the stretches of video, even when both videos are given")
     parser.add_argument("--no-frames", action="store_true",
@@ -615,51 +677,22 @@ def run(args: argparse.Namespace) -> None:
 
     print()
     reported = compare_editions(args.db, args.edition_a, args.edition_b)
+    rows = report(reported)
 
-    moves = [item for item in reported if isinstance(item, Move)]
-    table = [(time_range(item.a, item.b), time_range(item.b, item.a))
-             for item in reported if isinstance(item, Difference)]
-
-    def sort_key(row: tuple[TimeRange, TimeRange]) -> timedelta:
-        return max(row[0].range, row[1].range)
-
-    sorted_table = sorted(table, key=sort_key)
-
-    tabulated = tabulate(
-        [(
-            a.start, a.end, a.type,
-            b.start, b.end, b.type,
-            a.range, b.range, abs(b.range - a.range)
-        ) for a, b in sorted_table],
-        headers=["A Start", "A End", "A Type", "B Start", "B End", "B Type", "A Range", "B Range", "Range Difference"],
-        tablefmt="github")
-
+    kinds = Counter(row.kind for row in rows)
+    print(f"Count ({len(rows)}): " + ", ".join(
+        f"{kinds[kind]} {kind}" for kind in ("added", "removed", "differs", "moved") if kinds[kind]))
     print()
-    print(f'Count ({len(sorted_table)}):')
-    print()
-    print(tabulated)
-
-    if moves:
-        print()
-        print(f'Moved ({len(moves)}):')
-        print()
-        for move in moves:
-            print(f"  {frame_to_time(move.a_start)} -> {frame_to_time(move.b_start)}"
-                  f"  ({frame_to_time(move.count)})")
+    print(tabulate([row.cells() for row in rows], headers=HEADERS, tablefmt="github",
+                   colalign=("left", "right", "right", "right", "right", "right", "right")))
 
     if args.json:
-        print(json.dumps([get_differences_dict(a) for a, b in table if a.range > timedelta(seconds=0)]))
-        print(json.dumps([get_differences_dict(b) for a, b in table if b.range > timedelta(seconds=0)]))
+        print(json.dumps([row.record() for row in rows]))
 
     if args.movie_a and args.movie_b:
-        pairs = ([(item.a, item.b) for item in sorted(
-                     (item for item in reported if isinstance(item, Difference)),
-                     key=lambda item: max(item.a.count, item.b.count))]
-                 + [(Frames(move.a_start, move.count), Frames(move.b_start, move.count))
-                    for move in moves])
         print()
         cut_differences(
-            pairs,
+            [(row.a, row.b) for row in rows],
             Source(args.movie_a, label_a, args.edition_a),
             Source(args.movie_b, label_b, args.edition_b),
             args.db, args.output_dir, args.padding, fps,
