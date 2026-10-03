@@ -25,6 +25,7 @@ from datetime import timedelta
 import numpy as np
 from tabulate import tabulate
 
+from movie_edition_comparer.algorithms import PICTURE_HASHES
 from movie_edition_comparer.video import Source, cut_differences
 
 # Picture hashes this many bits apart or fewer are the same picture.
@@ -121,14 +122,17 @@ class Move:
                 f"appear at {self.b_start} in edition_b")
 
 
-def read_frames(db_path: str, edition: str) -> list[Frame]:
+def read_frames(db_path: str, edition: str, picture_hash: str = "block_mean_0") -> list[Frame]:
+    """An edition's frames, each with its pixel hash and the picture hash named."""
+    if picture_hash not in PICTURE_HASHES:
+        raise ValueError(f"{picture_hash!r} is not a picture hash; the hashes are {', '.join(PICTURE_HASHES)}")
     with closing(sqlite3.connect(db_path)) as connection:
         cursor = connection.cursor()
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT
                 frame_index,
                 hash_md5,
-                hash_block_mean_0
+                hash_{picture_hash}
             FROM
                 frame_hashes
             WHERE
@@ -136,7 +140,10 @@ def read_frames(db_path: str, edition: str) -> list[Frame]:
             ORDER BY
                 frame_index
         """, (edition,))
-        return [Frame(*row) for row in cursor.fetchall()]
+        frames = [Frame(*row) for row in cursor.fetchall()]
+    if any(frame.picture_hash is None for frame in frames):
+        raise ValueError(f"{edition} was not hashed with {picture_hash}")
+    return frames
 
 
 def runs_of(frames: list[Frame]) -> list[Run]:
@@ -213,10 +220,6 @@ def _link_unique(alignment: Alignment, key_of) -> None:
             alignment.link(a_index, b_index=b_once[key])
 
 
-# The block mean hash is 256 bits, however it is written.
-HASH_BITS = 256
-
-
 def _piece_masks(runs: list[Run]) -> list[int]:
     """The bits of the picture hash that vary across the film, cut into more
     pieces than a match is allowed to differ by bits.
@@ -231,11 +234,14 @@ def _piece_masks(runs: list[Run]) -> list[int]:
     bits apart are as few apart on the bits that vary, so leaving the rest
     out loses no match.
     """
+    if not runs:
+        return [0] * (perceptual_match_threshold + 1)
+    hash_bits = len(runs[0].picture_hash) * 4
     hashes = np.frombuffer(b"".join(bytes.fromhex(run.picture_hash) for run in runs),
-                           dtype=np.uint8).reshape(len(runs), HASH_BITS // 8)
+                           dtype=np.uint8).reshape(len(runs), hash_bits // 8)
     set_in = np.unpackbits(hashes, axis=1).sum(axis=0)
-    # unpackbits gives the first byte's high bit first; as a number, that is bit 255.
-    varying = sorted(HASH_BITS - 1 - place for place, count in enumerate(set_in)
+    # unpackbits gives the first byte's high bit first; as a number, that is the top bit.
+    varying = sorted(hash_bits - 1 - place for place, count in enumerate(set_in)
                if 0.02 * len(runs) < count < 0.98 * len(runs))
     count = perceptual_match_threshold + 1
     size = -(-len(varying) // count)
@@ -660,11 +666,11 @@ def _runs_of_block(runs: list[Run], block: _Block) -> list[Run]:
     return out
 
 
-def compare_editions(db_path: str, edition_a: str,
-                     edition_b: str) -> list[Difference | Move]:
+def compare_editions(db_path: str, edition_a: str, edition_b: str,
+                     picture_hash: str = "block_mean_0") -> list[Difference | Move]:
     """Everything to report between two editions of the one film."""
-    return compare_runs(runs_of(read_frames(db_path, edition_a)),
-                        runs_of(read_frames(db_path, edition_b)))
+    return compare_runs(runs_of(read_frames(db_path, edition_a, picture_hash)),
+                        runs_of(read_frames(db_path, edition_b, picture_hash)))
 
 
 # --- reporting ---------------------------------------------------------------
@@ -807,6 +813,8 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
                         help="Seconds of footage to keep either side of a clip (default: 5)")
     parser.add_argument("--json", action="store_true",
                         help="Print what was reported as JSON as well, one record per row")
+    parser.add_argument("--picture-hash", default="block_mean_0", choices=list(PICTURE_HASHES), metavar="HASH",
+                        help="Which picture hash to go by: " + ", ".join(PICTURE_HASHES) + " (default: %(default)s)")
     parser.add_argument("--link-within", type=int, default=perceptual_match_threshold, metavar="BITS",
                         help="Picture hashes this many bits apart or fewer are the same picture when "
                              "the editions are lined up (default: %(default)s)")
@@ -829,7 +837,7 @@ def run(args: argparse.Namespace) -> None:
     perceptual_match_threshold = args.link_within
 
     print()
-    reported = compare_editions(args.db, args.edition_a, args.edition_b)
+    reported = compare_editions(args.db, args.edition_a, args.edition_b, args.picture_hash)
     rows = report(reported, args.same_picture_within)
 
     kinds = Counter(row.kind for row in rows)
