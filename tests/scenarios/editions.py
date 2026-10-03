@@ -103,12 +103,14 @@ class Region:
 
 @dataclass(frozen=True)
 class Difference:
-    """A place where the two editions hold different footage."""
+    """A place where the two editions hold different footage, and how:
+    added, removed, replaced, reencoded or retimed."""
     a: Region
     b: Region
+    kind: str
 
     def __str__(self) -> str:
-        return f"edition_a: {str(self.a):<22} edition_b: {self.b}"
+        return f"{self.kind:<10} edition_a: {str(self.a):<22} edition_b: {self.b}"
 
 
 @dataclass(frozen=True)
@@ -194,7 +196,7 @@ class Relocated:
 
 
 def describe(reported) -> list:
-    """Turn (a_start, a_end, b_start, b_end) tuples into Differences.
+    """Turn (a_start, a_end, b_start, b_end, kind) tuples into Differences.
 
     A comparer reports the matching frames either side of a difference, so the
     differing frames are the ones strictly between them. Footage a comparer
@@ -204,7 +206,7 @@ def describe(reported) -> list:
     return [
         item if isinstance(item, Moved) else
         Difference(Region(item[0] + 1, max(0, item[1] - item[0] - 1)),
-                   Region(item[2] + 1, max(0, item[3] - item[2] - 1)))
+                   Region(item[2] + 1, max(0, item[3] - item[2] - 1)), item[4])
         for item in reported
     ]
 
@@ -396,12 +398,12 @@ class Scenario:
                 at = self._at(b, item.letters, item.nth, "edition_b")
                 found.append(Difference(
                     Region(self._gap(item.letters, at, b, a), 0),
-                    Region(at, len(tokens(item.letters)))))
+                    Region(at, len(tokens(item.letters))), "added"))
             elif isinstance(item, Removed):
                 at = self._at(a, item.letters, item.nth, "edition_a")
                 found.append(Difference(
                     Region(at, len(tokens(item.letters))),
-                    Region(self._gap(item.letters, at, a, b), 0)))
+                    Region(self._gap(item.letters, at, a, b), 0), "removed"))
             elif isinstance(item, (Replaced, Reencoded, Retimed)):
                 left, right = tokens(item.a), tokens(item.b)
                 here = {picture(f) for f in left}
@@ -429,7 +431,8 @@ class Scenario:
                         f"retimed -- say Reencoded.")
                 found.append(Difference(
                     Region(self._at(a, item.a, item.a_nth, "edition_a"), len(tokens(item.a))),
-                    Region(self._at(b, item.b, item.b_nth, "edition_b"), len(tokens(item.b)))))
+                    Region(self._at(b, item.b, item.b_nth, "edition_b"), len(tokens(item.b))),
+                    kind.lower()))
             elif isinstance(item, Relocated):
                 arrives = item.becomes or item.letters
                 here = [picture(f) for f in tokens(item.letters)]

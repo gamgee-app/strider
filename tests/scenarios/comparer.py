@@ -35,15 +35,16 @@ def _reported(item):
     return _boundaries(item)
 
 
-def _boundaries(difference) -> tuple[int, int, int, int]:
-    """A difference as the matching frames either side of it.
+def _boundaries(difference) -> tuple[int, int, int, int, str]:
+    """A difference as the matching frames either side of it, and its kind.
 
     compare_hashes reports the differing frames themselves, so the frames
     either side are one before the first and one after the last, which is what
     a scenario talks about.
     """
     return (difference.a.start - 1, difference.a.start + difference.a.count,
-            difference.b.start - 1, difference.b.start + difference.b.count)
+            difference.b.start - 1, difference.b.start + difference.b.count,
+            difference.kind)
 
 
 def compare(a_frames: list[str], b_frames: list[str]) -> list:
