@@ -166,6 +166,9 @@ class Alignment:
         self.a_to_b[a_index] = b_index
         self.b_to_a[b_index] = a_index
 
+    def unlink(self, a_index: int) -> None:
+        del self.b_to_a[self.a_to_b.pop(a_index)]
+
     def a_free(self) -> list[int]:
         return [i for i in range(len(self.a_runs)) if i not in self.a_to_b]
 
@@ -418,6 +421,38 @@ def _moved_runs(alignment: Alignment) -> set[int]:
     return {pairs[k][0] for k in set(range(len(pairs))) - set(staying)}
 
 
+def _crossed_by_noise(alignment: Alignment, moved: set[int]) -> list[int]:
+    """Links that cross only because frames that all look alike were paired
+    by which looked most alike.
+
+    Two transfers of a static shot give frames that differ by a bit or two
+    from each other in every direction, so the closest match to a frame is
+    as likely to be its neighbour's counterpart as its own, and the links
+    cross. Nothing moved: the footage is there in order on both sides. Such
+    a link -- a single frame each side, alike but not the same frame,
+    looking like the frame beside its partner, and landing a few frames from
+    where the links around it say it belongs -- is undone, so that the pass
+    that pairs what is left in order can put it where it belongs. Footage
+    that really moved lands far from where its neighbours' links point, and
+    is left alone.
+    """
+    a_runs, b_runs = alignment.a_runs, alignment.b_runs
+    noise = []
+    for i in moved:
+        j = alignment.a_to_b[i]
+        a, b = a_runs[i], b_runs[j]
+        if a.count != 1 or b.count != 1 or same_frame(a, b):
+            continue
+        near = any(abs(alignment.a_to_b[k] - j) <= 8
+                   for k in range(max(0, i - 4), min(len(a_runs), i + 5))
+                   if k in alignment.a_to_b and k not in moved)
+        alike_beside = (any(same_picture(a, b_runs[k]) for k in (j - 1, j + 1) if 0 <= k < len(b_runs))
+                        or any(same_picture(a_runs[k], b) for k in (i - 1, i + 1) if 0 <= k < len(a_runs)))
+        if near and alike_beside:
+            noise.append(i)
+    return noise
+
+
 def _moves(alignment: Alignment, moved: set[int]) -> list[Difference | Move]:
     """Footage that moved, with runs that travelled together reported as one.
 
@@ -516,6 +551,9 @@ def _at(item: Difference | Move) -> int:
 def compare_runs(a_runs: list[Run], b_runs: list[Run]) -> list[Difference | Move]:
     """Everything to report between two editions, in the order it comes."""
     alignment = align(a_runs, b_runs)
+    moved = _moved_runs(alignment)
+    for a_index in _crossed_by_noise(alignment, moved):
+        alignment.unlink(a_index)
     moved = _moved_runs(alignment)
     _link_between(alignment, moved)
     _extend_links(alignment, same_picture)

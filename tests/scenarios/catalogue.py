@@ -148,6 +148,9 @@ CATALOGUE = [
                  "two renderings, with nothing to choose between them but where they sit"),
             Case("abcb", "abcB", [Reencoded("b", "B", a_nth=2)],
                  "one of two apart is re-encoded"),
+            Case("abb'b''c", "abB''B'c", [Reencoded("b'b''", "B''B'")],
+                 "two frames a bit apart, each encoded again nearer the other: "
+                 "the likeness crosses, the footage does not"),
         ],
     ),
 
