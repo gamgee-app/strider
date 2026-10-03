@@ -10,7 +10,7 @@ meet the specification, they fail -- that is the point of them.
 import pytest
 
 from tests.scenarios.catalogue import CATALOGUE
-from tests.scenarios.comparer import compare
+from tests.scenarios.comparer import COMPARERS, compare
 from tests.scenarios.editions import (
     accounts_for_every_frame, cases_of, describe, satisfies,
 )
@@ -18,15 +18,19 @@ from tests.scenarios.editions import (
 CASES = [pytest.param(scenario, id=scenario.name)
          for _, _, scenario in cases_of(CATALOGUE)]
 
+# Every scenario is put to each comparer.
+BY = pytest.mark.parametrize("comparer", list(COMPARERS))
 
+
+@BY
 @pytest.mark.parametrize("scenario", CASES)
-def test_reports_the_differences_that_are_there(scenario):
+def test_reports_the_differences_that_are_there(scenario, comparer):
     truth = scenario.expected()
-    reported = describe(compare(*scenario.frames()))
+    reported = describe(compare(scenario, comparer))
 
     assert satisfies(truth, reported), "\n".join([
         "",
-        f"Scenario: {scenario.name}",
+        f"Scenario: {scenario.name}, compared {comparer}",
         f"  {scenario.story}",
         "",
         f"  edition_a: {scenario.edition_a}",
@@ -63,8 +67,9 @@ def test_the_expected_answer_accounts_for_every_frame(scenario):
     ])
 
 
+@BY
 @pytest.mark.parametrize("scenario", CASES)
-def test_the_report_accounts_for_every_frame(scenario):
+def test_the_report_accounts_for_every_frame(scenario, comparer):
     """The same second opinion, turned on what the comparer actually said.
 
     Whatever is reported has to add up against the editions as well: footage
@@ -73,7 +78,7 @@ def test_the_report_accounts_for_every_frame(scenario):
     moved and as a difference both, and no move landing off the end of an
     edition.
     """
-    reported = describe(compare(*scenario.frames()))
+    reported = describe(compare(scenario, comparer))
     complaints = accounts_for_every_frame(scenario, reported)
     assert not complaints, "\n".join([
         "",

@@ -549,7 +549,7 @@ def _would_sit_at(runs: list[Run], linked: dict[int, int],
     return 0
 
 
-def _difference_of(a: Run, b: Run) -> Difference | None:
+def _difference_of(a: Run, b: Run, apart=None) -> Difference | None:
     """What to report of two runs that hold the same picture.
 
     Nothing, if they are the same frame for the same length of time. The
@@ -560,15 +560,20 @@ def _difference_of(a: Run, b: Run) -> Difference | None:
         return None
     return Difference(Frames(a.start, a.count), Frames(b.start, b.count),
                       "reencoded" if a.count == b.count else "retimed",
-                      ((a.count, bits_apart(a, b)),))
+                      ((a.count, (apart or bits_apart)(a, b)),))
 
 
 def _at(item: Difference | Move) -> int:
     return item.a_start if isinstance(item, Move) else item.a.start
 
 
-def compare_runs(a_runs: list[Run], b_runs: list[Run]) -> list[Difference | Move]:
-    """Everything to report between two editions, in the order it comes."""
+def compare_runs(a_runs: list[Run], b_runs: list[Run],
+                 averages: tuple | None = None) -> list[Difference | Move]:
+    """Everything to report between two editions, in the order it comes.
+
+    Given the two editions' block averages, every link the hashes made is
+    checked by them before anything is reported.
+    """
     alignment = align(a_runs, b_runs)
     moved = _moved_runs(alignment)
     for a_index in _crossed_by_noise(alignment, moved):
@@ -576,16 +581,30 @@ def compare_runs(a_runs: list[Run], b_runs: list[Run]) -> list[Difference | Move
     moved = _moved_runs(alignment)
     _link_between(alignment, moved)
     _extend_links(alignment, same_picture)
+    if averages is not None:
+        check_by_averages(alignment, *averages)
+        moved = _moved_runs(alignment)
+    return differences_of(alignment, moved)
+
+
+def differences_of(alignment: Alignment, moved: set[int], apart=None) -> list[Difference | Move]:
+    """The differences and moves an alignment of the two editions makes.
+
+    apart says how far apart two runs are to look at, for the report; by
+    default, the bits their picture hashes are apart.
+    """
+    apart = apart or bits_apart
+    a_runs, b_runs = alignment.a_runs, alignment.b_runs
     anchors = [(i, j) for i, j in alignment.pairs() if i not in moved]
     fences = [(-1, -1)] + anchors + [(len(a_runs), len(b_runs))]
 
     found: list[Difference | Move] = []
     re_encoding = None  # the last thing found, if it is one and nothing has come since
     for left, right in zip(fences, fences[1:]):
-        between = _between(alignment, left, right)
+        between = _between(alignment, left, right, apart)
         found += between
         if right[0] < len(a_runs):
-            difference = _difference_of(a_runs[right[0]], b_runs[right[1]])
+            difference = _difference_of(a_runs[right[0]], b_runs[right[1]], apart)
             if difference and re_encoding and not between and _touching(re_encoding, difference):
                 found[-1] = re_encoding = _joined(re_encoding, difference)
                 continue
@@ -594,6 +613,54 @@ def compare_runs(a_runs: list[Run], b_runs: list[Run]) -> list[Difference | Move
             re_encoding = difference if difference and difference.kind == "reencoded" else None
     found += _moves(alignment, moved)
     return sorted(found, key=_at)
+
+
+def check_by_averages(alignment, a_averages, b_averages) -> None:
+    """Check every link by the two editions' block averages, which tell a
+    frame from its neighbour where a picture hash cannot.
+
+    A link to a frame that is not its partner's picture is undone; a link
+    one or two frames off is moved to the frame that is; and a run left
+    unlinked beside a link is tried against the frame its neighbour's link
+    says it would have, and linked if that is its picture. The block
+    averages of a run are those of its first frame, since its frames are the
+    same frame.
+    """
+    from movie_edition_comparer.averages import CLOSER, SAME_PICTURE, apart
+
+    a_runs, b_runs = alignment.a_runs, alignment.b_runs
+    def far(i, j):
+        return float(apart(a_averages[a_runs[i].start], b_averages[b_runs[j].start]))
+
+    # Moved first, so that a link put right is the one that is then judged.
+    for i, j in alignment.pairs():
+        if same_frame(a_runs[i], b_runs[j]):
+            continue
+        now = far(i, j)
+        best, nearest = j, now
+        for k in range(max(0, j - 2), min(len(b_runs), j + 3)):
+            if k != j and k not in alignment.b_to_a and (d := far(i, k)) < nearest:
+                best, nearest = k, d
+        if best != j and nearest < CLOSER * now:
+            alignment.unlink(i)
+            alignment.link(i, best)
+
+    for i, j in alignment.pairs():
+        if not same_frame(a_runs[i], b_runs[j]) and far(i, j) > SAME_PICTURE:
+            alignment.unlink(i)
+
+    grown = True
+    while grown:
+        grown = False
+        for i, j in alignment.pairs():
+            for step in (1, -1):
+                k, m = i + step, j + step
+                while (0 <= k < len(a_runs) and 0 <= m < len(b_runs)
+                       and k not in alignment.a_to_b and m not in alignment.b_to_a
+                       and far(k, m) <= SAME_PICTURE):
+                    alignment.link(k, m)
+                    grown = True
+                    k, m = k + step, m + step
 
 
 def _touching(before: Difference, after: Difference) -> bool:
@@ -625,17 +692,18 @@ def _stretches(bits: tuple[tuple[int, int], ...]) -> tuple[tuple[int, int], ...]
     return tuple(out)
 
 
-def _side_by_side(a_runs: list[Run], b_runs: list[Run]) -> tuple[tuple[int, int], ...]:
+def _side_by_side(a_runs: list[Run], b_runs: list[Run], apart=None) -> tuple[tuple[int, int], ...]:
     """How far apart two stretches of the same length are, frame against frame."""
     def frames(runs):
         for run in runs:
             for _ in range(run.count):
                 yield run
-    return _stretches(tuple((1, bits_apart(a, b)) for a, b in zip(frames(a_runs), frames(b_runs))))
+    apart = apart or bits_apart
+    return _stretches(tuple((1, apart(a, b)) for a, b in zip(frames(a_runs), frames(b_runs))))
 
 
 def _between(alignment: Alignment,
-             left: tuple[int, int], right: tuple[int, int]) -> list[Difference]:
+             left: tuple[int, int], right: tuple[int, int], apart=None) -> list[Difference]:
     """The differences lying between two anchors."""
     a_blocks = _unmatched_blocks(alignment.a_runs, alignment.a_to_b, left[0] + 1, right[0])
     b_blocks = _unmatched_blocks(alignment.b_runs, alignment.b_to_a, left[1] + 1, right[1])
@@ -651,7 +719,7 @@ def _between(alignment: Alignment,
         bits = ()
         if a_block and b_block and a_frames.count == b_frames.count:
             bits = _side_by_side(_runs_of_block(alignment.a_runs, a_block),
-                                 _runs_of_block(alignment.b_runs, b_block))
+                                 _runs_of_block(alignment.b_runs, b_block), apart)
         found.append(Difference(a_frames, b_frames,
                                 "replaced" if a_block and b_block else "removed" if a_block else "added",
                                 bits))
@@ -667,10 +735,18 @@ def _runs_of_block(runs: list[Run], block: _Block) -> list[Run]:
 
 
 def compare_editions(db_path: str, edition_a: str, edition_b: str,
-                     picture_hash: str = "block_mean_0") -> list[Difference | Move]:
-    """Everything to report between two editions of the one film."""
-    return compare_runs(runs_of(read_frames(db_path, edition_a, picture_hash)),
-                        runs_of(read_frames(db_path, edition_b, picture_hash)))
+                     picture_hash: str = "block_mean_0",
+                     with_averages: bool = False) -> list[Difference | Move]:
+    """Everything to report between two editions of the one film, its links
+    checked by the editions' block averages if asked."""
+    a_frames = read_frames(db_path, edition_a, picture_hash)
+    b_frames = read_frames(db_path, edition_b, picture_hash)
+    averages = None
+    if with_averages:
+        from movie_edition_comparer.averages import read_averages
+        averages = (read_averages(db_path, edition_a, len(a_frames)),
+                    read_averages(db_path, edition_b, len(b_frames)))
+    return compare_runs(runs_of(a_frames), runs_of(b_frames), averages)
 
 
 # --- reporting ---------------------------------------------------------------
@@ -821,6 +897,12 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--same-picture-within", type=int, default=None, metavar="BITS",
                         help="Draw the line between re-encoded and replaced footage here in the report, "
                              "which may be tighter or looser than --link-within (default: the same)")
+    parser.add_argument("--with-averages", action="store_true",
+                        help="Check every link the picture hash makes by the frames' block averages "
+                             "(strider average must have been run on both editions)")
+    parser.add_argument("--by-averages", action="store_true",
+                        help="Line the editions up by the frames' block averages alone, with no picture "
+                             "hash; how far apart frames are is then given in hundredths of a grey level")
     parser.add_argument("--no-trim", action="store_true",
                         help="Do not copy out the stretches of video, even when both videos are given")
     parser.add_argument("--no-frames", action="store_true",
@@ -837,7 +919,12 @@ def run(args: argparse.Namespace) -> None:
     perceptual_match_threshold = args.link_within
 
     print()
-    reported = compare_editions(args.db, args.edition_a, args.edition_b, args.picture_hash)
+    if args.by_averages:
+        from movie_edition_comparer import compare_averages
+        reported = compare_averages.compare_editions(args.db, args.edition_a, args.edition_b)
+    else:
+        reported = compare_editions(args.db, args.edition_a, args.edition_b, args.picture_hash,
+                                    with_averages=args.with_averages)
     rows = report(reported, args.same_picture_within)
 
     kinds = Counter(row.kind for row in rows)

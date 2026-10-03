@@ -86,6 +86,34 @@ def frame_hash(frame: str) -> str:
     return raw.hex()
 
 
+def block_averages(frame: str) -> bytes:
+    """What the frame looks like, as strider average keeps it: 16x16 block
+    averages, as sums of 256 pixels.
+
+    Each picture has blocks of its own, spread as a lit picture's are. Each
+    prime moves them PRIME_APART grey levels, the same way for a' and A';
+    encoding again moves them RENDERING_APART, as noise does.
+    """
+    import numpy as np
+    def seeded(text):
+        return np.random.default_rng(int.from_bytes(hashlib.sha256(text.encode()).digest()[:8], "big"))
+    averages = seeded(f"picture:{picture(frame)}").uniform(30, 220, 256)
+    steps = frame.count("'")
+    if steps:
+        averages += seeded(f"step:{frame.lower()}").normal(0, PRIME_APART * steps, 256)
+    if frame != frame.lower():
+        averages += seeded(f"rendering:{frame}").normal(0, RENDERING_APART, 256)
+    return np.round(np.clip(averages, 0, 255) * 256).astype("<u2").tobytes()
+
+
+# How far a prime moves a picture's block averages, in grey levels: a tenth of
+# the way to being another picture, as one bit of 256 is of five.
+PRIME_APART = 0.3
+
+# How far encoding a picture again moves them.
+RENDERING_APART = 0.05
+
+
 # --- what the tool should report --------------------------------------------
 
 @dataclass(frozen=True)

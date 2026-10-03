@@ -12,6 +12,7 @@ from movie_edition_comparer.compare_hashes import read_frames
 from movie_edition_comparer.db import create_database, write_frames
 from movie_edition_comparer.hash_video import _seek_to, hash_frame, seek_error
 from movie_edition_comparer.algorithms import PICTURE_HASHES
+from movie_edition_comparer.pictures import block_averages
 
 # The one hash the comparison goes by; the others take a while on thousands of frames.
 ONE = {"block_mean_0": PICTURE_HASHES["block_mean_0"]}
@@ -77,7 +78,7 @@ class TestSeekTo:
 class TestResuming:
     def hash_video_with(self, cap, path, monkeypatch):
         monkeypatch.setattr(hash_video.cv2, "VideoCapture", lambda _: cap)
-        hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=2, hashes=ONE)
+        hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=2, hashes=ONE, averages=False)
 
     def test_hashes_every_frame_of_a_fresh_edition(self, tmp_path, monkeypatch):
         path = hashed(DISTINCT, 0, tmp_path)
@@ -139,7 +140,7 @@ class TestBatches:
 
     def hash_video_with(self, cap, path, monkeypatch):
         monkeypatch.setattr(hash_video.cv2, "VideoCapture", lambda _: cap)
-        hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=4, hashes=ONE)
+        hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=4, hashes=ONE, averages=False)
 
     def test_a_crash_keeps_every_batch_committed_before_it(self, tmp_path, monkeypatch):
         path = hashed(FILM, 0, tmp_path)
@@ -165,3 +166,58 @@ class TestBatches:
         frames = read_frames(path, "theatrical")
         assert [f.index for f in frames] == list(range(12_000))
         assert [f.data_hash for f in frames] == [hash_md5(frame(v)) for v in FILM]
+
+
+class Letterboxed(Capture):
+    """A video of letterboxed frames, as a film is: rows of black above and below a picture."""
+
+    def frame_at(self, value):
+        picture = np.zeros((24, 40, 3), dtype=np.uint8)
+        rng = np.random.default_rng(value)
+        picture[3:21] = rng.integers(60, 250, (18, 40, 3))
+        return picture
+
+    def read(self):
+        ok, _ = super().read()
+        return (True, self.frame_at(self.values[self.position - 1])) if ok else (False, None)
+
+
+class TestPictures:
+    """Each frame's picture is measured as it is hashed, so the film is read once."""
+
+    def hash_video_with(self, caps, path, monkeypatch, averages=True):
+        made = iter(caps)
+        monkeypatch.setattr(hash_video.cv2, "VideoCapture", lambda _: next(made))
+        hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=2, hashes=ONE, averages=averages)
+
+    def stored(self, path):
+        with closing(sqlite3.connect(path)) as connection:
+            return connection.execute("SELECT frame_index, top, bottom, block_averages FROM frame_pictures "
+                                      "WHERE edition = 'theatrical' ORDER BY frame_index").fetchall()
+
+    def test_every_frame_hashed_has_its_picture(self, tmp_path, monkeypatch):
+        path = hashed(DISTINCT, 0, tmp_path)
+        video = Letterboxed(DISTINCT)
+        self.hash_video_with([Letterboxed(DISTINCT), video], path, monkeypatch)
+        rows = self.stored(path)
+        assert [r[0] for r in rows] == list(range(60))
+        assert {(r[1], r[2]) for r in rows} == {(3, 3)}, "cut at the film's own bars"
+        assert rows[17][3] == block_averages(video.frame_at(DISTINCT[17])[3:21])
+        assert video.reads == 60, "the film read once, for hashes and pictures both"
+
+    def test_a_resumed_run_carries_on_the_pictures_too(self, tmp_path, monkeypatch):
+        path = hashed(DISTINCT, 0, tmp_path)
+        with closing(sqlite3.connect(path)) as connection:
+            write_frames(connection, "theatrical", [hash_frame(i, Letterboxed(DISTINCT).frame_at(v), ONE)
+                                                    for i, v in enumerate(DISTINCT[:40])])
+            connection.commit()
+        self.hash_video_with([Letterboxed(DISTINCT), Letterboxed(DISTINCT, drift=-2)], path, monkeypatch)
+        assert [r[0] for r in self.stored(path)] == list(range(40, 60)), \
+            "pictures for the frames hashed in this run; the 40 hashed before are left for strider average"
+
+    def test_none_are_kept_when_turned_off(self, tmp_path, monkeypatch):
+        path = hashed(DISTINCT, 0, tmp_path)
+        self.hash_video_with([Letterboxed(DISTINCT)], path, monkeypatch, averages=False)
+        assert self.stored(path) == []
+        assert [f.index for f in read_frames(path, "theatrical")] == list(range(60))
+
