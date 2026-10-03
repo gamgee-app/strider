@@ -87,9 +87,21 @@ class Difference:
     a: Frames
     b: Frames
     kind: str
+    # How far apart the two sides are to look at, as stretches of (frames,
+    # bits): the picture hashes of a re-encoding or a retiming, and of a
+    # replacement whose sides are the same length, frame against frame.
+    # Empty where one side has nothing, or the sides cannot be laid side by
+    # side. Kept so that a report can draw the line between "the same
+    # picture" and "another picture" for itself.
+    bits: tuple[tuple[int, int], ...] = ()
 
     def __str__(self) -> str:
         return f"{self.kind:<10} edition_a: {str(self.a):<22} edition_b: {self.b}"
+
+    @property
+    def bits_apart(self) -> int | None:
+        """The most any frame is from its counterpart, or None if unknown."""
+        return max((apart for _, apart in self.bits), default=None)
 
 
 @dataclass(frozen=True)
@@ -541,7 +553,8 @@ def _difference_of(a: Run, b: Run) -> Difference | None:
     if same_frame(a, b) and a.count == b.count:
         return None
     return Difference(Frames(a.start, a.count), Frames(b.start, b.count),
-                      "reencoded" if a.count == b.count else "retimed")
+                      "reencoded" if a.count == b.count else "retimed",
+                      ((a.count, bits_apart(a, b)),))
 
 
 def _at(item: Difference | Move) -> int:
@@ -591,7 +604,28 @@ def _touching(before: Difference, after: Difference) -> bool:
 
 def _joined(before: Difference, after: Difference) -> Difference:
     return Difference(Frames(before.a.start, before.a.count + after.a.count),
-                      Frames(before.b.start, before.b.count + after.b.count), "reencoded")
+                      Frames(before.b.start, before.b.count + after.b.count), "reencoded",
+                      _stretches(before.bits + after.bits))
+
+
+def _stretches(bits: tuple[tuple[int, int], ...]) -> tuple[tuple[int, int], ...]:
+    """Stretches of frames the same number of bits apart, run together."""
+    out: list[tuple[int, int]] = []
+    for frames, apart in bits:
+        if out and out[-1][1] == apart:
+            out[-1] = (out[-1][0] + frames, apart)
+        else:
+            out.append((frames, apart))
+    return tuple(out)
+
+
+def _side_by_side(a_runs: list[Run], b_runs: list[Run]) -> tuple[tuple[int, int], ...]:
+    """How far apart two stretches of the same length are, frame against frame."""
+    def frames(runs):
+        for run in runs:
+            for _ in range(run.count):
+                yield run
+    return _stretches(tuple((1, bits_apart(a, b)) for a, b in zip(frames(a_runs), frames(b_runs))))
 
 
 def _between(alignment: Alignment,
@@ -608,9 +642,22 @@ def _between(alignment: Alignment,
         b_frames = b_block.frames if b_block else Frames(
             _would_sit_at(alignment.a_runs, alignment.a_to_b,
                           alignment.b_runs, a_block.run), 0)
+        bits = ()
+        if a_block and b_block and a_frames.count == b_frames.count:
+            bits = _side_by_side(_runs_of_block(alignment.a_runs, a_block),
+                                 _runs_of_block(alignment.b_runs, b_block))
         found.append(Difference(a_frames, b_frames,
-                                "replaced" if a_block and b_block else "removed" if a_block else "added"))
+                                "replaced" if a_block and b_block else "removed" if a_block else "added",
+                                bits))
     return found
+
+
+def _runs_of_block(runs: list[Run], block: _Block) -> list[Run]:
+    out, index = [], block.run
+    while index < len(runs) and runs[index].start < block.frames.end:
+        out.append(runs[index])
+        index += 1
+    return out
 
 
 def compare_editions(db_path: str, edition_a: str,
@@ -654,12 +701,37 @@ class Row:
     kind: str
     a: Frames
     b: Frames
+    bits: tuple[tuple[int, int], ...] = ()
 
     @classmethod
-    def of(cls, item: Difference | Move) -> "Row":
+    def of(cls, item: Difference | Move, same_picture_within: int | None = None) -> list["Row"]:
+        """The rows for one thing reported: one, unless a line is drawn.
+
+        Given how many bits apart is still the same picture, a re-encoding
+        further apart than that is a replacement, and a replacement of the
+        same length whose frames are within it is a re-encoding -- in
+        stretches, where a stretch is some of each.
+        """
         if isinstance(item, Move):
-            return cls("moved", Frames(item.a_start, item.count), Frames(item.b_start, item.count))
-        return cls(item.kind, item.a, item.b)
+            return [cls("moved", Frames(item.a_start, item.count), Frames(item.b_start, item.count))]
+        if same_picture_within is None or item.kind not in ("reencoded", "replaced") or not item.bits:
+            return [cls(item.kind, item.a, item.b, item.bits)]
+        rows, a_at, b_at = [], item.a.start, item.b.start
+        for frames, apart in item.bits:
+            kind = "reencoded" if apart <= same_picture_within else "replaced"
+            if rows and rows[-1].kind == kind:
+                last = rows[-1]
+                rows[-1] = cls(kind, Frames(last.a.start, last.a.count + frames),
+                               Frames(last.b.start, last.b.count + frames), last.bits + ((frames, apart),))
+            else:
+                rows.append(cls(kind, Frames(a_at, frames), Frames(b_at, frames), ((frames, apart),)))
+            a_at += frames
+            b_at += frames
+        return rows
+
+    @property
+    def bits_apart(self) -> int | None:
+        return max((apart for _, apart in self.bits), default=None)
 
     @property
     def size(self) -> int:
@@ -673,20 +745,45 @@ class Row:
         return (self.kind,
                 self.span(self.a), clock(self.a.start),
                 self.span(self.b), clock(self.b.start),
-                length(self.a.count), length(self.b.count))
+                length(self.a.count), length(self.b.count),
+                "—" if self.bits_apart is None else self.bits_apart)
 
     def record(self) -> dict:
         side = lambda frames: {"start": frames.start, "count": frames.count, "time": clock(frames.start)}
-        return {"type": self.kind, "a": side(self.a), "b": side(self.b)}
+        return {"type": self.kind, "a": side(self.a), "b": side(self.b),
+                "bits_apart": self.bits_apart, "bits": [list(stretch) for stretch in self.bits]}
 
 
-HEADERS = ["Type", "A frames", "A at", "B frames", "B at", "A length", "B length"]
+HEADERS = ["Type", "A frames", "A at", "B frames", "B at", "A length", "B length", "Bits apart"]
 
 
-def report(reported: list[Difference | Move]) -> list[Row]:
+def report(reported: list[Difference | Move], same_picture_within: int | None = None) -> list[Row]:
     """Everything reported as rows, smallest first, so what matters most is
-    last on the screen."""
-    return sorted((Row.of(item) for item in reported), key=lambda row: row.size)
+    last on the screen. Given a number of bits, the line between the same
+    picture and another is drawn there rather than where the comparison
+    drew it."""
+    rows = [row for item in reported for row in Row.of(item, same_picture_within)]
+    return sorted(_folded(rows), key=lambda row: row.size)
+
+
+def _folded(rows: list[Row]) -> list[Row]:
+    """Rows of one kind that touch on both sides, run together.
+
+    Drawing the line elsewhere than the comparison did can leave a
+    replacement beside a re-encoding beside another replacement, all of
+    one frame; where they are now the same kind they are one stretch.
+    """
+    out: list[Row] = []
+    for row in sorted(rows, key=lambda row: (row.a.start, row.b.start)):
+        last = out[-1] if out else None
+        if (last and row.kind == last.kind and row.kind in ("reencoded", "replaced")
+                and last.a.end == row.a.start and last.b.end == row.b.start
+                and (row.kind == "reencoded" or (last.bits and row.bits))):
+            out[-1] = Row(row.kind, Frames(last.a.start, last.a.count + row.a.count),
+                          Frames(last.b.start, last.b.count + row.b.count), _stretches(last.bits + row.bits))
+        else:
+            out.append(row)
+    return out
 
 
 def configure_parser(parser: argparse.ArgumentParser) -> None:
@@ -710,6 +807,12 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
                         help="Seconds of footage to keep either side of a clip (default: 5)")
     parser.add_argument("--json", action="store_true",
                         help="Print what was reported as JSON as well, one record per row")
+    parser.add_argument("--link-within", type=int, default=perceptual_match_threshold, metavar="BITS",
+                        help="Picture hashes this many bits apart or fewer are the same picture when "
+                             "the editions are lined up (default: %(default)s)")
+    parser.add_argument("--same-picture-within", type=int, default=None, metavar="BITS",
+                        help="Draw the line between re-encoded and replaced footage here in the report, "
+                             "which may be tighter or looser than --link-within (default: the same)")
     parser.add_argument("--no-trim", action="store_true",
                         help="Do not copy out the stretches of video, even when both videos are given")
     parser.add_argument("--no-frames", action="store_true",
@@ -722,9 +825,12 @@ def run(args: argparse.Namespace) -> None:
     label_a = args.label_a or args.edition_a
     label_b = args.label_b or args.edition_b
 
+    global perceptual_match_threshold
+    perceptual_match_threshold = args.link_within
+
     print()
     reported = compare_editions(args.db, args.edition_a, args.edition_b)
-    rows = report(reported)
+    rows = report(reported, args.same_picture_within)
 
     kinds = Counter(row.kind for row in rows)
     print(f"Count ({len(rows)}): " + ", ".join(
@@ -732,7 +838,7 @@ def run(args: argparse.Namespace) -> None:
         for kind in ("added", "removed", "replaced", "reencoded", "retimed", "moved") if kinds[kind]))
     print()
     print(tabulate([row.cells() for row in rows], headers=HEADERS, tablefmt="github",
-                   colalign=("left", "right", "right", "right", "right", "right", "right")))
+                   colalign=("left", "right", "right", "right", "right", "right", "right", "right")))
 
     if args.json:
         print(json.dumps([row.record() for row in rows]))
