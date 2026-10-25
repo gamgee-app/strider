@@ -95,9 +95,11 @@ def film_bars(cap, samples: int = 60) -> tuple[int, int]:
             continue
         top, bottom, _, _ = bars_counted(grey)
         height = grey.shape[0]
-        if 0 < top < height // 4:
+        # No bar is a count like any other: a film cropped to its picture
+        # has none, and a few dark frames must not outvote it.
+        if top < height // 4:
             tops.append(top)
-        if 0 < bottom < height // 4:
+        if bottom < height // 4:
             bottoms.append(bottom)
     mode = lambda counts: max(set(counts), key=counts.count) if counts else 0
     return mode(tops), mode(bottoms)

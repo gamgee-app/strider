@@ -9,7 +9,7 @@ import pytest
 
 from movie_edition_comparer.algorithms import hash_md5
 from movie_edition_comparer.average_video import average_stretches, share
-from movie_edition_comparer.pictures import Letterbox, averages_of, bars_counted, block_averages
+from movie_edition_comparer.pictures import Letterbox, averages_of, bars_counted, block_averages, film_bars
 from movie_edition_comparer.db import create_database, create_pictures_table, pictures_missing, write_frames
 
 W, H = 384, 216                # a 4K frame at a tenth of the size
@@ -82,6 +82,32 @@ class TestShare:
 
     def test_of_nothing_is_nothing(self):
         assert share([], 4) == []
+
+
+class Film:
+    """A video that seeks exactly, for sampling the film's bars."""
+
+    def __init__(self, frames):
+        self.frames, self.position = frames, 0
+
+    def get(self, prop):
+        return len(self.frames)
+
+    def set(self, prop, value):
+        self.position = int(value)
+
+    def read(self):
+        return True, self.frames[self.position]
+
+
+class TestFilmBars:
+    def test_are_the_commonest_bars_of_the_lit_frames(self):
+        assert film_bars(Film([letterboxed(i) for i in range(60)])) == FILM
+
+    def test_of_a_film_cropped_to_its_picture_are_none_whatever_a_dark_frame_says(self):
+        frames = [letterboxed(i, 0, 0) for i in range(60)]
+        frames[30] = letterboxed(30, 12, 0)
+        assert film_bars(Film(frames)) == (0, 0)
 
 
 class Video:
