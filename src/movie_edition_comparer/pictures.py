@@ -121,18 +121,14 @@ def picture_of(frame: ndarray, cut: tuple[int, int, int, int]) -> ndarray:
     return frame[top:frame.shape[0] - bottom, left:frame.shape[1] - right]
 
 
-def average_frame(frame: ndarray, letterbox: Letterbox) -> tuple[tuple, tuple[int, int, int, int], bytes]:
-    """A frame's bars counted, where it is cut, and its block averages."""
-    counted = bars_counted(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
-    cut = letterbox.cut(counted)
-    return counted, cut, block_averages(picture_of(frame, cut))
+def cut_frame(frame: ndarray, letterbox: Letterbox) -> ndarray:
+    """The picture between a frame's bars, cut where the letterbox says."""
+    return picture_of(frame, letterbox.cut(bars_counted(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))))
 
 
-def picture_row(index: int, frame: ndarray, letterbox: Letterbox) -> tuple:
-    """A frame's picture as the database keeps it: its index, the bars cut,
-    the bars counted, and its block averages."""
-    counted, cut, averages = average_frame(frame, letterbox)
-    return (index, *cut, *counted, averages)
+def picture_row(index: int, picture: ndarray) -> tuple:
+    """A frame's picture as the database keeps it: its index and its block averages."""
+    return index, block_averages(picture)
 
 
 def letterbox_of(cap) -> "Letterbox | None":

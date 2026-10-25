@@ -7,7 +7,7 @@ import pytest
 
 from movie_edition_comparer.compare_hashes import Frame, read_frames
 from movie_edition_comparer.db import (
-    create_database, landmarks_near, write_chapters, write_frames,
+    create_database, landmarks_near, write_chapters, write_frames, write_pictures,
 )
 
 
@@ -50,6 +50,29 @@ def test_creating_the_database_again_keeps_what_is_in_it(tmp_path):
         assert connection.execute(
             "SELECT edition, start_time, title FROM chapters").fetchall() == [
             ("extended", "00:00:00.000", "Prologue")]
+
+
+def test_a_database_that_kept_the_bars_keeps_only_its_averages(tmp_path):
+    path = str(tmp_path / "film.db")
+    with closing(sqlite3.connect(path)) as connection:
+        connection.execute("""
+            CREATE TABLE frame_pictures (
+                edition TEXT NOT NULL, frame_index INTEGER NOT NULL,
+                top INTEGER NOT NULL, bottom INTEGER NOT NULL, left INTEGER NOT NULL, right INTEGER NOT NULL,
+                top_counted INTEGER NOT NULL, bottom_counted INTEGER NOT NULL,
+                left_counted INTEGER NOT NULL, right_counted INTEGER NOT NULL,
+                block_averages BLOB NOT NULL,
+                PRIMARY KEY (edition, frame_index))
+        """)
+        connection.execute("INSERT INTO frame_pictures VALUES ('theatrical', 0, 3, 3, 0, 0, 4, 3, 0, 0, x'0102')")
+        connection.commit()
+    create_database(path)
+    with closing(sqlite3.connect(path)) as connection:
+        write_pictures(connection, "theatrical", [(1, b"\x03\x04")])
+        assert [row[1] for row in connection.execute("PRAGMA table_info(frame_pictures)")] == [
+            "edition", "frame_index", "block_averages"]
+        assert connection.execute("SELECT * FROM frame_pictures ORDER BY frame_index").fetchall() == [
+            ("theatrical", 0, b"\x01\x02"), ("theatrical", 1, b"\x03\x04")]
 
 
 class TestLandmarksNear:

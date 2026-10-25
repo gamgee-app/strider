@@ -4,8 +4,11 @@ Hashing a film takes hours, so it picks up where it left off: the frames
 already in the database are not read again. Seeking a video is not exact,
 so where it left off is found by the frames around it rather than trusted.
 
-Each frame's picture is measured as it is hashed: its black bars found and
-cut, and its block averages kept, so that the film is read once for both.
+Each frame's picture is found between its black bars as it is hashed. The
+picture hashes are of that picture, not the bars, and its block averages are
+kept too, so that the film is read once for both. The pixel hash is of the
+whole frame, as the decoder gives it, since that is what finds a frame again
+after seeking.
 """
 
 import argparse
@@ -25,7 +28,7 @@ from movie_edition_comparer.algorithms import PICTURE_HASHES, hash_md5
 from movie_edition_comparer.db import (
     create_database, landmarks_near, last_frame_hashed, write_chapters, write_frames, write_pictures,
 )
-from movie_edition_comparer.pictures import Letterbox, letterbox_of, picture_row
+from movie_edition_comparer.pictures import Letterbox, cut_frame, letterbox_of, picture_row
 
 # Frames hashed between one commit and the next.
 BATCH_SIZE = 10_000
@@ -34,16 +37,24 @@ BATCH_SIZE = 10_000
 MAX_SEEK_ERROR = 5
 
 
-def hash_frame(index: int, frame: ndarray, hashes: dict = PICTURE_HASHES) -> tuple:
+def hash_frame(index: int, frame: ndarray, hashes: dict = PICTURE_HASHES,
+               picture: ndarray | None = None) -> tuple:
     """The frame's index, its pixel hash, and the picture hashes asked for,
-    in the order the database keeps them; one not asked for is left empty."""
+    in the order the database keeps them; one not asked for is left empty.
+    The picture hashes are of the picture given, or the whole frame if none is."""
+    picture = frame if picture is None else picture
     return (index, hash_md5(frame),
-            *(hashing(frame) if name in hashes else None for name, hashing in PICTURE_HASHES.items()))
+            *(hashing(picture) if name in hashes else None for name, hashing in PICTURE_HASHES.items()))
 
 
-def measure_frame(index: int, frame: ndarray, hashes: dict, letterbox: Letterbox | None) -> tuple:
-    """A frame's hashes, and its picture when a letterbox is given to find it by."""
-    return hash_frame(index, frame, hashes), (picture_row(index, frame, letterbox) if letterbox else None)
+def measure_frame(index: int, frame: ndarray, hashes: dict, letterbox: Letterbox | None,
+                  averages: bool) -> tuple:
+    """A frame's hashes, of its picture cut from its bars when there is a
+    letterbox to cut it by, and that picture's row when averages are kept."""
+    if letterbox is None:
+        return hash_frame(index, frame, hashes), None
+    picture = cut_frame(frame, letterbox)
+    return hash_frame(index, frame, hashes, picture), (picture_row(index, picture) if averages else None)
 
 
 # --- chapters ----------------------------------------------------------------
@@ -147,14 +158,13 @@ def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers
 
     # The film's own letterbox, found from frames sampled through it, on a
     # capture of its own so that the one hashing is not moved.
-    letterbox = None
+    sampler = cv2.VideoCapture(video_path)
+    letterbox = letterbox_of(sampler)
+    sampler.release()
+    if letterbox:
+        print(f"The film's letterbox is {letterbox.default[0]} rows at the top and "
+              f"{letterbox.default[1]} at the bottom", flush=True)
     if averages:
-        sampler = cv2.VideoCapture(video_path)
-        letterbox = letterbox_of(sampler)
-        sampler.release()
-        if letterbox:
-            print(f"The film's letterbox is {letterbox.default[0]} rows at the top and "
-                  f"{letterbox.default[1]} at the bottom", flush=True)
         if resume_from and pictured < resume_from:
             print(f"{resume_from - pictured} frames already hashed have no block averages; "
                   f"strider average fills them in", flush=True)
@@ -186,7 +196,7 @@ def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers
                 if not ret:
                     break
 
-                futures.append(executor.submit(measure_frame, frame_index, frame, hashes, letterbox))
+                futures.append(executor.submit(measure_frame, frame_index, frame, hashes, letterbox, averages))
                 if len(futures) == BATCH_SIZE:
                     _commit(connection, edition, futures)
                     futures = []
@@ -214,7 +224,7 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--threads', default=os.cpu_count() or 4, type=int,
                         help="Number of threads to hash on (default: every core)")
     parser.add_argument('--no-averages', action='store_true',
-                        help="Do not find each frame's picture between its bars and keep its block averages "
+                        help="Do not keep each frame's block averages "
                              "(strider average can add them later, reading the film again)")
     parser.add_argument('--hashes', default=",".join(PICTURE_HASHES), metavar="NAMES",
                         help="Which picture hashes to compute, comma-separated, of "

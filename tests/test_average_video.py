@@ -120,16 +120,16 @@ class TestAveraging:
 
     def stored(self, path):
         with closing(sqlite3.connect(path)) as connection:
-            return connection.execute("SELECT frame_index, top, bottom, block_averages FROM frame_pictures "
+            return connection.execute("SELECT frame_index, block_averages FROM frame_pictures "
                                       "WHERE edition = 'theatrical' ORDER BY frame_index").fetchall()
 
-    def test_keeps_every_frames_cut_and_averages(self, tmp_path):
+    def test_keeps_every_frames_averages_of_its_cut_picture(self, tmp_path):
         path = hashed(FRAMES, tmp_path)
         average_stretches(Video(FRAMES), [(0, 40)], path, "theatrical", self.letterbox, seek)
         rows = self.stored(path)
         assert [r[0] for r in rows] == list(range(40))
-        assert {(r[1], r[2]) for r in rows[:30]} == {FILM} and {(r[1], r[2]) for r in rows[30:]} == {(0, 0)}
-        assert rows[7][3] == block_averages(FRAMES[7][28:H - 28])
+        assert rows[7][1] == block_averages(FRAMES[7][28:H - 28])
+        assert rows[35][1] == block_averages(FRAMES[35]), "a frame with no bars is not cut"
 
     def test_a_second_run_reads_only_what_is_missing(self, tmp_path):
         path = hashed(FRAMES, tmp_path)

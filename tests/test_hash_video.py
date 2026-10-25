@@ -77,7 +77,9 @@ class TestSeekTo:
 
 class TestResuming:
     def hash_video_with(self, cap, path, monkeypatch):
-        monkeypatch.setattr(hash_video.cv2, "VideoCapture", lambda _: cap)
+        # The letterbox is sampled on a capture of its own, before the one that hashes.
+        made = iter([Capture(cap.values), cap])
+        monkeypatch.setattr(hash_video.cv2, "VideoCapture", lambda _: next(made))
         hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=2, hashes=ONE, averages=False)
 
     def test_hashes_every_frame_of_a_fresh_edition(self, tmp_path, monkeypatch):
@@ -139,7 +141,9 @@ class TestBatches:
     the first margin, with the seek to place."""
 
     def hash_video_with(self, cap, path, monkeypatch):
-        monkeypatch.setattr(hash_video.cv2, "VideoCapture", lambda _: cap)
+        # The letterbox is sampled on a capture of its own, before the one that hashes.
+        made = iter([Capture(cap.values), cap])
+        monkeypatch.setattr(hash_video.cv2, "VideoCapture", lambda _: next(made))
         hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=4, hashes=ONE, averages=False)
 
     def test_a_crash_keeps_every_batch_committed_before_it(self, tmp_path, monkeypatch):
@@ -192,7 +196,7 @@ class TestPictures:
 
     def stored(self, path):
         with closing(sqlite3.connect(path)) as connection:
-            return connection.execute("SELECT frame_index, top, bottom, block_averages FROM frame_pictures "
+            return connection.execute("SELECT frame_index, block_averages FROM frame_pictures "
                                       "WHERE edition = 'theatrical' ORDER BY frame_index").fetchall()
 
     def test_every_frame_hashed_has_its_picture(self, tmp_path, monkeypatch):
@@ -201,8 +205,7 @@ class TestPictures:
         self.hash_video_with([Letterboxed(DISTINCT), video], path, monkeypatch)
         rows = self.stored(path)
         assert [r[0] for r in rows] == list(range(60))
-        assert {(r[1], r[2]) for r in rows} == {(3, 3)}, "cut at the film's own bars"
-        assert rows[17][3] == block_averages(video.frame_at(DISTINCT[17])[3:21])
+        assert rows[17][1] == block_averages(video.frame_at(DISTINCT[17])[3:21]), "cut at the film's own bars"
         assert video.reads == 60, "the film read once, for hashes and pictures both"
 
     def test_a_resumed_run_carries_on_the_pictures_too(self, tmp_path, monkeypatch):
@@ -217,7 +220,18 @@ class TestPictures:
 
     def test_none_are_kept_when_turned_off(self, tmp_path, monkeypatch):
         path = hashed(DISTINCT, 0, tmp_path)
-        self.hash_video_with([Letterboxed(DISTINCT)], path, monkeypatch, averages=False)
+        self.hash_video_with([Letterboxed(DISTINCT), Letterboxed(DISTINCT)], path, monkeypatch, averages=False)
         assert self.stored(path) == []
         assert [f.index for f in read_frames(path, "theatrical")] == list(range(60))
+
+    @pytest.mark.parametrize("averages", [True, False])
+    def test_the_picture_is_hashed_without_its_bars(self, tmp_path, monkeypatch, averages):
+        path = hashed(DISTINCT, 0, tmp_path)
+        video = Letterboxed(DISTINCT)
+        self.hash_video_with([Letterboxed(DISTINCT), video], path, monkeypatch, averages=averages)
+        whole = video.frame_at(DISTINCT[17])
+        stored = read_frames(path, "theatrical")[17]
+        assert stored.picture_hash == ONE["block_mean_0"](whole[3:21])
+        assert stored.picture_hash != ONE["block_mean_0"](whole)
+        assert stored.data_hash == hash_md5(whole), "the pixel hash is of the whole frame, to seek by"
 

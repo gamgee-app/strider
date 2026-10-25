@@ -28,7 +28,7 @@ def _write(path: str, a_frames: list[tuple], b_frames: list[tuple]) -> None:
             write_frames(connection, edition,
                          [(i, md5, perceptual) for i, (md5, perceptual, _) in enumerate(frames)])
             write_pictures(connection, edition,
-                           [(i, 0, 0, 0, 0, 0, 0, 0, 0, averages) for i, (_, _, averages) in enumerate(frames)])
+                           [(i, averages) for i, (_, _, averages) in enumerate(frames)])
         connection.commit()
 
 

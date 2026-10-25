@@ -29,7 +29,7 @@ from movie_edition_comparer.algorithms import hash_md5
 from movie_edition_comparer.db import (
     create_database, create_pictures_table, frame_count_hashed, pictures_missing, write_pictures,
 )
-from movie_edition_comparer.pictures import Letterbox, film_bars, picture_row
+from movie_edition_comparer.pictures import Letterbox, cut_frame, film_bars, picture_row
 
 # Frames averaged between one commit and the next, for each reader.
 BATCH_SIZE = 2_000
@@ -86,7 +86,7 @@ def average_stretches(cap, stretches: list[tuple[int, int]], db_path: str, editi
                 if index in md5_at and hash_md5(frame) != md5_at[index]:
                     raise RuntimeError(f"{edition}: frame {index} is not the frame hashed there; "
                                        f"the reader has lost its place")
-                rows.append(picture_row(index, frame, letterbox))
+                rows.append(picture_row(index, cut_frame(frame, letterbox)))
                 if len(rows) == BATCH_SIZE:
                     write_pictures(connection, edition, rows)
                     connection.commit()

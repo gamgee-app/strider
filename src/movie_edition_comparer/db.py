@@ -15,6 +15,9 @@ from movie_edition_comparer.algorithms import PICTURE_HASHES
 # first is the one the comparison goes by, and the only one a frame must have.
 PICTURE_COLUMNS = [f"hash_{name}" for name in PICTURE_HASHES]
 
+# Where each frame's bars were counted and cut, once kept beside its averages.
+BAR_COLUMNS = [f"{side}{kept}" for kept in ("", "_counted") for side in ("top", "bottom", "left", "right")]
+
 
 def create_database(db_path: str) -> None:
     db_dir = os.path.dirname(db_path)
@@ -120,37 +123,29 @@ def landmarks_near(db_path: str, edition: str, centre: int,
 # --- pictures ----------------------------------------------------------------
 
 def create_pictures_table(connection: sqlite3.Connection) -> None:
-    """Each frame's picture: where its black bars were cut, and its block averages.
-
-    The bars are kept both as counted and as cut, since a dark picture counts
-    as more bar than it has and is cut as its neighbours were. The block
-    averages are those of the picture between the bars cut, 16 by 16 blocks
-    of it in grey, each kept as the sum of the block's 256 pixels so that no
-    rounding is done: divide by 256 for the average.
+    """Each frame's block averages: those of the picture between its black
+    bars, 16 by 16 blocks of it in grey, each kept as the sum of the block's
+    256 pixels so that no rounding is done: divide by 256 for the average.
     """
     connection.execute("""
         CREATE TABLE IF NOT EXISTS frame_pictures (
             edition TEXT NOT NULL,
             frame_index INTEGER NOT NULL,
-            top INTEGER NOT NULL,
-            bottom INTEGER NOT NULL,
-            left INTEGER NOT NULL,
-            right INTEGER NOT NULL,
-            top_counted INTEGER NOT NULL,
-            bottom_counted INTEGER NOT NULL,
-            left_counted INTEGER NOT NULL,
-            right_counted INTEGER NOT NULL,
             block_averages BLOB NOT NULL,
             PRIMARY KEY (edition, frame_index)
         )
     """)
+    # A database from when the bars were kept too loses them, not its averages.
+    present = {row[1] for row in connection.execute("PRAGMA table_info(frame_pictures)")}
+    for column in BAR_COLUMNS:
+        if column in present:
+            connection.execute(f"ALTER TABLE frame_pictures DROP COLUMN {column}")
 
 
 def write_pictures(connection: sqlite3.Connection, edition: str, pictures: list[tuple]) -> None:
-    """Pictures of one edition, each as (frame_index, the bars cut as top,
-    bottom, left, right, the bars counted likewise, block averages)."""
+    """Pictures of one edition, each as (frame_index, block averages)."""
     connection.executemany(
-        "INSERT OR REPLACE INTO frame_pictures VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT OR REPLACE INTO frame_pictures (edition, frame_index, block_averages) VALUES (?, ?, ?)",
         [(edition, *picture) for picture in pictures])
 
 
