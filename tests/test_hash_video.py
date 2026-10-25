@@ -1,6 +1,7 @@
 """Hashing picks up where it left off, and lands on the right frame doing so."""
 
 import sqlite3
+import time
 from contextlib import closing
 
 import numpy as np
@@ -81,6 +82,20 @@ class TestResuming:
         made = iter([Capture(cap.values), cap])
         monkeypatch.setattr(hash_video.cv2, "VideoCapture", lambda _: next(made))
         hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=2, hashes=ONE, averages=False)
+
+    def test_reads_no_further_ahead_of_the_hashing_than_it_may(self, tmp_path, monkeypatch):
+        path = hashed(DISTINCT, 0, tmp_path)
+        video, measured, ahead = Capture(DISTINCT), [], []
+        measure = hash_video.measure_frame
+        def slowly(index, frame, *rest):
+            ahead.append(video.position - len(measured))
+            time.sleep(0.002)
+            measured.append(index)
+            return measure(index, frame, *rest)
+        monkeypatch.setattr(hash_video, "measure_frame", slowly)
+        self.hash_video_with(video, path, monkeypatch)
+        assert len(measured) == 60
+        assert max(ahead) <= 2 * hash_video.IN_FLIGHT_PER_WORKER + 1, "two threads, each with its frames waiting"
 
     def test_hashes_every_frame_of_a_fresh_edition(self, tmp_path, monkeypatch):
         path = hashed(DISTINCT, 0, tmp_path)

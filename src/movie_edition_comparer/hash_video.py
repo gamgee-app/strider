@@ -33,6 +33,15 @@ from movie_edition_comparer.pictures import Letterbox, cut_frame, letterbox_of, 
 # Frames hashed between one commit and the next.
 BATCH_SIZE = 10_000
 
+# Frames read but not yet hashed, for each thread hashing them. Reading does
+# not wait for hashing otherwise, and a 4K frame is 25 MB: with the hashing
+# behind, a batch's worth of frames would sit in memory.
+IN_FLIGHT_PER_WORKER = 4
+
+# How long a commit waits on another run writing to the same database: every
+# edition of a film goes in the one file, and they may be hashed at once.
+LOCK_TIMEOUT = 600
+
 # How far a seek is allowed to land from where it was asked to, either way.
 MAX_SEEK_ERROR = 5
 
@@ -186,7 +195,7 @@ def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers
     # spend more time meeting than hashing.
     cv2.setNumThreads(1)
 
-    with (closing(sqlite3.connect(db_path)) as connection,
+    with (closing(sqlite3.connect(db_path, timeout=LOCK_TIMEOUT)) as connection,
           ThreadPoolExecutor(max_workers=workers) as executor):
 
         futures = []
@@ -196,6 +205,8 @@ def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers
                 if not ret:
                     break
 
+                if len(futures) >= workers * IN_FLIGHT_PER_WORKER:
+                    futures[-workers * IN_FLIGHT_PER_WORKER].result()
                 futures.append(executor.submit(measure_frame, frame_index, frame, hashes, letterbox, averages))
                 if len(futures) == BATCH_SIZE:
                     _commit(connection, edition, futures)
