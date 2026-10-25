@@ -9,6 +9,10 @@ picture hashes are of that picture, not the bars, and its block averages are
 kept too, so that the film is read once for both. The pixel hash is of the
 whole frame, as the decoder gives it, since that is what finds a frame again
 after seeking.
+
+A PQ HDR video can be hashed a second way in the same pass: each picture
+taken to SDR by tone.py's curve, into an edition of its own. The two editions
+share their pixel hashes and are committed together, so they resume together.
 """
 
 import argparse
@@ -29,6 +33,7 @@ from movie_edition_comparer.db import (
     create_database, landmarks_near, last_frame_hashed, write_chapters, write_frames, write_pictures,
 )
 from movie_edition_comparer.pictures import Letterbox, cut_frame, letterbox_of, picture_row
+from movie_edition_comparer.tone import HDR_TO_SDR
 
 # Frames hashed between one commit and the next.
 BATCH_SIZE = 10_000
@@ -57,13 +62,16 @@ def hash_frame(index: int, frame: ndarray, hashes: dict = PICTURE_HASHES,
 
 
 def measure_frame(index: int, frame: ndarray, hashes: dict, letterbox: Letterbox | None,
-                  averages: bool) -> tuple:
+                  averages: bool, tone_map: ndarray | None = None) -> tuple:
     """A frame's hashes, of its picture cut from its bars when there is a
-    letterbox to cut it by, and that picture's row when averages are kept."""
-    if letterbox is None:
-        return hash_frame(index, frame, hashes), None
-    picture = cut_frame(frame, letterbox)
-    return hash_frame(index, frame, hashes, picture), (picture_row(index, picture) if averages else None)
+    letterbox to cut it by, and that picture's row when averages are kept;
+    then the same again of the picture through the tone map, if one is given."""
+    picture = frame if letterbox is None else cut_frame(frame, letterbox)
+    def measured(picture):
+        return hash_frame(index, frame, hashes, picture), (picture_row(index, picture) if averages else None)
+    if tone_map is None:
+        return measured(picture), None
+    return measured(picture), measured(cv2.LUT(picture, tone_map))
 
 
 # --- chapters ----------------------------------------------------------------
@@ -158,11 +166,17 @@ def _read_hashing(cap, count: int) -> list[str | None]:
 # --- hashing -----------------------------------------------------------------
 
 def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers: int,
-                            hashes: dict = PICTURE_HASHES, averages: bool = True) -> None:
+                            hashes: dict = PICTURE_HASHES, averages: bool = True,
+                            tone_mapped_edition: str | None = None) -> None:
     with closing(sqlite3.connect(db_path)) as connection:
         last = last_frame_hashed(connection, edition)
         pictured = connection.execute(
             "SELECT COUNT(*) FROM frame_pictures WHERE edition = ?", (edition,)).fetchone()[0]
+        if tone_mapped_edition:
+            last_mapped = last_frame_hashed(connection, tone_mapped_edition)
+            if last_mapped != last:
+                raise SystemExit(f"{edition} is hashed to frame {last} and {tone_mapped_edition} to {last_mapped}; "
+                                 f"they are hashed together, so they must stand at the same frame")
     resume_from = 0 if last is None else last + 1
 
     # The film's own letterbox, found from frames sampled through it, on a
@@ -206,23 +220,50 @@ def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers
 
                 if len(futures) >= workers * IN_FLIGHT_PER_WORKER:
                     futures[-workers * IN_FLIGHT_PER_WORKER].result()
-                futures.append(executor.submit(measure_frame, frame_index, frame, hashes, letterbox, averages))
+                futures.append(executor.submit(measure_frame, frame_index, frame, hashes, letterbox, averages,
+                                               HDR_TO_SDR if tone_mapped_edition else None))
                 if len(futures) == BATCH_SIZE:
-                    _commit(connection, edition, futures)
+                    _commit(connection, edition, tone_mapped_edition, futures)
                     futures = []
                 bar.next()
 
         if futures:
-            _commit(connection, edition, futures)
+            _commit(connection, edition, tone_mapped_edition, futures)
 
     cap.release()
 
 
-def _commit(connection: sqlite3.Connection, edition: str, futures) -> None:
+def _commit(connection: sqlite3.Connection, edition: str, tone_mapped_edition: str | None, futures) -> None:
     measured = [future.result() for future in futures]
-    write_frames(connection, edition, [hashed for hashed, _ in measured])
-    write_pictures(connection, edition, [picture for _, picture in measured if picture])
+    for name, which in ((edition, 0), (tone_mapped_edition, 1)):
+        if name:
+            write_frames(connection, name, [m[which][0] for m in measured])
+            write_pictures(connection, name, [m[which][1] for m in measured if m[which][1]])
     connection.commit()
+
+
+# --- HDR ---------------------------------------------------------------------
+
+def transfer_of(video_path: str) -> str | None:
+    """The video stream's transfer characteristic as ffprobe names it:
+    smpte2084 for PQ HDR, bt709 for most SDR, None when not given."""
+    result = subprocess.run(
+        ["ffprobe", "-v", "quiet", "-select_streams", "v:0", "-print_format", "json",
+         "-show_entries", "stream=color_transfer", video_path],
+        capture_output=True, text=True)
+    if result.returncode != 0:
+        return None
+    streams = json.loads(result.stdout or "{}").get("streams", [])
+    return streams[0].get("color_transfer") if streams else None
+
+
+def tone_mapped_edition_for(video_path: str, name: str | None) -> str | None:
+    """The edition to hash the tone mapped pictures into: the one asked for,
+    if the video is PQ HDR; otherwise none, since an SDR video needs no curve."""
+    if name and transfer_of(video_path) != "smpte2084":
+        print(f"Not PQ HDR, so {name} is not hashed", flush=True)
+        return None
+    return name
 
 
 # --- command -----------------------------------------------------------------
@@ -236,6 +277,9 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--no-averages', action='store_true',
                         help="Do not keep each frame's block averages "
                              "(strider average can add them later, reading the film again)")
+    parser.add_argument('--tone-mapped-edition', metavar="NAME",
+                        help="If the video is PQ HDR, also hash each picture taken to SDR by one fixed curve "
+                             "into this edition, in the same pass (e.g. theatrical_tonemapped)")
     parser.add_argument('--hashes', default=",".join(PICTURE_HASHES), metavar="NAMES",
                         help="Which picture hashes to compute, comma-separated, of "
                              + ", ".join(PICTURE_HASHES) + " (default: all)")
@@ -246,17 +290,21 @@ def run(args: argparse.Namespace) -> None:
 
     create_database(args.db)
 
+    tone_mapped = tone_mapped_edition_for(args.video, args.tone_mapped_edition)
+
     chapters = chapters_of(args.video)
     if chapters:
-        with closing(sqlite3.connect(args.db)) as connection:
-            write_chapters(connection, args.edition, chapters)
+        with closing(sqlite3.connect(args.db, timeout=LOCK_TIMEOUT)) as connection:
+            for edition in filter(None, (args.edition, tone_mapped)):
+                write_chapters(connection, edition, chapters)
             connection.commit()
         print(f"{len(chapters)} chapters")
 
     wanted = {name: PICTURE_HASHES[name] for name in args.hashes.split(",")}
     if "block_mean_0" not in wanted:
         raise SystemExit("block_mean_0 is the hash the comparison goes by; every frame must have it")
-    hash_video_frames_to_db(args.video, args.db, args.edition, args.threads, wanted, averages=not args.no_averages)
+    hash_video_frames_to_db(args.video, args.db, args.edition, args.threads, wanted,
+                            averages=not args.no_averages, tone_mapped_edition=tone_mapped)
 
     print(f"Took {datetime.now() - start_time}")
 

@@ -4,6 +4,7 @@ import sqlite3
 import time
 from contextlib import closing
 
+import cv2
 import numpy as np
 import pytest
 
@@ -14,6 +15,7 @@ from movie_edition_comparer.db import create_database, write_frames
 from movie_edition_comparer.hash_video import _seek_to, hash_frame, seek_error
 from movie_edition_comparer.algorithms import PICTURE_HASHES
 from movie_edition_comparer.pictures import block_averages
+from movie_edition_comparer.tone import HDR_TO_SDR
 
 # The one hash the comparison goes by; the others take a while on thousands of frames.
 ONE = {"block_mean_0": PICTURE_HASHES["block_mean_0"]}
@@ -204,15 +206,16 @@ class Letterboxed(Capture):
 class TestPictures:
     """Each frame's picture is measured as it is hashed, so the film is read once."""
 
-    def hash_video_with(self, caps, path, monkeypatch, averages=True):
+    def hash_video_with(self, caps, path, monkeypatch, averages=True, tone_mapped_edition=None):
         made = iter(caps)
         monkeypatch.setattr(hash_video.cv2, "VideoCapture", lambda _: next(made))
-        hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=2, hashes=ONE, averages=averages)
+        hash_video.hash_video_frames_to_db("film.mkv", path, "theatrical", workers=2, hashes=ONE, averages=averages,
+                                           tone_mapped_edition=tone_mapped_edition)
 
-    def stored(self, path):
+    def stored(self, path, edition="theatrical"):
         with closing(sqlite3.connect(path)) as connection:
             return connection.execute("SELECT frame_index, block_averages FROM frame_pictures "
-                                      "WHERE edition = 'theatrical' ORDER BY frame_index").fetchall()
+                                      "WHERE edition = ? ORDER BY frame_index", (edition,)).fetchall()
 
     def test_every_frame_hashed_has_its_picture(self, tmp_path, monkeypatch):
         path = hashed(DISTINCT, 0, tmp_path)
@@ -250,3 +253,33 @@ class TestPictures:
         assert stored.picture_hash != ONE["block_mean_0"](whole)
         assert stored.data_hash == hash_md5(whole), "the pixel hash is of the whole frame, to seek by"
 
+
+
+class TestToneMapped:
+    """A PQ HDR video is also hashed through the HDR to SDR curve, into an edition of its own, in the same pass."""
+
+    hash_video_with = TestPictures.hash_video_with
+    stored = TestPictures.stored
+
+    def test_is_hashed_alongside_with_the_same_pixel_hashes(self, tmp_path, monkeypatch):
+        path = hashed(DISTINCT, 0, tmp_path)
+        video = Letterboxed(DISTINCT)
+        self.hash_video_with([Letterboxed(DISTINCT), video], path, monkeypatch, tone_mapped_edition="theatrical_tonemapped")
+        raw, mapped = read_frames(path, "theatrical"), read_frames(path, "theatrical_tonemapped")
+        assert [f.index for f in mapped] == list(range(60))
+        assert [f.data_hash for f in mapped] == [f.data_hash for f in raw]
+        picture = video.frame_at(DISTINCT[17])[3:21]
+        assert raw[17].picture_hash == ONE["block_mean_0"](picture)
+        assert mapped[17].picture_hash == ONE["block_mean_0"](cv2.LUT(picture, HDR_TO_SDR))
+        assert self.stored(path, "theatrical_tonemapped")[17][1] == block_averages(cv2.LUT(picture, HDR_TO_SDR))
+
+    def test_will_not_resume_out_of_step_with_the_edition_it_goes_with(self, tmp_path, monkeypatch):
+        path = hashed(DISTINCT, 40, tmp_path)
+        with pytest.raises(SystemExit, match="same frame"):
+            self.hash_video_with([Letterboxed(DISTINCT)], path, monkeypatch, tone_mapped_edition="theatrical_tonemapped")
+
+    def test_is_hashed_only_from_a_pq_video(self, monkeypatch):
+        monkeypatch.setattr(hash_video, "transfer_of", lambda _: "bt709")
+        assert hash_video.tone_mapped_edition_for("film.mkv", "theatrical_tonemapped") is None
+        monkeypatch.setattr(hash_video, "transfer_of", lambda _: "smpte2084")
+        assert hash_video.tone_mapped_edition_for("film.mkv", "theatrical_tonemapped") == "theatrical_tonemapped"
