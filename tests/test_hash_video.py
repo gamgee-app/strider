@@ -99,6 +99,11 @@ class TestResuming:
         assert len(measured) == 60
         assert max(ahead) <= 2 * hash_video.IN_FLIGHT_PER_WORKER + 1, "two threads, each with its frames waiting"
 
+    def test_a_video_that_cannot_be_read_is_an_error_not_hashed(self, tmp_path, monkeypatch):
+        path = hashed(DISTINCT, 0, tmp_path)
+        with pytest.raises(SystemExit, match="Cannot read"):
+            self.hash_video_with(Capture([]), path, monkeypatch)
+
     def test_hashes_every_frame_of_a_fresh_edition(self, tmp_path, monkeypatch):
         path = hashed(DISTINCT, 0, tmp_path)
         self.hash_video_with(Capture(DISTINCT), path, monkeypatch)

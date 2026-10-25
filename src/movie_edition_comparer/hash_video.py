@@ -193,6 +193,11 @@ def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers
 
     cap = cv2.VideoCapture(video_path)
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    if frame_count <= 0:
+        # A video that cannot be opened has no frames, and would otherwise
+        # look hashed to the end.
+        cap.release()
+        raise SystemExit(f"Cannot read any frames from {video_path}")
 
     if resume_from >= frame_count:
         print(f"Already hashed, all {frame_count} frames")
