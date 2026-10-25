@@ -17,8 +17,9 @@ import cv2
 import numpy as np
 from numpy import ndarray
 
-# Brighter than this, a row or column is picture, not bar.
-BLACK = 20
+# Brighter than this, a row or column is picture, not bar. Bars decode as
+# nought, with compression ringing a few levels up where they meet the picture.
+BLACK = 10
 
 # How far a count may be from a standard bar and still be cut there.
 SNAP = 12
