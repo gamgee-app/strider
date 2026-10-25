@@ -1,7 +1,9 @@
 /data/*.db
+/data/cut/
 /dist/
 /out/
 /frames/
+/videos
 /.venv/
 __pycache__/
 *.pyc
