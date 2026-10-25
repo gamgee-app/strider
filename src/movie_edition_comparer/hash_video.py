@@ -171,8 +171,7 @@ def hash_video_frames_to_db(video_path: str, db_path: str, edition: str, workers
     letterbox = letterbox_of(sampler)
     sampler.release()
     if letterbox:
-        print(f"The film's letterbox is {letterbox.default[0]} rows at the top and "
-              f"{letterbox.default[1]} at the bottom", flush=True)
+        print(f"The film's letterbox is {letterbox.described()}", flush=True)
     if averages:
         if resume_from and pictured < resume_from:
             print(f"{resume_from - pictured} frames already hashed have no block averages; "

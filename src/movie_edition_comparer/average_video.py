@@ -129,10 +129,9 @@ def average_video_frames_to_db(video_path: str, db_path: str, edition: str, read
 
     cap = cv2.VideoCapture(video_path)
     width, height = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    film_top, film_bottom = film_bars(cap)
+    letterbox = Letterbox(width, height, *film_bars(cap))
     cap.release()
-    print(f"The film's letterbox is {film_top} rows at the top and {film_bottom} at the bottom", flush=True)
-    letterbox = Letterbox(width, height, film_top, film_bottom)
+    print(f"The film's letterbox is {letterbox.described()}", flush=True)
 
     shares = share(missing, readers)
     print(f"{sum(b - a for a, b in missing)} frames to average, shared between {len(shares)} readers", flush=True)

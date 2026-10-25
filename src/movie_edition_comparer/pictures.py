@@ -52,19 +52,27 @@ def _nearest(counted: int, standards: list[int], within: int) -> int | None:
 class Letterbox:
     """The bars a film of this size can have, and how a frame's count is cut."""
 
-    def __init__(self, width: int, height: int, film_top: int, film_bottom: int):
+    def __init__(self, width: int, height: int, film_top: int, film_bottom: int,
+                 film_left: int = 0, film_right: int = 0):
         self.height = height
-        self.default = (film_top, film_bottom, 0, 0)
+        self.default = (film_top, film_bottom, film_left, film_right)
         def rows(film):
             return sorted({max(0, round((height - width / ratio) / 2)) for ratio in RATIOS} | {film})
         self.top_rows, self.bottom_rows = rows(film_top), rows(film_bottom)
         self.columns = sorted({max(0, round((width - height * ratio) / 2)) for ratio in PILLARBOX_RATIOS}) + [0]
+
+    def described(self) -> str:
+        top, bottom, left, right = self.default
+        sides = f", {left} columns at the left and {right} at the right" if left or right else ""
+        return f"{top} rows at the top and {bottom} at the bottom{sides}"
 
     def cut(self, counted: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
         """Where to cut a frame with these bars counted.
 
         At the nearest standard bars within SNAP, or where nothing standard
         is near -- a black frame, a dark one -- at the film's own letterbox.
+        Its sides are cut at a standard pillarbox when both agree on one, and
+        otherwise at the film's own side bars, which most films have none of.
         Never by the frames around it: a frame and its counterpart in another
         edition are then cut alike whatever stands beside each, and frames
         can be measured in any order.
@@ -74,18 +82,20 @@ class Letterbox:
         bottom = _nearest(bottom_counted, self.bottom_rows, SNAP)
         if top is None or bottom is None or top + bottom >= self.height * 0.6:
             return self.default
-        columns = 0
         if abs(left_counted - right_counted) <= COLUMNS_AGREE:
-            columns = _nearest(left_counted, self.columns, COLUMNS_AGREE) or 0
-        return top, bottom, columns, columns
+            pillar = _nearest(left_counted, self.columns, COLUMNS_AGREE)
+            if pillar:
+                return top, bottom, pillar, pillar
+        return top, bottom, *self.default[2:]
 
 
-def film_bars(cap, samples: int = 60) -> tuple[int, int]:
+def film_bars(cap, samples: int = 60) -> tuple[int, int, int, int]:
     """The film's own letterbox: the commonest count of black rows at the top
-    and at the bottom, over lit frames spread through it. They need not be
-    equal, since an odd number of rows of bar cannot be split evenly."""
+    and at the bottom, and of black columns at the left and right, over lit
+    frames spread through it. They need not be equal, since an odd number of
+    rows of bar cannot be split evenly."""
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    tops, bottoms = [], []
+    tops, bottoms, lefts, rights = [], [], [], []
     for k in range(samples):
         cap.set(cv2.CAP_PROP_POS_FRAMES, int(frame_count * (k + 0.5) / samples))
         ok, frame = cap.read()
@@ -94,16 +104,20 @@ def film_bars(cap, samples: int = 60) -> tuple[int, int]:
         grey = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         if grey.mean() < 15:
             continue
-        top, bottom, _, _ = bars_counted(grey)
-        height = grey.shape[0]
+        top, bottom, left, right = bars_counted(grey)
+        height, width = grey.shape
         # No bar is a count like any other: a film cropped to its picture
         # has none, and a few dark frames must not outvote it.
         if top < height // 4:
             tops.append(top)
         if bottom < height // 4:
             bottoms.append(bottom)
+        if left < width // 4:
+            lefts.append(left)
+        if right < width // 4:
+            rights.append(right)
     mode = lambda counts: max(set(counts), key=counts.count) if counts else 0
-    return mode(tops), mode(bottoms)
+    return mode(tops), mode(bottoms), mode(lefts), mode(rights)
 
 
 def block_averages(picture: ndarray) -> bytes:
@@ -144,5 +158,4 @@ def letterbox_of(cap) -> "Letterbox | None":
     if not ok:
         return None
     height, width = frame.shape[:2]
-    top, bottom = film_bars(cap)
-    return Letterbox(width, height, top, bottom)
+    return Letterbox(width, height, *film_bars(cap))

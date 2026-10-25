@@ -56,6 +56,22 @@ class TestCut:
         assert self.letterbox.cut((28, 28, pillar, 3)) == (28, 28, 0, 0)
 
 
+class TestCutWithSideBars:
+    """A film with a few columns of black at its sides, as one 1080p remux has."""
+    letterbox = Letterbox(W, H, *FILM, 4, 5)
+
+    def test_a_frame_is_cut_at_the_films_own_sides(self):
+        assert self.letterbox.cut((28, 28, 4, 6)) == (28, 28, 4, 5)
+
+    def test_a_dark_frame_is_cut_at_the_films_own_sides(self):
+        assert self.letterbox.cut((28, 28, 40, 9)) == (28, 28, 4, 5)
+        assert self.letterbox.cut((H, 0, W, 0)) == (28, 28, 4, 5)
+
+    def test_a_pillarbox_both_sides_agree_on_is_still_cut(self):
+        pillar = round((W - H * 4 / 3) / 2)
+        assert self.letterbox.cut((28, 28, pillar, pillar + 2)) == (28, 28, pillar, pillar)
+
+
 class TestBlockAverages:
     def test_of_a_flat_picture_are_its_grey(self):
         assert np.all(averages_of(block_averages(np.full((100, 300, 3), 77, dtype=np.uint8))) == 77)
@@ -102,12 +118,15 @@ class Film:
 
 class TestFilmBars:
     def test_are_the_commonest_bars_of_the_lit_frames(self):
-        assert film_bars(Film([letterboxed(i) for i in range(60)])) == FILM
+        assert film_bars(Film([letterboxed(i) for i in range(60)])) == (*FILM, 0, 0)
 
     def test_of_a_film_cropped_to_its_picture_are_none_whatever_a_dark_frame_says(self):
         frames = [letterboxed(i, 0, 0) for i in range(60)]
         frames[30] = letterboxed(30, 12, 0)
-        assert film_bars(Film(frames)) == (0, 0)
+        assert film_bars(Film(frames)) == (0, 0, 0, 0)
+
+    def test_count_the_films_own_side_bars(self):
+        assert film_bars(Film([letterboxed(i, *FILM, 4, 5) for i in range(60)])) == (*FILM, 4, 5)
 
 
 class Video:
