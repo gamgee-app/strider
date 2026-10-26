@@ -623,7 +623,8 @@ def differences_of(alignment: Alignment, moved: set[int], apart=None) -> list[Di
     return sorted(found, key=_at)
 
 
-def check_by_averages(alignment, a_averages, b_averages, same: float | None = None, fill: bool = False) -> None:
+def check_by_averages(alignment, a_averages, b_averages, same: float | None = None,
+                      a_flat=None, b_flat=None, fill: bool = False) -> None:
     """Check every link by the two editions' block averages, which tell a
     frame from its neighbour where a picture hash cannot.
 
@@ -633,14 +634,19 @@ def check_by_averages(alignment, a_averages, b_averages, same: float | None = No
     says it would have, and linked if that is its picture. The block
     averages of a run are those of its first frame, since its frames are the
     same frame. same is how near is the same picture, in whatever the
-    averages are given as; by default, SAME_PICTURE grey levels. Given fill,
-    what is still left between links is then paired in order.
+    averages are given as; by default, SAME_PICTURE grey levels. Given which
+    frames of each edition are flat, two flat frames are the same picture,
+    as averages that say nothing of a picture's structure cannot tell them
+    apart. Given fill, what is still left between links is then paired in
+    order.
     """
     from movie_edition_comparer.averages import CLOSER, SAME_PICTURE, apart
     same = SAME_PICTURE if same is None else same
 
     a_runs, b_runs = alignment.a_runs, alignment.b_runs
-    far = _Far(a_averages[[run.start for run in a_runs]], b_averages[[run.start for run in b_runs]])
+    a_starts, b_starts = [run.start for run in a_runs], [run.start for run in b_runs]
+    far = _Far(a_averages[a_starts], b_averages[b_starts],
+               None if a_flat is None else a_flat[a_starts], None if b_flat is None else b_flat[b_starts])
 
     # Moved first, so that a link put right is the one that is then judged.
     for i, j in alignment.pairs():
@@ -660,8 +666,14 @@ def check_by_averages(alignment, a_averages, b_averages, same: float | None = No
             alignment.unlink(i)
 
     _grow(alignment, far, same)
-    if not fill:
-        return
+    if fill:
+        _fill(alignment, far, same)
+    _unlink_lone_flats(alignment, far)
+
+
+def _fill(alignment, far, same: float) -> None:
+    """Link what checking by averages left unlinked, by where the footage
+    around it puts it."""
     # Where the footage around says a run belongs, it need only be its
     # picture as a regrade leaves it.
     placed = same * PLACED
@@ -677,16 +689,69 @@ def check_by_averages(alignment, a_averages, b_averages, same: float | None = No
             break
 
 
+def _unlink_lone_flats(alignment, far) -> None:
+    """Undo the links between flat runs -- black, or a frame all one shade --
+    that footage linked on the same diagonal does not hold in place on both
+    sides. Flat frames are all alike, so only the footage around one says
+    which flat frame it is: a fade to black between two shots both editions
+    hold is the same fade, while the black between two credits that differ
+    is not the same black, though it looks it."""
+    a_runs, b_runs = alignment.a_runs, alignment.b_runs
+    def flat_link(i):
+        j = alignment.a_to_b.get(i)
+        return (j is not None and far.a_flat[i] and far.b_flat[j]
+                and not same_frame(a_runs[i], b_runs[j]))
+    def held(i, step, offset):
+        """Whether, within FLAT_HELD frames from run i on, stepping by step,
+        the first link that is not between flat runs keeps offset; or both
+        editions start or end there."""
+        reach = a_runs[i].start + step * FLAT_HELD
+        k = i + step
+        while 0 <= k < len(a_runs) and (a_runs[k].start - reach) * step <= 0:
+            j = alignment.a_to_b.get(k)
+            if j is not None and not (far.a_flat[k] and far.b_flat[j]):
+                return b_runs[j].start - a_runs[k].start == offset
+            k += step
+        if not 0 <= k < len(a_runs):
+            edge = 0 if step < 0 else b_runs[-1].end
+            return (a_runs[i].start + offset == edge) if step < 0 else (a_runs[i].end + offset == edge)
+        return False
+    i = 0
+    while i < len(a_runs):
+        if not flat_link(i):
+            i += 1
+            continue
+        last = i
+        while last + 1 < len(a_runs) and flat_link(last + 1) \
+                and alignment.a_to_b[last + 1] == alignment.a_to_b[last] + 1:
+            last += 1
+        offset = b_runs[alignment.a_to_b[i]].start - a_runs[i].start
+        if not (held(i, -1, offset) and held(last, 1, offset)):
+            for k in range(i, last + 1):
+                alignment.unlink(k)
+        i = last + 1
+
+
+# How many frames either side of a stretch of black a link of the footage
+# around it is looked for, to hold the stretch in place.
+FLAT_HELD = 24
+
+
 class _Far:
     """How far apart run i of edition_a and run j of edition_b look, by the
     averages of their first frames: one pair at a time, or many at once,
-    where a run beyond either end is infinitely far."""
+    where a run beyond either end is infinitely far, and two flat runs, if
+    which are flat is given, are no distance apart."""
 
-    def __init__(self, a, b):
+    def __init__(self, a, b, a_flat=None, b_flat=None):
         self.a, self.b = np.ascontiguousarray(a, np.float32), np.ascontiguousarray(b, np.float32)
         self.size = self.a.shape[1]
+        self.a_flat = np.zeros(len(a), bool) if a_flat is None else np.asarray(a_flat, bool)
+        self.b_flat = np.zeros(len(b), bool) if b_flat is None else np.asarray(b_flat, bool)
 
     def __call__(self, i: int, j: int) -> float:
+        if self.a_flat[i] and self.b_flat[j]:
+            return 0.0
         d = self.a[i] - self.b[j]
         return float(np.sqrt(d.dot(d) / self.size))
 
@@ -695,7 +760,8 @@ class _Far:
         inside = (i >= 0) & (i < len(self.a)) & (j >= 0) & (j < len(self.b))
         out = np.full(len(i), np.inf, np.float32)
         d = self.a[i[inside]] - self.b[j[inside]]
-        out[inside] = np.sqrt(np.einsum("ij,ij->i", d, d) / self.size)
+        out[inside] = np.where(self.a_flat[i[inside]] & self.b_flat[j[inside]], 0,
+                               np.sqrt(np.einsum("ij,ij->i", d, d) / self.size))
         return out
 
 
@@ -943,13 +1009,32 @@ def compare_editions(db_path: str, edition_a: str, edition_b: str,
     as structure."""
     a_frames = read_frames(db_path, edition_a, picture_hash)
     b_frames = read_frames(db_path, edition_b, picture_hash)
+    a_runs, b_runs = runs_of(a_frames), runs_of(b_frames)
     averages = None
     if with_averages:
         from movie_edition_comparer.averages import Looks, read_averages
         a_looks = Looks(read_averages(db_path, edition_a, len(a_frames)), looks)
         b_looks = Looks(read_averages(db_path, edition_b, len(b_frames)), looks)
         averages = (a_looks.features, b_looks.features, a_looks.same)
-    return compare_runs(runs_of(a_frames), runs_of(b_frames), averages)
+        if looks == "structure":
+            # A flat frame's structure is its noise, made as large as any picture's.
+            averages += (a_looks.flat, b_looks.flat)
+            a_runs, b_runs = _split_flat(a_runs, a_looks.flat), _split_flat(b_runs, b_looks.flat)
+    return compare_runs(a_runs, b_runs, averages)
+
+
+def _split_flat(runs: list[Run], flat) -> list[Run]:
+    """Runs of a flat frame repeated, as frames one at a time. One master
+    holds black as the one frame over and over and another as frames that
+    differ by their noise, so that as runs one edition's black is a single
+    run and the other's many; frame by frame, they line up."""
+    out: list[Run] = []
+    for run in runs:
+        if run.count > 1 and flat[run.start]:
+            out += [Run(run.start + k, 1, run.data_hash, run.picture_hash) for k in range(run.count)]
+        else:
+            out.append(run)
+    return out
 
 
 # --- reporting ---------------------------------------------------------------
