@@ -38,7 +38,7 @@ def test_compare_reports_from_the_database_named(tmp_path, monkeypatch, capsys):
         {"type": "added",
          "a": {"start": 2, "count": 0, "time": "0:00:00.08"},
          "b": {"start": 2, "count": 1, "time": "0:00:00.08"},
-         "bits_apart": None, "bits": []}]
+         "bits_apart": None, "bits": [], "grey_apart": None}]
 
 
 def test_compare_reports_footage_that_moved_as_a_row(tmp_path, monkeypatch, capsys):
@@ -58,7 +58,7 @@ def test_compare_reports_footage_that_moved_as_a_row(tmp_path, monkeypatch, caps
         {"type": "moved",
          "a": {"start": 1, "count": 1, "time": "0:00:00.04"},
          "b": {"start": 3, "count": 1, "time": "0:00:00.13"},
-         "bits_apart": None, "bits": []}]
+         "bits_apart": None, "bits": [], "grey_apart": None}]
 
 
 def test_compare_needs_both_editions(tmp_path, monkeypatch, capsys):

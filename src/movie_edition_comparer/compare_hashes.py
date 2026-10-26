@@ -81,9 +81,15 @@ class Difference:
 
     added       edition_b has footage edition_a does not
     removed     edition_a has footage edition_b does not
-    replaced    each has footage there, and it is not the same picture
-    reencoded   the same picture for the same length, carried by other frames
-    retimed     the same picture, held for a different length
+    replaced    each has footage there, and it is not the same footage
+    reencoded   the same footage at the same place for the same length,
+                looking alike, carried by other frames
+    regraded    the same footage at the same place, its look changed by more
+                than encoding changes it: brighter, darker, another colour
+    retimed     the same footage, held for a different length
+
+    A link between the two editions says where footage is, not that it
+    looks the same: how it looks is told apart by reencoded and regraded.
     """
     a: Frames
     b: Frames
@@ -95,6 +101,10 @@ class Difference:
     # side. Kept so that a report can draw the line between "the same
     # picture" and "another picture" for itself.
     bits: tuple[tuple[int, int], ...] = ()
+    # How many grey levels apart the two sides look once the grade the whole
+    # film takes from one edition to the other is allowed for, where the
+    # block averages are known: how far a stretch was regraded.
+    regrade: float | None = None
 
     def __str__(self) -> str:
         return f"{self.kind:<10} edition_a: {str(self.a):<22} edition_b: {self.b}"
@@ -568,11 +578,13 @@ def _at(item: Difference | Move) -> int:
 
 
 def compare_runs(a_runs: list[Run], b_runs: list[Run],
-                 averages: tuple | None = None) -> list[Difference | Move]:
+                 averages: tuple | None = None, grey: tuple | None = None) -> list[Difference | Move]:
     """Everything to report between two editions, in the order it comes.
 
     Given the two editions' block averages, every link the hashes made is
-    checked by them before anything is reported.
+    checked by them before anything is reported. Given their grey block
+    averages, footage that is in the same place but looks different is told
+    from footage that looks the same.
     """
     alignment = align(a_runs, b_runs)
     moved = _moved_runs(alignment)
@@ -584,14 +596,19 @@ def compare_runs(a_runs: list[Run], b_runs: list[Run],
     if averages is not None:
         check_by_averages(alignment, *averages, fill=FILL)
         moved = _moved_runs(alignment)
-    return differences_of(alignment, moved)
+    regrade = _regrades(alignment, *grey) if grey is not None else None
+    return differences_of(alignment, moved, regrade=regrade)
 
 
-def differences_of(alignment: Alignment, moved: set[int], apart=None) -> list[Difference | Move]:
+def differences_of(alignment: Alignment, moved: set[int], apart=None,
+                   regrade: dict[int, float] | None = None) -> list[Difference | Move]:
     """The differences and moves an alignment of the two editions makes.
 
     apart says how far apart two runs are to look at, for the report; by
-    default, the bits their picture hashes are apart.
+    default, the bits their picture hashes are apart. regrade says, for a
+    linked run of edition_a, how many grey levels apart it and its partner
+    look once the film's grade is allowed for; a re-encoding further apart
+    than REGRADED is reported as regraded.
     """
     apart = apart or bits_apart
     a_runs, b_runs = alignment.a_runs, alignment.b_runs
@@ -609,6 +626,10 @@ def differences_of(alignment: Alignment, moved: set[int], apart=None) -> list[Di
             stretch = []
         if right[0] < len(a_runs):
             difference = _difference_of(a_runs[right[0]], b_runs[right[1]], apart)
+            if difference and regrade is not None and right[0] in regrade:
+                grade = regrade[right[0]]
+                kind = "regraded" if difference.kind == "reencoded" and grade > REGRADED else difference.kind
+                difference = Difference(difference.a, difference.b, kind, difference.bits, grade)
             if difference and stretch and _touching(stretch[-1], difference):
                 stretch.append(difference)
                 continue
@@ -616,7 +637,7 @@ def differences_of(alignment: Alignment, moved: set[int], apart=None) -> list[Di
                 found[-1] = _joined(stretch)
             if difference:
                 found.append(difference)
-            stretch = [difference] if difference and difference.kind == "reencoded" else []
+            stretch = [difference] if difference and difference.kind in JOINED else []
     if len(stretch) > 1:
         found[-1] = _joined(stretch)
     found += _moves(alignment, moved)
@@ -735,6 +756,57 @@ def _unlink_lone_flats(alignment, far) -> None:
 # How many frames either side of a stretch of black a link of the footage
 # around it is looked for, to hold the stretch in place.
 FLAT_HELD = 24
+
+
+# How many grey levels apart, once the film's grade is allowed for and
+# averaged over a second, footage in the same place may look and still be
+# called a re-encoding. Two encodes of one master were measured at 0.6 for
+# most frames and under 6 for all but one in a thousand; across the 2020
+# remaster and the original Blu-ray, Arwen's vision is 56 apart.
+REGRADED = 6.0
+
+# Over how many linked runs either side a run's regrade is averaged, so that
+# a shot is judged rather than a frame's noise: about a second.
+REGRADE_SPAN = 12
+
+
+def _regrades(alignment: Alignment, a_grey, b_grey) -> dict[int, float]:
+    """For every linked run of edition_a, how many grey levels apart it and
+    its partner look, once the grade the whole film takes from one edition
+    to the other is allowed for.
+
+    One master may be darker or flatter than another throughout, and an HDR
+    edition taken to SDR by a fixed curve will be; that is one curve for the
+    film, found from every link: for each grey level of edition_a, the
+    middle level edition_b has for it. What the curve does not explain is
+    how far the footage was regraded on its own: a shot recoloured, a scene
+    made brighter. A run's regrade is the root mean square of its blocks'
+    distance from the curve, averaged over the runs about it.
+    """
+    pairs = alignment.pairs()
+    if not pairs:
+        return {}
+    i, j = np.array(pairs).T
+    a = np.asarray(a_grey, np.float32)[[alignment.a_runs[k].start for k in i]]
+    b = np.asarray(b_grey, np.float32)[[alignment.b_runs[k].start for k in j]]
+    sample = slice(None, None, max(1, len(a) // 20000))
+    levels = np.clip(a[sample].astype(int), 0, 255).ravel()
+    found = b[sample].ravel()
+    curve = np.full(256, np.nan)
+    order = np.argsort(levels, kind="stable")
+    bounds = np.searchsorted(levels[order], np.arange(257))
+    for level in range(256):
+        if bounds[level + 1] - bounds[level] >= 20:
+            curve[level] = np.median(found[order[bounds[level]:bounds[level + 1]]])
+    known = ~np.isnan(curve)
+    if not known.any():
+        return {}
+    curve = np.maximum.accumulate(np.interp(np.arange(256), np.nonzero(known)[0], curve[known]))
+    apart = np.sqrt(((np.interp(a, np.arange(256), curve) - b) ** 2).mean(axis=1))
+    width = 2 * REGRADE_SPAN + 1
+    sums = np.convolve(apart, np.ones(width), mode="same")
+    counts = np.convolve(np.ones(len(apart)), np.ones(width), mode="same")
+    return dict(zip(i.tolist(), (sums / counts).tolist()))
 
 
 class _Far:
@@ -929,23 +1001,37 @@ def _fill_between(alignment, far, same: float) -> bool:
     return paired
 
 
-def _touching(before: Difference, after: Difference) -> bool:
-    """Two re-encodings with nothing between them on either side.
+# The kinds that come in stretches, frame after frame, and are reported a
+# stretch at a time.
+JOINED = ("reencoded", "regraded")
 
-    A transfer re-encodes every frame, so re-encoded frames come in
-    stretches, and a stretch is one difference rather than one for each
-    frame of it. Only re-encodings join: a frame held for longer is its own
+
+def _touching(before: Difference, after: Difference) -> bool:
+    """Two re-encodings, or two regradings, with nothing between them on
+    either side.
+
+    A transfer re-encodes every frame, and a grade takes a whole shot, so
+    such frames come in stretches, and a stretch is one difference rather
+    than one for each frame of it. A frame held for longer is its own
     difference, since a stretch has one length and that has two.
     """
-    return (after.kind == "reencoded"
+    return (after.kind in JOINED and before.kind == after.kind
             and before.a.end == after.a.start and before.b.end == after.b.start)
+
+
+def _mean_regrade(items) -> float | None:
+    """The regrade of a stretch: its parts' regrades, weighed by their frames."""
+    if any(item.regrade is None for item in items):
+        return None
+    frames = sum(item.a.count for item in items)
+    return sum(item.regrade * item.a.count for item in items) / frames if frames else None
 
 
 def _joined(stretch: list[Difference]) -> Difference:
     first = stretch[0]
     return Difference(Frames(first.a.start, sum(d.a.count for d in stretch)),
-                      Frames(first.b.start, sum(d.b.count for d in stretch)), "reencoded",
-                      _stretches(tuple(bits for d in stretch for bits in d.bits)))
+                      Frames(first.b.start, sum(d.b.count for d in stretch)), first.kind,
+                      _stretches(tuple(bits for d in stretch for bits in d.bits)), _mean_regrade(stretch))
 
 
 def _stretches(bits: tuple[tuple[int, int], ...]) -> tuple[tuple[int, int], ...]:
@@ -1010,17 +1096,17 @@ def compare_editions(db_path: str, edition_a: str, edition_b: str,
     a_frames = read_frames(db_path, edition_a, picture_hash)
     b_frames = read_frames(db_path, edition_b, picture_hash)
     a_runs, b_runs = runs_of(a_frames), runs_of(b_frames)
-    averages = None
+    averages = grey = None
     if with_averages:
         from movie_edition_comparer.averages import Looks, read_averages
-        a_looks = Looks(read_averages(db_path, edition_a, len(a_frames)), looks)
-        b_looks = Looks(read_averages(db_path, edition_b, len(b_frames)), looks)
+        grey = (read_averages(db_path, edition_a, len(a_frames)), read_averages(db_path, edition_b, len(b_frames)))
+        a_looks, b_looks = Looks(grey[0], looks), Looks(grey[1], looks)
         averages = (a_looks.features, b_looks.features, a_looks.same)
         if looks == "structure":
             # A flat frame's structure is its noise, made as large as any picture's.
             averages += (a_looks.flat, b_looks.flat)
             a_runs, b_runs = _split_flat(a_runs, a_looks.flat), _split_flat(b_runs, b_looks.flat)
-    return compare_runs(a_runs, b_runs, averages)
+    return compare_runs(a_runs, b_runs, averages, grey)
 
 
 def _split_flat(runs: list[Run], flat) -> list[Run]:
@@ -1072,6 +1158,7 @@ class Row:
     a: Frames
     b: Frames
     bits: tuple[tuple[int, int], ...] = ()
+    regrade: float | None = None
 
     @classmethod
     def of(cls, item: Difference | Move, same_picture_within: int | None = None) -> list["Row"]:
@@ -1085,16 +1172,17 @@ class Row:
         if isinstance(item, Move):
             return [cls("moved", Frames(item.a_start, item.count), Frames(item.b_start, item.count))]
         if same_picture_within is None or item.kind not in ("reencoded", "replaced") or not item.bits:
-            return [cls(item.kind, item.a, item.b, item.bits)]
+            return [cls(item.kind, item.a, item.b, item.bits, item.regrade)]
         rows, a_at, b_at = [], item.a.start, item.b.start
         for frames, apart in item.bits:
             kind = "reencoded" if apart <= same_picture_within else "replaced"
             if rows and rows[-1].kind == kind:
                 last = rows[-1]
                 rows[-1] = cls(kind, Frames(last.a.start, last.a.count + frames),
-                               Frames(last.b.start, last.b.count + frames), last.bits + ((frames, apart),))
+                               Frames(last.b.start, last.b.count + frames), last.bits + ((frames, apart),),
+                               item.regrade)
             else:
-                rows.append(cls(kind, Frames(a_at, frames), Frames(b_at, frames), ((frames, apart),)))
+                rows.append(cls(kind, Frames(a_at, frames), Frames(b_at, frames), ((frames, apart),), item.regrade))
             a_at += frames
             b_at += frames
         return rows
@@ -1116,15 +1204,17 @@ class Row:
                 self.span(self.a), clock(self.a.start),
                 self.span(self.b), clock(self.b.start),
                 length(self.a.count), length(self.b.count),
-                "—" if self.bits_apart is None else self.bits_apart)
+                "—" if self.bits_apart is None else self.bits_apart,
+                "—" if self.regrade is None else f"{self.regrade:.1f}")
 
     def record(self) -> dict:
         side = lambda frames: {"start": frames.start, "count": frames.count, "time": clock(frames.start)}
         return {"type": self.kind, "a": side(self.a), "b": side(self.b),
-                "bits_apart": self.bits_apart, "bits": [list(stretch) for stretch in self.bits]}
+                "bits_apart": self.bits_apart, "bits": [list(stretch) for stretch in self.bits],
+                "grey_apart": None if self.regrade is None else round(self.regrade, 1)}
 
 
-HEADERS = ["Type", "A frames", "A at", "B frames", "B at", "A length", "B length", "Bits apart"]
+HEADERS = ["Type", "A frames", "A at", "B frames", "B at", "A length", "B length", "Bits apart", "Grey apart"]
 
 
 def report(reported: list[Difference | Move], same_picture_within: int | None = None) -> list[Row]:
@@ -1150,7 +1240,8 @@ def _folded(rows: list[Row]) -> list[Row]:
                 and last.a.end == row.a.start and last.b.end == row.b.start
                 and (row.kind == "reencoded" or (last.bits and row.bits))):
             out[-1] = Row(row.kind, Frames(last.a.start, last.a.count + row.a.count),
-                          Frames(last.b.start, last.b.count + row.b.count), _stretches(last.bits + row.bits))
+                          Frames(last.b.start, last.b.count + row.b.count), _stretches(last.bits + row.bits),
+                          _mean_regrade([last, row]))
         else:
             out.append(row)
     return out
@@ -1224,7 +1315,7 @@ def run(args: argparse.Namespace) -> None:
     kinds = Counter(row.kind for row in rows)
     print(f"Count ({len(rows)}): " + ", ".join(
         f"{kinds[kind]} {kind}"
-        for kind in ("added", "removed", "replaced", "reencoded", "retimed", "moved") if kinds[kind]))
+        for kind in ("added", "removed", "replaced", "reencoded", "regraded", "retimed", "moved") if kinds[kind]))
     print()
     print(tabulate([row.cells() for row in rows], headers=HEADERS, tablefmt="github",
                    colalign=("left", "right", "right", "right", "right", "right", "right", "right")))
