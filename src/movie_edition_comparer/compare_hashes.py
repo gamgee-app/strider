@@ -582,7 +582,7 @@ def compare_runs(a_runs: list[Run], b_runs: list[Run],
     _link_between(alignment, moved)
     _extend_links(alignment, same_picture)
     if averages is not None:
-        check_by_averages(alignment, *averages)
+        check_by_averages(alignment, *averages, fill=FILL)
         moved = _moved_runs(alignment)
     return differences_of(alignment, moved)
 
@@ -599,23 +599,31 @@ def differences_of(alignment: Alignment, moved: set[int], apart=None) -> list[Di
     fences = [(-1, -1)] + anchors + [(len(a_runs), len(b_runs))]
 
     found: list[Difference | Move] = []
-    re_encoding = None  # the last thing found, if it is one and nothing has come since
+    stretch: list[Difference] = []  # re-encodings that make the last thing found, if nothing has come since
     for left, right in zip(fences, fences[1:]):
         between = _between(alignment, left, right, apart)
+        if between and len(stretch) > 1:
+            found[-1] = _joined(stretch)
         found += between
+        if between:
+            stretch = []
         if right[0] < len(a_runs):
             difference = _difference_of(a_runs[right[0]], b_runs[right[1]], apart)
-            if difference and re_encoding and not between and _touching(re_encoding, difference):
-                found[-1] = re_encoding = _joined(re_encoding, difference)
+            if difference and stretch and _touching(stretch[-1], difference):
+                stretch.append(difference)
                 continue
+            if len(stretch) > 1:
+                found[-1] = _joined(stretch)
             if difference:
                 found.append(difference)
-            re_encoding = difference if difference and difference.kind == "reencoded" else None
+            stretch = [difference] if difference and difference.kind == "reencoded" else []
+    if len(stretch) > 1:
+        found[-1] = _joined(stretch)
     found += _moves(alignment, moved)
     return sorted(found, key=_at)
 
 
-def check_by_averages(alignment, a_averages, b_averages) -> None:
+def check_by_averages(alignment, a_averages, b_averages, same: float | None = None, fill: bool = False) -> None:
     """Check every link by the two editions' block averages, which tell a
     frame from its neighbour where a picture hash cannot.
 
@@ -624,13 +632,15 @@ def check_by_averages(alignment, a_averages, b_averages) -> None:
     unlinked beside a link is tried against the frame its neighbour's link
     says it would have, and linked if that is its picture. The block
     averages of a run are those of its first frame, since its frames are the
-    same frame.
+    same frame. same is how near is the same picture, in whatever the
+    averages are given as; by default, SAME_PICTURE grey levels. Given fill,
+    what is still left between links is then paired in order.
     """
     from movie_edition_comparer.averages import CLOSER, SAME_PICTURE, apart
+    same = SAME_PICTURE if same is None else same
 
     a_runs, b_runs = alignment.a_runs, alignment.b_runs
-    def far(i, j):
-        return float(apart(a_averages[a_runs[i].start], b_averages[b_runs[j].start]))
+    far = _Far(a_averages[[run.start for run in a_runs]], b_averages[[run.start for run in b_runs]])
 
     # Moved first, so that a link put right is the one that is then judged.
     for i, j in alignment.pairs():
@@ -646,9 +656,50 @@ def check_by_averages(alignment, a_averages, b_averages) -> None:
             alignment.link(i, best)
 
     for i, j in alignment.pairs():
-        if not same_frame(a_runs[i], b_runs[j]) and far(i, j) > SAME_PICTURE:
+        if not same_frame(a_runs[i], b_runs[j]) and far(i, j) > same:
             alignment.unlink(i)
 
+    _grow(alignment, far, same)
+    if not fill:
+        return
+    for _ in range(FILL_ROUNDS):
+        before = set(alignment.a_to_b.items())
+        _follow_diagonals(alignment, far, same)
+        if OFFSET_WINDOW:
+            _follow_offset(alignment, far, same)
+        _grow(alignment, far, same)
+        _fill_between(alignment, far, same)
+        _grow(alignment, far, same)
+        if set(alignment.a_to_b.items()) == before:
+            break
+
+
+class _Far:
+    """How far apart run i of edition_a and run j of edition_b look, by the
+    averages of their first frames: one pair at a time, or many at once,
+    where a run beyond either end is infinitely far."""
+
+    def __init__(self, a, b):
+        self.a, self.b = np.ascontiguousarray(a, np.float32), np.ascontiguousarray(b, np.float32)
+        self.size = self.a.shape[1]
+
+    def __call__(self, i: int, j: int) -> float:
+        d = self.a[i] - self.b[j]
+        return float(np.sqrt(d.dot(d) / self.size))
+
+    def many(self, i, j):
+        i, j = np.asarray(i), np.asarray(j)
+        inside = (i >= 0) & (i < len(self.a)) & (j >= 0) & (j < len(self.b))
+        out = np.full(len(i), np.inf, np.float32)
+        d = self.a[i[inside]] - self.b[j[inside]]
+        out[inside] = np.sqrt(np.einsum("ij,ij->i", d, d) / self.size)
+        return out
+
+
+def _grow(alignment, far, same: float) -> None:
+    """Link the runs either side of every link, frame for frame outwards,
+    while they are the same picture."""
+    a_runs, b_runs = alignment.a_runs, alignment.b_runs
     grown = True
     while grown:
         grown = False
@@ -657,10 +708,149 @@ def check_by_averages(alignment, a_averages, b_averages) -> None:
                 k, m = i + step, j + step
                 while (0 <= k < len(a_runs) and 0 <= m < len(b_runs)
                        and k not in alignment.a_to_b and m not in alignment.b_to_a
-                       and far(k, m) <= SAME_PICTURE):
+                       and far(k, m) <= same):
                     alignment.link(k, m)
                     grown = True
                     k, m = k + step, m + step
+
+
+def _distinct(far, pairs) -> np.ndarray:
+    """Which links have a partner clearly nearer than the frames either side
+    of it on the other side: a moving picture, placed beyond doubt. In a
+    still shot every frame is as near as the next, and across two masters
+    any of them can come out nearest."""
+    from movie_edition_comparer.averages import CLOSER
+    if not pairs:
+        return np.zeros(0, bool)
+    i, j = np.array(pairs).T
+    here = far.many(i, j) / CLOSER
+    return ((here < far.many(i, j - 1)) & (here < far.many(i, j + 1))
+            & (here < far.many(i - 1, j)) & (here < far.many(i + 1, j)))
+
+
+def _follow_diagonals(alignment, far, same: float) -> None:
+    """Between two links placed beyond doubt that are as many frames apart on
+    either side, the footage is the same footage in order: everything between
+    is linked frame for frame along the diagonal, in place of whatever the
+    looks of still frames linked it to, wherever the frames are the same
+    picture. A link placed beyond doubt in between is kept: footage can
+    still have moved."""
+    a_runs, b_runs = alignment.a_runs, alignment.b_runs
+    moved = _moved_runs(alignment)
+    pairs = alignment.pairs()
+    distinct = dict(zip(pairs, _distinct(far, pairs)))
+    sure = [pair for pair in pairs if pair[0] not in moved and distinct[pair]]
+    b_starts = [run.start for run in b_runs]
+    for (a_left, b_left), (a_right, b_right) in zip(sure, sure[1:]):
+        if a_right - a_left < 2 and b_right - b_left < 2:
+            continue
+        a_from, b_from = a_runs[a_left].end, b_runs[b_left].end
+        if a_runs[a_right].start - a_from != b_runs[b_right].start - b_from:
+            continue                     # footage added or taken away between: not one diagonal
+        for i in range(a_left + 1, a_right):
+            if i in alignment.a_to_b and not distinct[(i, alignment.a_to_b[i])]:
+                alignment.unlink(i)
+        for i in range(a_left + 1, a_right):
+            if i in alignment.a_to_b:
+                continue
+            at = b_from + (a_runs[i].start - a_from)
+            m = bisect.bisect_right(b_starts, at) - 1
+            if b_left < m < b_right and m not in alignment.b_to_a and far(i, m) <= same:
+                alignment.link(i, m)
+
+
+# How many frames either side of a run are looked at for the offset most of
+# its neighbours' links keep, and how many of them must keep it.
+OFFSET_WINDOW = 240
+OFFSET_SHARE = 0.5
+
+
+def _follow_offset(alignment, far, same: float) -> None:
+    """Footage keeps one offset between the editions for long stretches. A
+    run whose link breaks with the offset most links around it keep, or
+    that has no link, is linked at that offset instead, wherever that is its
+    picture and its own link is not placed beyond doubt nearer. Across two
+    masters the frames of a still or murky shot are all about as near, and
+    links land a frame or two off; the offset of the footage around them
+    says where they belong."""
+    a_runs, b_runs = alignment.a_runs, alignment.b_runs
+    moved = _moved_runs(alignment)
+    pairs = [(i, j) for i, j in alignment.pairs() if i not in moved]
+    if not pairs:
+        return
+    at = [a_runs[i].start for i, _ in pairs]
+    offsets = [b_runs[j].start - a_runs[i].start for i, j in pairs]
+    distinct = dict(zip(alignment.pairs(), _distinct(far, alignment.pairs())))
+    b_starts = [run.start for run in b_runs]
+    counts: Counter = Counter()
+    low = high = 0
+    targets = []
+    for i, run in enumerate(a_runs):
+        while high < len(at) and at[high] <= run.start + OFFSET_WINDOW:
+            counts[offsets[high]] += 1
+            high += 1
+        while low < high and at[low] < run.start - OFFSET_WINDOW:
+            counts[offsets[low]] -= 1
+            low += 1
+        if high > low:
+            offset, many = counts.most_common(1)[0]
+            if many >= OFFSET_SHARE * (high - low):
+                targets.append((i, offset))
+    for i, offset in targets:
+        j = alignment.a_to_b.get(i)
+        frame = a_runs[i].start + offset
+        m = bisect.bisect_right(b_starts, frame) - 1
+        if m < 0 or m == j or b_runs[m].end <= frame:
+            continue
+        near = far(i, m)
+        if near > same:
+            continue
+        if j is not None and (i in moved or (distinct[(i, j)] and far(i, j) < near)):
+            continue
+        k = alignment.b_to_a.get(m)
+        if k is not None:
+            if k in moved or b_runs[m].start - a_runs[k].start == offset or (distinct.get((k, m)) and far(k, m) < near):
+                continue
+            alignment.unlink(k)
+        if j is not None:
+            alignment.unlink(i)
+        alignment.link(i, m)
+
+
+# Whether checking links by averages also pairs what is left between them.
+FILL = True
+
+# How many times following diagonals and pairing what is left are tried in
+# turn, each able to place links the other then builds on.
+FILL_ROUNDS = 4
+
+# How far ahead on the other side a run left between two links looks for its
+# picture when the gap is paired in order.
+FILL_WINDOW = 24
+
+
+def _fill_between(alignment, far, same: float) -> bool:
+    """Pair what is left between two links in order, first with first: each
+    run with the first run within FILL_WINDOW after the last paired that is
+    its picture. Two masters' frames seldom hash alike, so a stretch both
+    hold can lie unlinked between links on either side. Whether anything
+    was paired."""
+    a_runs, b_runs = alignment.a_runs, alignment.b_runs
+    moved = _moved_runs(alignment)
+    anchors = [(i, j) for i, j in alignment.pairs() if i not in moved]
+    fences = [(-1, -1)] + anchors + [(len(a_runs), len(b_runs))]
+    paired = False
+    for (a_left, b_left), (a_right, b_right) in zip(fences, fences[1:]):
+        after = b_left + 1
+        for i in range(a_left + 1, a_right):
+            if i in alignment.a_to_b:
+                continue
+            for m in range(after, min(b_right, after + FILL_WINDOW)):
+                if m not in alignment.b_to_a and far(i, m) <= same:
+                    alignment.link(i, m)
+                    after, paired = m + 1, True
+                    break
+    return paired
 
 
 def _touching(before: Difference, after: Difference) -> bool:
@@ -675,10 +865,11 @@ def _touching(before: Difference, after: Difference) -> bool:
             and before.a.end == after.a.start and before.b.end == after.b.start)
 
 
-def _joined(before: Difference, after: Difference) -> Difference:
-    return Difference(Frames(before.a.start, before.a.count + after.a.count),
-                      Frames(before.b.start, before.b.count + after.b.count), "reencoded",
-                      _stretches(before.bits + after.bits))
+def _joined(stretch: list[Difference]) -> Difference:
+    first = stretch[0]
+    return Difference(Frames(first.a.start, sum(d.a.count for d in stretch)),
+                      Frames(first.b.start, sum(d.b.count for d in stretch)), "reencoded",
+                      _stretches(tuple(bits for d in stretch for bits in d.bits)))
 
 
 def _stretches(bits: tuple[tuple[int, int], ...]) -> tuple[tuple[int, int], ...]:
@@ -736,16 +927,18 @@ def _runs_of_block(runs: list[Run], block: _Block) -> list[Run]:
 
 def compare_editions(db_path: str, edition_a: str, edition_b: str,
                      picture_hash: str = "block_mean_0",
-                     with_averages: bool = False) -> list[Difference | Move]:
+                     with_averages: bool = False, looks: str = "structure") -> list[Difference | Move]:
     """Everything to report between two editions of the one film, its links
-    checked by the editions' block averages if asked."""
+    checked by the editions' block averages if asked, seen as grey levels or
+    as structure."""
     a_frames = read_frames(db_path, edition_a, picture_hash)
     b_frames = read_frames(db_path, edition_b, picture_hash)
     averages = None
     if with_averages:
-        from movie_edition_comparer.averages import read_averages
-        averages = (read_averages(db_path, edition_a, len(a_frames)),
-                    read_averages(db_path, edition_b, len(b_frames)))
+        from movie_edition_comparer.averages import Looks, read_averages
+        a_looks = Looks(read_averages(db_path, edition_a, len(a_frames)), looks)
+        b_looks = Looks(read_averages(db_path, edition_b, len(b_frames)), looks)
+        averages = (a_looks.features, b_looks.features, a_looks.same)
     return compare_runs(runs_of(a_frames), runs_of(b_frames), averages)
 
 
@@ -903,6 +1096,12 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--by-averages", action="store_true",
                         help="Line the editions up by the frames' block averages alone, with no picture "
                              "hash; how far apart frames are is then given in hundredths of a grey level")
+    parser.add_argument("--looks", choices=["grey", "structure"], default=None,
+                        help="How the averages modes see a frame: its blocks' grey levels, or its structure -- "
+                             "the blocks against their own mean and spread, and the steps between them -- which "
+                             "a regrade by another master leaves largely alone (default: structure with "
+                             "--with-averages, grey with --by-averages, which cannot yet search structure "
+                             "across a whole film)")
     parser.add_argument("--no-trim", action="store_true",
                         help="Do not copy out the stretches of video, even when both videos are given")
     parser.add_argument("--no-frames", action="store_true",
@@ -921,10 +1120,10 @@ def run(args: argparse.Namespace) -> None:
     print()
     if args.by_averages:
         from movie_edition_comparer import compare_averages
-        reported = compare_averages.compare_editions(args.db, args.edition_a, args.edition_b)
+        reported = compare_averages.compare_editions(args.db, args.edition_a, args.edition_b, args.looks or "grey")
     else:
         reported = compare_editions(args.db, args.edition_a, args.edition_b, args.picture_hash,
-                                    with_averages=args.with_averages)
+                                    with_averages=args.with_averages, looks=args.looks or "structure")
     rows = report(reported, args.same_picture_within)
 
     kinds = Counter(row.kind for row in rows)

@@ -8,7 +8,7 @@ like is only ever read from their block averages:
   1. Runs of the same frame carried by exactly one run each side are linked,
      and links are carried to their neighbours while they stay the same
      frame -- Heckel's anchoring, by the pixel hash.
-  2. A run whose nearest picture on the other side is within SAME_PICTURE,
+  2. A run whose nearest picture on the other side is within the same-picture limit,
      clearly nearer than the next nearest, and whose partner's nearest is
      it in turn, is linked -- a picture that is one of a kind on both sides.
      Pictures too flat to tell apart are never linked by looks.
@@ -20,9 +20,9 @@ like is only ever read from their block averages:
      hash comparer's.
 
 Finding a run's nearest picture never means measuring it against every run
-on the other side. A link is only made to a picture within SAME_PICTURE that
+on the other side. A link is only made to a picture within the same-picture limit that
 is clearly nearer than the next, by CLOSER, so nothing further than
-SAME_PICTURE / CLOSER away can change what is linked -- and pictures that
+that limit / CLOSER away can change what is linked -- and pictures that
 near are near along every direction too. So the pictures are laid on a grid
 over the directions they differ in most, with cells as wide as that reach,
 and each is measured only against those in its own cell and the cells beside
@@ -35,7 +35,7 @@ import numpy as np
 from numpy import ndarray
 
 from movie_edition_comparer import compare_hashes
-from movie_edition_comparer.averages import CLOSER, SAME_PICTURE, apart, flat, read_averages
+from movie_edition_comparer.averages import CLOSER, Looks, apart, read_averages
 from movie_edition_comparer.compare_hashes import (
     Difference, Move, _extend_links, _link_unique, _moved_runs, check_by_averages, differences_of, same_frame,
 )
@@ -94,10 +94,10 @@ class Pictures:
     row to a run, would be hundreds of megabytes for nothing.
     """
 
-    def __init__(self, averages: ndarray, runs: list[Run]):
-        self.averages = averages
+    def __init__(self, looks: Looks, runs: list[Run]):
+        self.averages = looks.features
         self.starts = np.fromiter((run.start for run in runs), dtype=np.int64, count=len(runs))
-        self.flat = flat(averages)[self.starts]
+        self.flat = looks.flat[self.starts]
 
     def __getitem__(self, runs):
         return self.averages[self.starts[runs]]
@@ -203,20 +203,20 @@ def best_two(owner: ndarray, other: ndarray, far: ndarray, n: int) -> tuple[ndar
     return best, first, second
 
 
-def _link_alike(alignment: Alignment, a_pictures: Pictures, b_pictures: Pictures) -> None:
+def _link_alike(alignment: Alignment, a_pictures: Pictures, b_pictures: Pictures, same: float) -> None:
     """Link runs whose nearest picture is each other, close and clearly closest."""
     a_free = np.array([i for i in alignment.a_free() if not a_pictures.flat[i]], dtype=int)
     b_free = np.array([j for j in alignment.b_free() if not b_pictures.flat[j]], dtype=int)
     if not len(a_free) or not len(b_free):
         return
     # Nothing further than this can be linked or stop a link being made: a
-    # link needs its nearest within SAME_PICTURE and nearer by CLOSER than the next.
-    i, j, far = within(a_pictures[a_free], b_pictures[b_free], SAME_PICTURE / CLOSER)
+    # link needs its nearest within the same-picture limit and nearer by CLOSER than the next.
+    i, j, far = within(a_pictures[a_free], b_pictures[b_free], same / CLOSER)
     a_best, a_first, a_second = best_two(i, j, far, len(a_free))
     b_best, b_first, b_second = best_two(j, i, far, len(b_free))
     for k, i in enumerate(a_free):
         m = a_best[k]
-        if a_first[k] > SAME_PICTURE or a_first[k] >= CLOSER * a_second[k]:
+        if a_first[k] > same or a_first[k] >= CLOSER * a_second[k]:
             continue
         if b_best[m] != k or b_first[m] >= CLOSER * b_second[m]:
             continue
@@ -225,13 +225,14 @@ def _link_alike(alignment: Alignment, a_pictures: Pictures, b_pictures: Pictures
 
 # --- placing by order ----------------------------------------------------------
 
-def _crossed_by_noise(alignment: Alignment, moved: set[int], a_pictures: Pictures, b_pictures: Pictures) -> list[int]:
+def _crossed_by_noise(alignment: Alignment, moved: set[int], a_pictures: Pictures, b_pictures: Pictures,
+                      same: float) -> list[int]:
     """Links that cross only because a still shot's frames all look alike: a
     single frame each side, not the same frame, alike to the frame beside its
     partner, landing a few frames from where the links around it point."""
     a_runs, b_runs = alignment.a_runs, alignment.b_runs
     def alike(i, j):
-        return 0 <= i < len(a_runs) and 0 <= j < len(b_runs) and apart(a_pictures[i], b_pictures[j]) <= SAME_PICTURE
+        return 0 <= i < len(a_runs) and 0 <= j < len(b_runs) and apart(a_pictures[i], b_pictures[j]) <= same
     noise = []
     for i in moved:
         j = alignment.a_to_b[i]
@@ -245,7 +246,8 @@ def _crossed_by_noise(alignment: Alignment, moved: set[int], a_pictures: Picture
     return noise
 
 
-def _link_between(alignment: Alignment, moved: set[int], a_pictures: Pictures, b_pictures: Pictures) -> None:
+def _link_between(alignment: Alignment, moved: set[int], a_pictures: Pictures, b_pictures: Pictures,
+                  same: float) -> None:
     """Pair what is left between one anchor and the next, first with first.
 
     Of the runs between the same two anchors, a run is paired with the first
@@ -266,7 +268,7 @@ def _link_between(alignment: Alignment, moved: set[int], a_pictures: Pictures, b
             if i in alignment.a_to_b or after >= len(b_between):
                 continue
             distances = apart(a_pictures[i], b_pictures[b_between[after:]])
-            alike = np.flatnonzero(distances <= SAME_PICTURE)
+            alike = np.flatnonzero(distances <= same)
             if not len(alike):
                 continue
             k = after + int(alike[0])
@@ -274,26 +276,27 @@ def _link_between(alignment: Alignment, moved: set[int], a_pictures: Pictures, b
             after = k + 1
 
 
-def compare_runs(a_runs: list[Run], b_runs: list[Run], a_averages: ndarray, b_averages: ndarray) -> list[Difference | Move]:
-    """Everything to report between two editions, by their block averages."""
-    a_pictures, b_pictures = Pictures(a_averages, a_runs), Pictures(b_averages, b_runs)
+def compare_runs(a_runs: list[Run], b_runs: list[Run], a_looks: Looks, b_looks: Looks) -> list[Difference | Move]:
+    """Everything to report between two editions, by how their frames look."""
+    a_pictures, b_pictures = Pictures(a_looks, a_runs), Pictures(b_looks, b_runs)
+    a_averages, b_averages, same = a_looks.features, b_looks.features, a_looks.same
     def same_picture(a, b):
-        return apart(a_averages[a.start], b_averages[b.start]) <= SAME_PICTURE
+        return apart(a_averages[a.start], b_averages[b.start]) <= same
 
     alignment = Alignment(a_runs, b_runs)
     _link_unique(alignment, lambda run: run.data_hash)
     _extend_links(alignment, same_frame)
-    _link_alike(alignment, a_pictures, b_pictures)
+    _link_alike(alignment, a_pictures, b_pictures, same)
     _extend_links(alignment, same_picture)
 
     moved = _moved_runs(alignment)
-    for a_index in _crossed_by_noise(alignment, moved, a_pictures, b_pictures):
+    for a_index in _crossed_by_noise(alignment, moved, a_pictures, b_pictures, same):
         alignment.unlink(a_index)
     moved = _moved_runs(alignment)
-    _link_between(alignment, moved, a_pictures, b_pictures)
+    _link_between(alignment, moved, a_pictures, b_pictures, same)
     _extend_links(alignment, same_picture)
 
-    check_by_averages(alignment, a_averages, b_averages)
+    check_by_averages(alignment, a_averages, b_averages, same)
     moved = _moved_runs(alignment)
     return differences_of(alignment, moved, apart=lambda a, b: hundredths_apart(a_averages, b_averages, a, b))
 
@@ -311,9 +314,10 @@ def read_md5s(db_path: str, edition: str) -> list[str]:
             "SELECT hash_md5 FROM frame_hashes WHERE edition = ? ORDER BY frame_index", (edition,))]
 
 
-def compare_editions(db_path: str, edition_a: str, edition_b: str) -> list[Difference | Move]:
-    """Everything to report between two editions of the one film, by their block averages."""
+def compare_editions(db_path: str, edition_a: str, edition_b: str, looks: str = "grey") -> list[Difference | Move]:
+    """Everything to report between two editions of the one film, by their
+    block averages, seen as grey levels or as structure."""
     a_md5s, b_md5s = read_md5s(db_path, edition_a), read_md5s(db_path, edition_b)
     return compare_runs(runs_of(a_md5s), runs_of(b_md5s),
-                        read_averages(db_path, edition_a, len(a_md5s)),
-                        read_averages(db_path, edition_b, len(b_md5s)))
+                        Looks(read_averages(db_path, edition_a, len(a_md5s)), looks),
+                        Looks(read_averages(db_path, edition_b, len(b_md5s)), looks))
