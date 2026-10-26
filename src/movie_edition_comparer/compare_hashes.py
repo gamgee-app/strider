@@ -662,14 +662,17 @@ def check_by_averages(alignment, a_averages, b_averages, same: float | None = No
     _grow(alignment, far, same)
     if not fill:
         return
+    # Where the footage around says a run belongs, it need only be its
+    # picture as a regrade leaves it.
+    placed = same * PLACED
     for _ in range(FILL_ROUNDS):
         before = set(alignment.a_to_b.items())
-        _follow_diagonals(alignment, far, same)
+        _follow_diagonals(alignment, far, placed)
         if OFFSET_WINDOW:
-            _follow_offset(alignment, far, same)
-        _grow(alignment, far, same)
+            _follow_offset(alignment, far, placed)
+        _grow(alignment, far, placed)
         _fill_between(alignment, far, same)
-        _grow(alignment, far, same)
+        _grow(alignment, far, placed)
         if set(alignment.a_to_b.items()) == before:
             break
 
@@ -819,6 +822,13 @@ def _follow_offset(alignment, far, same: float) -> None:
 
 # Whether checking links by averages also pairs what is left between them.
 FILL = True
+
+# How much further apart than the same-picture limit a run may look from the
+# run the footage around it puts it beside, and still be linked there. Two
+# masters grade some shots far apart -- a vision bright and grey in one, dark
+# and blue in the other -- and the structure of the blocks moves with it, but
+# not so far as to look like another picture.
+PLACED = 1.6
 
 # How many times following diagonals and pairing what is left are tried in
 # turn, each able to place links the other then builds on.

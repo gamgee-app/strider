@@ -11,14 +11,21 @@ from movie_edition_comparer.compare_hashes import Alignment, Run, check_by_avera
 def editions(looks: str, early: int = 0, seed: int = 0):
     """Two masters of one footage, as runs and block averages. Each letter of
     looks is a frame: m one that moves, its picture its own; s one of a still
-    shot, its picture all but its neighbours'. Edition b starts early frames
-    early, with pictures of its own."""
+    shot, its picture all but its neighbours'; g one edition b grades further
+    from edition a's than the same-picture limit, though not so far as to be
+    another picture; r one edition b replaces with another picture. Edition
+    b starts early frames early, with pictures of its own."""
     rng = np.random.default_rng(seed)
     still = rng.uniform(30, 220, 256)
-    pictures = [rng.uniform(30, 220, 256) if kind == "m" else still + rng.normal(0, 0.05, 256) for kind in looks]
+    pictures = [rng.uniform(30, 220, 256) if kind != "s" else still + rng.normal(0, 0.05, 256) for kind in looks]
     a = np.array(pictures, np.float32) + rng.normal(0, 0.1, (len(looks), 256)).astype(np.float32)
-    b = np.concatenate([rng.uniform(30, 220, (early, 256)),
-                        np.array(pictures) + rng.normal(0, 0.1, (len(looks), 256))]).astype(np.float32)
+    b = np.array(pictures) + rng.normal(0, 0.1, (len(looks), 256))
+    for k, kind in enumerate(looks):
+        if kind == "g":
+            b[k] += rng.normal(0, 1.3, 256)
+        elif kind == "r":
+            b[k] = rng.uniform(30, 220, 256)
+    b = np.concatenate([rng.uniform(30, 220, (early, 256)), b]).astype(np.float32)
     a_runs = [Run(i, 1, f"a{i}", "0" * 64) for i in range(len(a))]
     b_runs = [Run(j, 1, f"b{j}", "0" * 64) for j in range(len(b))]
     return Alignment(a_runs, b_runs), a, b
@@ -43,3 +50,21 @@ def test_a_still_shot_linked_a_frame_off_takes_the_offset_of_the_footage_around_
         alignment.link(i, i + 4)
     check_by_averages(alignment, a, b, fill=True)
     assert alignment.pairs() == [(i, i + 3) for i in range(len(looks))]
+
+
+def test_a_shot_graded_apart_is_linked_where_the_footage_around_it_puts_it():
+    looks = "mmm" + "g" * 5 + "mmm"
+    alignment, a, b = editions(looks)
+    for i in (0, 1, 2, 8, 9, 10):
+        alignment.link(i, i)
+    check_by_averages(alignment, a, b, fill=True)
+    assert alignment.pairs() == [(i, i) for i in range(len(looks))]
+
+
+def test_a_shot_replaced_by_another_is_left_unlinked_however_the_footage_around_it_is_placed():
+    looks = "mmm" + "r" * 5 + "mmm"
+    alignment, a, b = editions(looks)
+    for i in (0, 1, 2, 8, 9, 10):
+        alignment.link(i, i)
+    check_by_averages(alignment, a, b, fill=True)
+    assert alignment.pairs() == [(i, i) for i in (0, 1, 2, 8, 9, 10)]
